@@ -32,6 +32,12 @@ func newMusicSearchCmd(app *App) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 			query := strings.Join(args, " ")
+			// The unfiltered "all" results page returns items under
+			// itemSectionRenderer with no shelf titles to classify by, so it
+			// yields nothing useful. Default to songs, the canonical result.
+			if typ == "" {
+				typ = "song"
+			}
 			var n int
 			err := app.Client.MusicSearch(ctx, query, typ, app.PageOptions(false), func(v any) error {
 				n++
@@ -46,7 +52,7 @@ func newMusicSearchCmd(app *App) *cobra.Command {
 			return app.Out.Flush()
 		},
 	}
-	cmd.Flags().StringVar(&typ, "type", "", "song|album|artist|playlist")
+	cmd.Flags().StringVar(&typ, "type", "", "song|video|album|artist|playlist (default song)")
 	return cmd
 }
 
