@@ -43,24 +43,38 @@ make build        # produces ./bin/ytb
 ./bin/ytb version
 ```
 
+## Optional: ffmpeg
+
+`ytb download` has a built-in pure-Go engine, so basic downloads need nothing
+extra. Combining a separate high-resolution video track with its audio,
+converting audio to mp3/opus/flac, and embedding cover art shell out to
+[ffmpeg](https://ffmpeg.org/) when it is on your `PATH` (or set via
+`--ffmpeg-bin` / `YTB_FFMPEG_BIN`). Without ffmpeg the engine still downloads
+any single progressive or adaptive stream; commands that need merging report a
+clear error and exit with code 6. The `ytb` binary never links ffmpeg, so the
+install stays small and pure Go.
+
 ## Optional: yt-dlp
 
-Two features shell out to [yt-dlp](https://github.com/yt-dlp/yt-dlp) when it is
-on your `PATH`:
+A couple of paths can still use [yt-dlp](https://github.com/yt-dlp/yt-dlp) when
+it is on your `PATH`:
 
-- `ytb download` and `ytb extract` for media files, and
+- `ytb download --use-yt-dlp` and `ytb extract` delegate media downloads to it, and
 - `ytb transcript` text, when YouTube gates the raw caption endpoint behind a
   proof-of-origin token (it usually does now). Listing tracks with
   `transcript --list` never needs it.
 
-If yt-dlp is absent, those two paths report a clear, actionable error and exit;
+If yt-dlp is absent, those paths report a clear, actionable error and exit;
 everything else in ytb works without it. The ytb binary never links
 yt-dlp, so the install stays small and pure Go.
 
 ## Requirements
 
 - **Go 1.26 or later** to build. The released binary has no Go requirement.
-- **A `yt-dlp` binary** only for media download and gated-transcript text.
+- **ffmpeg** (optional) only to merge high-resolution video+audio, convert
+  audio, or embed thumbnails.
+- **A `yt-dlp` binary** (optional) only for `download --use-yt-dlp`, `extract`,
+  and gated-transcript text.
 
 That is the whole list. No API key, no config file, no database to provision, no
 daemon.
