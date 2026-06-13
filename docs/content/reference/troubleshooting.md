@@ -22,7 +22,24 @@ ytb transcript dQw4w9WgXcQ          # text, via yt-dlp fallback if gated
 ```
 
 If yt-dlp lives somewhere off PATH, point at it with `--yt-dlp-bin` or the
-`YOUTUBE_YT_DLP_BIN` environment variable.
+`YTB_YT_DLP_BIN` environment variable.
+
+## A download exits with code 6
+
+Exit code 6 means an operation needed an external tool that was not found.
+Single-stream downloads use only the built-in engine, but three things shell out
+to ffmpeg: merging a separate video track with its audio (`-f bv*+ba`), audio
+conversion (`--audio-format`), and embedding cover art (`--embed-thumbnail`).
+Install [ffmpeg](https://ffmpeg.org/), put it on your PATH (or pass `--ffmpeg-bin`
+/ set `YTB_FFMPEG_BIN`), or pick a single progressive stream that needs no merge:
+
+```sh
+ytb download dQw4w9WgXcQ -f 22         # a progressive stream, no ffmpeg needed
+ytb download dQw4w9WgXcQ --ffmpeg-bin /opt/homebrew/bin/ffmpeg
+```
+
+The same code is returned when `--use-yt-dlp` is set but no yt-dlp binary is
+found.
 
 ## Comments are hidden by Restricted Mode
 
@@ -58,7 +75,7 @@ ytb maps outcomes to process exit codes, so scripts can branch on them:
 | `2` | Usage error (bad flags or arguments) |
 | `3` | No results |
 | `4` | Partial result (for example comments suppressed by Restricted Mode) |
-| `6` | A required external tool is missing (yt-dlp) |
+| `6` | A required external tool is missing (ffmpeg, or yt-dlp with `--use-yt-dlp`) |
 
 ```sh
 ytb search "this returns nothing xyzzy" ; echo "exit $?"

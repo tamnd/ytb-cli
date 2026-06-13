@@ -46,6 +46,22 @@ for you, so `ytb channel @someone --videos` streams the entire upload history
 without you ever seeing a page boundary. The `-n`/`--limit` and `--max-pages`
 flags bound how far it goes.
 
+## Downloading without an external tool
+
+Older command-line YouTube tools lean on a separate downloader for the bytes.
+ytb has a built-in one, in pure Go. It asks YouTube's `ANDROID_VR` client for the
+stream list (the one anonymous client that still returns directly-fetchable URLs
+with no proof-of-origin token), deciphers the URL signature and the `n`
+throttling parameter with an embedded JavaScript interpreter, and pulls the media
+down in parallel byte ranges. So `ytb download <id>` works on its own, with no
+API key and nothing else installed.
+
+ffmpeg only enters the picture for the three things that genuinely need it:
+merging a separate high-resolution video track with its audio, transcoding audio,
+and embedding cover art. When it is on your `PATH` ytb uses it; when it is not,
+single-stream downloads still work and the rest report a clear error. The binary
+never links ffmpeg, so it stays small and CGO-free.
+
 ## How ytb is built
 
 Two layers. The `ytb` Go package is the library: an HTTP client with polite

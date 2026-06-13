@@ -58,20 +58,36 @@ writes:
 # yt_dlp_bin = "yt-dlp"
 ```
 
+## ffmpeg
+
+`download` uses a built-in pure-Go engine, so basic downloads need no external
+tool. ffmpeg is used only to merge a separate video track with its audio, convert
+audio with `--audio-format`, and embed cover art with `--embed-thumbnail`. ytb
+looks for `ffmpeg` on your PATH by default. Point at a specific binary two ways,
+in order of precedence:
+
+1. the `--ffmpeg-bin` flag
+2. the `YTB_FFMPEG_BIN` environment variable
+
+```sh
+ytb download dQw4w9WgXcQ -f bv*+ba --ffmpeg-bin /opt/homebrew/bin/ffmpeg
+export YTB_FFMPEG_BIN=/opt/homebrew/bin/ffmpeg
+```
+
 ## yt-dlp
 
-The `download` and `extract` commands shell out to yt-dlp, and the `transcript`
-command falls back to it when YouTube gates the caption endpoints. ytb looks
-for `yt-dlp` on your PATH by default. Point at a specific binary three ways, in
-order of precedence:
+yt-dlp is optional. The `download --use-yt-dlp` and `extract` commands delegate to
+it, and `transcript` falls back to it when YouTube gates the caption endpoints.
+ytb looks for `yt-dlp` on your PATH by default. Point at a specific binary three
+ways, in order of precedence:
 
 1. the `--yt-dlp-bin` flag
-2. the `YOUTUBE_YT_DLP_BIN` environment variable
+2. the `YTB_YT_DLP_BIN` environment variable
 3. the `yt_dlp_bin` key in the config file
 
 ```sh
-ytb download dQw4w9WgXcQ --yt-dlp-bin /opt/bin/yt-dlp
-export YOUTUBE_YT_DLP_BIN=/opt/bin/yt-dlp
+ytb download dQw4w9WgXcQ --use-yt-dlp --yt-dlp-bin /opt/bin/yt-dlp
+export YTB_YT_DLP_BIN=/opt/bin/yt-dlp
 ```
 
 ## Global flags worth tuning
