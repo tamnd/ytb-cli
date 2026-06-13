@@ -20,43 +20,45 @@ var (
 
 // App carries the resolved configuration and shared clients for a command run.
 type App struct {
-	Cfg      youtube.Config
-	Client   *youtube.Client
-	Out      *Output
-	DBPath   string
-	store    *youtube.Store // lazily opened when DBPath is set
-	Limit    int
-	MaxPages int
-	Workers  int
-	quiet    bool
-	verbose  int
-	yes      bool
-	dryRun   bool
-	YtDlpBin string
+	Cfg       youtube.Config
+	Client    *youtube.Client
+	Out       *Output
+	DBPath    string
+	store     *youtube.Store // lazily opened when DBPath is set
+	Limit     int
+	MaxPages  int
+	Workers   int
+	quiet     bool
+	verbose   int
+	yes       bool
+	dryRun    bool
+	YtDlpBin  string
+	FFmpegBin string
 }
 
 // globalFlags holds the persistent flag values before they are folded into Cfg.
 type globalFlags struct {
-	output   string
-	fields   string
-	limit    int
-	maxPages int
-	workers  int
-	rate     time.Duration
-	retries  int
-	timeout  time.Duration
-	hl       string
-	gl       string
-	db       string
-	quiet    bool
-	verbose  int
-	color    string
-	template string
-	noHeader bool
-	config   string
-	yes      bool
-	dryRun   bool
-	ytDlpBin string
+	output    string
+	fields    string
+	limit     int
+	maxPages  int
+	workers   int
+	rate      time.Duration
+	retries   int
+	timeout   time.Duration
+	hl        string
+	gl        string
+	db        string
+	quiet     bool
+	verbose   int
+	color     string
+	template  string
+	noHeader  bool
+	config    string
+	yes       bool
+	dryRun    bool
+	ytDlpBin  string
+	ffmpegBin string
 }
 
 // Root builds the root command and its whole subtree.
@@ -108,7 +110,8 @@ Quick start:
 	pf.StringVar(&g.config, "config", "", "config file (default: XDG config)")
 	pf.BoolVarP(&g.yes, "yes", "y", false, "assume yes to prompts")
 	pf.BoolVar(&g.dryRun, "dry-run", false, "print actions without performing them")
-	pf.StringVar(&g.ytDlpBin, "yt-dlp-bin", "", "path to the yt-dlp binary (download/extract)")
+	pf.StringVar(&g.ytDlpBin, "yt-dlp-bin", "", "path to the yt-dlp binary (download --use-yt-dlp)")
+	pf.StringVar(&g.ffmpegBin, "ffmpeg-bin", "", "path to ffmpeg (used to merge/convert when present)")
 
 	root.AddCommand(
 		newVideoCmd(app),
@@ -132,6 +135,9 @@ Quick start:
 		newMusicCmd(app),
 		newDownloadCmd(app),
 		newExtractCmd(app),
+		newSponsorBlockCmd(app),
+		newThumbnailCmd(app),
+		newChaptersCmd(app),
 		newConfigCmd(app),
 		newVersionCmd(),
 	)
@@ -161,6 +167,7 @@ func (a *App) init(g *globalFlags) error {
 	a.yes = g.yes
 	a.dryRun = g.dryRun
 	a.YtDlpBin = g.ytDlpBin
+	a.FFmpegBin = g.ffmpegBin
 	a.Out = newOutput(g)
 
 	// --db wins over YTB_DB.

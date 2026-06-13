@@ -17,6 +17,8 @@ func newTranscriptCmd(app *App) *cobra.Command {
 		lang       string
 		list       bool
 		timestamps bool
+		subFormat  string
+		out        string
 	)
 	cmd := &cobra.Command{
 		Use:   "transcript <video-id|url>",
@@ -69,6 +71,17 @@ PATH, the transcript is recovered through it automatically.`,
 			if text == "" && len(segments) == 0 {
 				return noResults("no transcript available")
 			}
+			if subFormat != "" {
+				rendered := youtube.RenderSubtitles(segments, youtube.SubtitleFormat(subFormat))
+				if out != "" {
+					if err := os.WriteFile(out, []byte(rendered), 0o644); err != nil {
+						return err
+					}
+					_, _ = cmdErr.Write([]byte("saved " + out + "\n"))
+					return nil
+				}
+				return app.Out.Line(rendered)
+			}
 			if timestamps {
 				for _, s := range segments {
 					if err := app.Out.Emit(segmentRow(s)); err != nil {
@@ -77,6 +90,13 @@ PATH, the transcript is recovered through it automatically.`,
 				}
 				return app.Out.Flush()
 			}
+			if out != "" {
+				if err := os.WriteFile(out, []byte(text), 0o644); err != nil {
+					return err
+				}
+				_, _ = cmdErr.Write([]byte("saved " + out + "\n"))
+				return nil
+			}
 			return app.Out.Line(text)
 		},
 	}
@@ -84,6 +104,8 @@ PATH, the transcript is recovered through it automatically.`,
 	f.StringVar(&lang, "lang", "", "preferred caption language")
 	f.BoolVar(&list, "list", false, "list available caption tracks")
 	f.BoolVar(&timestamps, "timestamps", false, "emit timed segments instead of joined text")
+	f.StringVar(&subFormat, "format", "", "render as subtitles: srt|vtt|txt")
+	f.StringVar(&out, "out", "", "write the transcript/subtitles to this file")
 	return cmd
 }
 
