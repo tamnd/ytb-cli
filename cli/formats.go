@@ -51,6 +51,9 @@ formats. This lists metadata only; it does not resolve playable URLs.`,
 					return err
 				}
 				n++
+				if app.Limit > 0 && n >= app.Limit {
+					break
+				}
 			}
 			if n == 0 {
 				return noResults("no formats matched the filter")
@@ -98,6 +101,9 @@ func emitStreamURLs(ctx context.Context, app *App, idOrURL string, audio, video,
 			return err
 		}
 		n++
+		if app.Limit > 0 && n >= app.Limit {
+			break
+		}
 	}
 	if n == 0 {
 		return noResults("no streams matched the filter")

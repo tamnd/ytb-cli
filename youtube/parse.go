@@ -282,6 +282,39 @@ func parseCountText(s string) int64 {
 	return int64(f * mult)
 }
 
+// compactCountRe matches a bare display count like "101K", "1.2M", "423", "1,234".
+var compactCountRe = regexp.MustCompile(`^\d[\d.,]*\s*[KMB]?$`)
+
+// looksLikeCount reports whether s is a bare compact count with no unit word, as
+// served in /browse continuation lockups (e.g. "101K" instead of "101K views").
+func looksLikeCount(s string) bool {
+	return compactCountRe.MatchString(strings.TrimSpace(s))
+}
+
+// isRelativeTimeText reports whether s is a published/scheduled time string such
+// as "1 month ago", "1mo ago", "Streamed 2 days ago", or "Premiered 5 hours ago".
+func isRelativeTimeText(s string) bool {
+	return strings.Contains(s, " ago") ||
+		strings.Contains(s, "Streamed") ||
+		strings.Contains(s, "Premiered") ||
+		strings.Contains(s, "Scheduled")
+}
+
+// formatDurationClock renders seconds as "M:SS" or "H:MM:SS", the inverse of
+// parseDurationSeconds. It returns "" for non-positive input.
+func formatDurationClock(total int) string {
+	if total <= 0 {
+		return ""
+	}
+	h := total / 3600
+	m := (total % 3600) / 60
+	s := total % 60
+	if h > 0 {
+		return fmt.Sprintf("%d:%02d:%02d", h, m, s)
+	}
+	return fmt.Sprintf("%d:%02d", m, s)
+}
+
 // parseDurationSeconds converts "H:MM:SS" or "M:SS" to integer seconds.
 func parseDurationSeconds(s string) int {
 	if s == "" {
@@ -390,6 +423,9 @@ func ParseVideoPage(data *PageData, pageURL string) (*Video, []CaptionTrack, []R
 			v.ChannelID = stringValue(details["channelId"])
 			v.ChannelName = stringValue(details["author"])
 			v.DurationSeconds = int(int64Value(details["lengthSeconds"]))
+			if v.DurationText == "" {
+				v.DurationText = formatDurationClock(v.DurationSeconds)
+			}
 			v.ViewCount = int64Value(details["viewCount"])
 			v.IsLive = boolValue(details["isLiveContent"])
 			if arr := stringSlice(details["keywords"]); len(arr) > 0 {
@@ -479,6 +515,53 @@ func ParsePlayerDetails(data map[string]any, videoID string) *Video {
 	return v
 }
 
+// pageHeaderMetadataParts returns the text.content of every metadataPart under a
+// pageHeaderViewModel's contentMetadataViewModel rows, in document order. Modern
+// channel and playlist pages carry their subscriber/video/view counts here rather
+// than in the older subscriberCountText / videoCountText renderers.
+func pageHeaderMetadataParts(ph map[string]any) []string {
+	var parts []string
+	cmv := mapValue(mapValue(ph, "metadata"), "contentMetadataViewModel")
+	if cmv == nil {
+		return parts
+	}
+	for _, row := range arrayValue(cmv["metadataRows"]) {
+		rm := mapValue(row, "")
+		for _, mp := range arrayValue(rm["metadataParts"]) {
+			if txt := mapValue(mapValue(mp, ""), "text"); txt != nil {
+				if s := stringValue(txt["content"]); s != "" {
+					parts = append(parts, s)
+				}
+			}
+		}
+	}
+	return parts
+}
+
+// pageHeaderAvatarName returns the channel name from the metadata part backed by
+// the owner's avatar stack, the reliable owner signal in a pageHeaderViewModel
+// (the bare "Playlist"/"5 videos" labels carry no owner).
+func pageHeaderAvatarName(ph map[string]any) string {
+	cmv := mapValue(mapValue(ph, "metadata"), "contentMetadataViewModel")
+	if cmv == nil {
+		return ""
+	}
+	for _, row := range arrayValue(cmv["metadataRows"]) {
+		for _, mp := range arrayValue(mapValue(row, "")["metadataParts"]) {
+			mpm := mapValue(mp, "")
+			if mpm["avatarStack"] == nil {
+				continue
+			}
+			if txt := mapValue(mpm, "text"); txt != nil {
+				if s := stringValue(txt["content"]); s != "" {
+					return s
+				}
+			}
+		}
+	}
+	return ""
+}
+
 // ParseChannelPage parses ytInitialData from a channel HTML page.
 func ParseChannelPage(data *PageData, pageURL string) (*Channel, []Video, string, error) {
 	ch := &Channel{URL: pageURL, FetchedAt: time.Now()}
@@ -498,6 +581,14 @@ func ParseChannelPage(data *PageData, pageURL string) (*Channel, []Video, string
 		if r, ok := m["pageHeaderViewModel"].(map[string]any); ok {
 			if banner := mapValue(r, "banner"); banner != nil {
 				ch.BannerURL = bestThumbnail(mapValue(banner, "image")["sources"])
+			}
+			for _, s := range pageHeaderMetadataParts(r) {
+				switch {
+				case ch.SubscribersText == "" && strings.Contains(s, "subscriber"):
+					ch.SubscribersText = s
+				case ch.VideosText == "" && strings.Contains(s, "video"):
+					ch.VideosText = s
+				}
 			}
 		}
 		if r, ok := m["videoCountText"].(map[string]any); ok && ch.VideosText == "" {
@@ -558,6 +649,24 @@ func ParsePlaylistPage(data *PageData, pageURL string) (*Playlist, []PlaylistVid
 		}
 		if r, ok := m["playlistSidebarSecondaryInfoRenderer"].(map[string]any); ok {
 			p.ChannelName = firstNonEmpty(p.ChannelName, extractText(r["videoOwner"]))
+		}
+		if r, ok := m["pageHeaderViewModel"].(map[string]any); ok {
+			if dt := mapValue(mapValue(r, "title"), "dynamicTextViewModel"); dt != nil {
+				p.Title = firstNonEmpty(p.Title, stringValue(mapValue(dt, "text")["content"]))
+			}
+			p.ChannelName = firstNonEmpty(p.ChannelName, pageHeaderAvatarName(r))
+			for _, s := range pageHeaderMetadataParts(r) {
+				switch {
+				case strings.Contains(s, "video"):
+					if c := int(parseCountText(s)); c > 0 && p.VideoCount == 0 {
+						p.VideoCount = c
+					}
+				case strings.Contains(s, " view"):
+					p.ViewCountText = firstNonEmpty(p.ViewCountText, s)
+				case strings.Contains(s, "pdated"):
+					p.LastUpdatedText = firstNonEmpty(p.LastUpdatedText, s)
+				}
+			}
 		}
 	})
 	videos, edges := parsePlaylistVideos(data.InitialData, playlistID)
@@ -1193,8 +1302,40 @@ func parseVideosFromTree(root any) []Video {
 				out = append(out, v)
 			}
 		}
+		if r, ok := m["shortsLockupViewModel"].(map[string]any); ok {
+			v := parseShortsLockupViewModel(r)
+			if v.VideoID != "" {
+				out = append(out, v)
+			}
+		}
 	})
 	return out
+}
+
+// parseShortsLockupViewModel parses the shortsLockupViewModel used on the Shorts
+// tab. The video id rides in the entityId ("shorts-shelf-item-<id>") and the
+// title and view count sit in overlayMetadata.
+func parseShortsLockupViewModel(r map[string]any) Video {
+	videoID := strings.TrimPrefix(stringValue(r["entityId"]), "shorts-shelf-item-")
+	if videoID == "" {
+		meta := mapValue(mapValue(mapValue(r, "onTap"), "innertubeCommand"), "commandMetadata")
+		u := stringValue(mapValue(meta, "webCommandMetadata")["url"])
+		videoID = strings.TrimPrefix(u, "/shorts/")
+	}
+	if videoID == "" {
+		return Video{}
+	}
+	v := Video{
+		VideoID:   videoID,
+		URL:       BaseURL + "/shorts/" + videoID,
+		EmbedURL:  BaseURL + "/embed/" + videoID,
+		FetchedAt: time.Now(),
+	}
+	if om := mapValue(r, "overlayMetadata"); om != nil {
+		v.Title = stringValue(mapValue(om, "primaryText")["content"])
+		v.ViewCount = parseCountText(stringValue(mapValue(om, "secondaryText")["content"]))
+	}
+	return v
 }
 
 // parseLockupViewModel parses YouTube's newer lockupViewModel format.
@@ -1227,11 +1368,18 @@ func parseLockupViewModel(r map[string]any) Video {
 										if mpm, ok := mp.(map[string]any); ok {
 											if txt := mapValue(mpm, "text"); txt != nil {
 												content := stringValue(txt["content"])
-												if strings.Contains(content, " views") {
+												switch {
+												case strings.Contains(content, " view") || strings.Contains(content, " watching"):
+													// Full format: "101K views", "1.2K watching".
 													v.ViewCount = parseCountText(content)
-												} else if strings.Contains(content, " ago") || strings.Contains(content, "Streamed") {
+												case isRelativeTimeText(content):
 													v.PublishedText = content
-												} else if v.ChannelName == "" {
+												case looksLikeCount(content):
+													// Compact continuation format: a bare "101K" with no "views" word.
+													if v.ViewCount == 0 {
+														v.ViewCount = parseCountText(content)
+													}
+												case v.ChannelName == "":
 													v.ChannelName = content
 												}
 											}
@@ -1374,18 +1522,25 @@ func parsePlaylistVideos(root any, playlistID string) ([]Video, []PlaylistVideo)
 		seen   = map[string]struct{}{}
 		pos    = 0
 	)
+	add := func(v Video) {
+		if v.VideoID == "" {
+			return
+		}
+		if _, ok := seen[v.VideoID]; ok {
+			return
+		}
+		seen[v.VideoID] = struct{}{}
+		pos++
+		if v.FetchedAt.IsZero() {
+			v.FetchedAt = time.Now()
+		}
+		videos = append(videos, v)
+		edges = append(edges, PlaylistVideo{PlaylistID: playlistID, VideoID: v.VideoID, Position: pos})
+	}
 	walkJSON(root, func(m map[string]any) {
 		if r, ok := m["playlistVideoRenderer"].(map[string]any); ok {
 			videoID := stringValue(r["videoId"])
-			if videoID == "" {
-				return
-			}
-			if _, ok := seen[videoID]; ok {
-				return
-			}
-			seen[videoID] = struct{}{}
-			pos++
-			v := Video{
+			add(Video{
 				VideoID:         videoID,
 				Title:           extractText(r["title"]),
 				ChannelName:     extractText(r["shortBylineText"]),
@@ -1395,9 +1550,12 @@ func parsePlaylistVideos(root any, playlistID string) ([]Video, []PlaylistVideo)
 				EmbedURL:        BaseURL + "/embed/" + videoID,
 				FetchedAt:       time.Now(),
 				DurationSeconds: parseDurationSeconds(extractText(r["lengthText"])),
-			}
-			videos = append(videos, v)
-			edges = append(edges, PlaylistVideo{PlaylistID: playlistID, VideoID: videoID, Position: pos})
+			})
+		}
+		// Modern playlist pages render items as lockupViewModel rather than
+		// playlistVideoRenderer.
+		if r, ok := m["lockupViewModel"].(map[string]any); ok {
+			add(parseLockupViewModel(r))
 		}
 	})
 	return videos, edges
