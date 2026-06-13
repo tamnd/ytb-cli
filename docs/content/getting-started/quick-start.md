@@ -82,7 +82,23 @@ direct text fetch often comes back empty. When that happens ytb falls back to
 result for you. Listing tracks never needs it. See
 [comments and transcripts](/guides/comments-transcripts/) for the details.
 
-## 5. Keep what you fetch
+## 5. Download a video
+
+`ytb download` has a built-in pure-Go engine, so a basic grab needs no API key
+and no external downloader:
+
+```bash
+ytb download dQw4w9WgXcQ
+ytb download dQw4w9WgXcQ -x --audio-format mp3
+```
+
+The first saves the best combined stream; the second pulls audio only and
+transcodes to mp3 (which uses ffmpeg if it is on your `PATH`). See
+[downloading media](/guides/downloading/) for format selection, playlists, and
+subtitles. Media download is your responsibility: respect YouTube's Terms of
+Service and copyright.
+
+## 6. Keep what you fetch
 
 Add `--db` to any command and ytb also writes everything into a local SQLite
 database, turning the same commands into an incremental crawler:

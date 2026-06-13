@@ -35,7 +35,8 @@ Persistent flags accepted by every command.
 | `--config` | Config file (default: XDG config) |
 | `-y, --yes` | Assume yes to prompts |
 | `--dry-run` | Print actions without performing them |
-| `--yt-dlp-bin` | Path to the yt-dlp binary (download/extract) |
+| `--yt-dlp-bin` | Path to the yt-dlp binary (`download --use-yt-dlp`) |
+| `--ffmpeg-bin` | Path to ffmpeg (used to merge/convert when present) |
 
 ## Commands
 
@@ -54,8 +55,11 @@ Persistent flags accepted by every command.
 | `transcript` | Captions as text |
 | `formats` | Streaming formats (metadata only) |
 | `music` | YouTube Music (artists, albums, songs) |
-| `download` | Download media via yt-dlp |
+| `download` | Download media with the native engine (or yt-dlp) |
 | `extract` | Extract a specific stream via yt-dlp |
+| `sponsorblock` | List community SponsorBlock segments |
+| `thumbnail` | List or download a video's thumbnails |
+| `chapters` | List a video's chapter markers |
 | `seed` | Load a worklist into the crawl queue (needs `--db`) |
 | `crawl` | Process the crawl queue with workers (needs `--db`) |
 | `queue` | Inspect the crawl queue (needs `--db`) |
@@ -164,16 +168,19 @@ Persistent flags accepted by every command.
 | `--list` | List available caption tracks |
 | `--lang` | Preferred caption language |
 | `--timestamps` | Emit timed segments instead of joined text |
+| `--format` | Render as subtitles: `srt`, `vtt`, `txt` |
+| `--out` | Write the transcript/subtitles to this file |
 
 ## formats
 
-`ytb formats <video-id|url> [--flags]`. Lists formats from `/player` streamingData, deduped by itag. Metadata only; does not resolve playable URLs.
+`ytb formats <video-id|url> [--flags]`. Lists formats from `/player` streamingData, deduped by itag. Metadata only by default; pass `--urls` to resolve the deciphered, directly-fetchable stream URLs through the native engine.
 
 | Flag | Meaning |
 | --- | --- |
 | `--audio` | Audio-only adaptive formats |
 | `--video` | Video-only adaptive formats |
 | `--muxed` | Progressive (muxed) formats only |
+| `--urls` | Resolve playable stream URLs (deciphered) via the native engine |
 
 ## music
 
@@ -196,18 +203,28 @@ Notable subcommand flags:
 
 ## download
 
-`ytb download <id|url>... [--flags]`. Download media via yt-dlp.
+`ytb download <id|url>... [--flags]`. Downloads media with the built-in pure-Go engine.
+
+The native engine fetches streams through the ANDROID_VR client (no API key, no token), deciphers the signature and the throttling `n` parameter with an embedded JavaScript interpreter, and downloads in parallel byte ranges. The `ytb` binary itself stays pure-Go and CGO-free; merging separate video+audio tracks, audio conversion, and thumbnail embedding shell out to ffmpeg when it is on PATH (or `--ffmpeg-bin` / `YTB_FFMPEG_BIN`). Without ffmpeg the engine still downloads any single progressive or adaptive stream, and commands that need merging exit with code 6. Pass `--use-yt-dlp` to delegate to a yt-dlp binary instead.
+
+The `--format` selector accepts a yt-dlp-style grammar: keywords (`best`, `worst`, `bestvideo`/`bv`, `bestaudio`/`ba`, `bv*`), explicit itags (`22`), a single `+` to merge a video and audio track (`bv*+ba`, `137+140`), `/` fallback groups (`bv*+ba/b`), and `[key OP value]` filters on `height`, `width`, `fps`, `ext`, `vcodec`, `acodec`, `itag`, and bitrate (`bv*[height<=720]+ba`).
 
 | Flag | Meaning |
 | --- | --- |
-| `--audio` | Download best audio only |
-| `--format` | yt-dlp format selector |
-| `--quality` | Preferred video quality (e.g. 1080) |
+| `-x, --audio` | Download audio only |
+| `--audio-format` | Convert audio to this codec (`mp3`, `m4a`, `opus`, `flac`); needs ffmpeg |
+| `-f, --format` | Format selector (e.g. `best`, `22`, `bv*+ba`, `bv[height<=720]+ba`) |
+| `--quality` | Max video height shorthand (e.g. 1080) |
 | `--out` | Output directory (.) |
-| `--add-metadata` | Embed metadata in the output file |
-| `--concurrent-fragments` | Parallel fragment downloads |
-| `--playlist-items` | Playlist item selection |
-| `--sub-langs` | Subtitle languages to write |
+| `--output-template` | yt-dlp-style output filename template (`%(title)s [%(id)s].%(ext)s`) |
+| `--concurrent-fragments` | Parallel byte-range workers (4) |
+| `--embed-thumbnail` | Embed the thumbnail as cover art (mp4/m4a); needs ffmpeg |
+| `--playlist-items` | Playlist item selection (e.g. `1,3,5-7,10-`) |
+| `--sub-langs` | Subtitle language to write (e.g. `en`) |
+| `--sub-format` | Subtitle format to write (`srt`, `vtt`, `txt`) |
+| `--write-subs` | Write the subtitle sidecar file |
+| `--download-archive` | Record downloaded ids here and skip ones already present |
+| `--use-yt-dlp` | Delegate to a yt-dlp binary instead of the native engine |
 
 ## extract
 
@@ -218,6 +235,27 @@ Notable subcommand flags:
 | `--format` | Audio format for `extract audio` (e.g. mp3) |
 | `--quality` | Max video height for `extract video` (e.g. 1080) |
 | `--out` | Output directory (.) |
+
+## sponsorblock
+
+`ytb sponsorblock <id|url> [--flags]`. Lists community-submitted segments from the public SponsorBlock API (sponsor, intros, outros, self-promo, and more). This is an independent community service; no key is required.
+
+| Flag | Meaning |
+| --- | --- |
+| `--categories` | Segment categories to fetch (default all): `sponsor`, `selfpromo`, `intro`, `outro`, ... |
+
+## thumbnail
+
+`ytb thumbnail <id|url> [--flags]`. Lists the standard thumbnail renditions, or downloads the best available one.
+
+| Flag | Meaning |
+| --- | --- |
+| `--download` | Download the best available rendition |
+| `--out` | Output path or directory for `--download` |
+
+## chapters
+
+`ytb chapters <id|url>`. Lists a video's chapter markers (position, start time, title). No notable flags beyond the globals.
 
 ## seed
 
