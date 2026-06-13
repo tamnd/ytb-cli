@@ -103,6 +103,40 @@ func (it *InnerTubeClient) Player(ctx context.Context, videoID string) (map[stri
 	})
 }
 
+const androidVRClientVer = "1.65.10"
+
+// androidVRUA is the Oculus YouTube VR app user agent. The ANDROID_VR client is
+// the one anonymous context that still returns complete, directly-fetchable
+// stream URLs (no signature cipher) and needs no proof-of-origin token, so the
+// native downloader leads with it. Its UA must match or YouTube strips formats.
+const androidVRUA = "com.google.android.apps.youtube.vr.oculus/" + androidVRClientVer +
+	" (Linux; U; Android 12L; eureka-user Build/SQ3A.220605.009.A1) gzip"
+
+// AndroidVRPlayer calls /player with the ANDROID_VR client. Unlike the WEB
+// /player call, the formats it returns carry plain `url` fields rather than a
+// signatureCipher, so only the `n` throttling parameter still needs solving.
+func (it *InnerTubeClient) AndroidVRPlayer(ctx context.Context, videoID string) (map[string]any, error) {
+	body := map[string]any{
+		"context": map[string]any{
+			"client": map[string]any{
+				"clientName":        "ANDROID_VR",
+				"clientVersion":     androidVRClientVer,
+				"deviceMake":        "Oculus",
+				"deviceModel":       "Quest 3",
+				"androidSdkVersion": 32,
+				"osName":            "Android",
+				"osVersion":         "12L",
+				"hl":                it.hl,
+				"gl":                it.gl,
+			},
+		},
+		"videoId":        videoID,
+		"contentCheckOk": true,
+		"racyCheckOk":    true,
+	}
+	return it.c.postJSONUA(ctx, innertubeURL+"/player", body, androidVRUA)
+}
+
 // Next calls /next.
 func (it *InnerTubeClient) Next(ctx context.Context, videoID, continuation string) (map[string]any, error) {
 	body := map[string]any{"context": it.context(), "videoId": videoID}

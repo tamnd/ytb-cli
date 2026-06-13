@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
@@ -21,7 +22,12 @@ type Client struct {
 	delay      time.Duration
 	retries    int
 	hl, gl     string
-	lastReq    time.Time
+
+	mu      sync.Mutex
+	lastReq time.Time
+
+	cipherMu    sync.Mutex
+	cipherCache map[string]*playerCipher // keyed by base.js player URL
 }
 
 // NewClient builds a Client from cfg.
@@ -208,6 +214,8 @@ func (c *Client) rateLimit() {
 	if c.delay <= 0 {
 		return
 	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	if since := time.Since(c.lastReq); since < c.delay {
 		time.Sleep(c.delay - since)
 	}
@@ -238,9 +246,19 @@ func parseJSONObject(raw string) map[string]any {
 
 // postJSON is a helper for InnerTube and music POSTs.
 func (c *Client) postJSON(ctx context.Context, url string, body map[string]any) (map[string]any, error) {
+	return c.postJSONUA(ctx, url, body, "")
+}
+
+// postJSONUA is postJSON with an explicit User-Agent. A non-browser client such
+// as ANDROID_VR must send its matching app UA to receive complete, token-free
+// streaming data, so the cipher-free download path overrides the default here.
+func (c *Client) postJSONUA(ctx context.Context, url string, body map[string]any, ua string) (map[string]any, error) {
 	raw, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
+	}
+	if ua == "" {
+		ua = c.userAgents[0]
 	}
 	var lastErr error
 	attempts := c.retries + 1
@@ -261,7 +279,7 @@ func (c *Client) postJSON(ctx context.Context, url string, body map[string]any) 
 			return nil, err
 		}
 		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("User-Agent", c.userAgents[0])
+		req.Header.Set("User-Agent", ua)
 		req.Header.Set("Accept-Language", "en-US,en;q=0.9")
 		req.AddCookie(&http.Cookie{Name: "CONSENT", Value: "YES+"})
 		resp, err := c.http.Do(req)
