@@ -1,0 +1,10 @@
+title       = "ytb"
+baseURL     = "https://ytb-cli.tamnd.com/"
+description = "A fast, friendly command line for YouTube. One binary that resolves videos to full metadata, streams channels and playlists, searches with the full filter grid, pulls comments and transcripts, follows hashtags and community posts, browses YouTube Music, and optionally persists everything into a local SQLite store. No API key."
+contentDir  = "content"
+outputDir   = "public"
+theme       = "tago-doks"
+syntaxHighlight = "true"
+
+[params]
+github = "https://github.com/tamnd/ytb-cli"
