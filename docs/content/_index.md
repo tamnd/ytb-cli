@@ -1,8 +1,8 @@
 ---
 title: "ytb"
-description: "A fast, friendly command line for YouTube. Resolve videos to full metadata, stream channels and playlists, search with the full filter grid, pull comments and transcripts, browse YouTube Music, and persist it all locally, from one binary with no API key."
+description: "A fast, friendly command line for YouTube. Resolve videos to full metadata, stream channels and playlists, search with the full filter grid, pull comments and transcripts, download video and audio with a built-in engine, browse YouTube Music, and persist it all locally, from one binary with no API key."
 heroTitle: "YouTube, from the command line"
-heroLead: "ytb is a single pure-Go binary that puts the whole of YouTube behind a tool that feels like curl. Resolve a video to full metadata, stream a channel's uploads, page a playlist, search with every filter the site has, pull comments and transcripts, follow hashtags and community posts, and browse YouTube Music, with no API key and nothing to pay for."
+heroLead: "ytb is a single pure-Go binary that puts the whole of YouTube behind a tool that feels like curl. Resolve a video to full metadata, stream a channel's uploads, page a playlist, search with every filter the site has, pull comments and transcripts, download video and audio with a built-in engine, follow hashtags and community posts, and browse YouTube Music, with no API key and nothing to pay for."
 heroPrimaryURL: "/getting-started/quick-start/"
 heroPrimaryText: "Get started"
 ---
@@ -17,11 +17,14 @@ ytb video dQw4w9WgXcQ                 # full metadata for a video
 ytb channel @MrBeast --videos          # stream a channel's uploads
 ytb search "lofi hip hop" -n 50        # search with continuation paging
 ytb transcript dQw4w9WgXcQ             # the video's transcript as text
+ytb download dQw4w9WgXcQ               # download it with the built-in engine
 ```
 
 It speaks to the public endpoints behind `youtube.com/youtubei/v1/*` over plain
-HTTPS. The binary is pure Go with no runtime dependencies; yt-dlp is optional and
-only used for media downloads and recovering gated transcripts.
+HTTPS. The binary is pure Go with no runtime dependencies. Downloads use a
+built-in pure-Go engine, so they need no external tool either; ffmpeg and yt-dlp
+are optional and only come in for merging, audio conversion, and recovering
+gated transcripts.
 
 ## What you can do with it
 
@@ -36,6 +39,9 @@ only used for media downloads and recovering gated transcripts.
   Creative Commons).
 - **Read the social layer.** Comments and replies, community posts, hashtag
   feeds, and search autocomplete suggestions.
+- **Download video and audio.** A built-in pure-Go engine fetches streams with
+  no API key and no external downloader, with a yt-dlp-style format selector,
+  playlist support, subtitles, SponsorBlock, and optional ffmpeg post-processing.
 - **Browse YouTube Music.** Search artists, albums, and songs, and open an
   artist, album, playlist, or song through the Music endpoints.
 - **Keep what you fetch.** Point any command at a local SQLite store and it
@@ -47,5 +53,6 @@ only used for media downloads and recovering gated transcripts.
   the mental model, then the [quick start](/getting-started/quick-start/).
 - Want to install it? See [installation](/getting-started/installation/).
 - Looking for a specific task? The [guides](/guides/) cover videos, channels and
-  playlists, search, comments and transcripts, music, and the local store.
+  playlists, search, comments and transcripts, downloading media, music, and the
+  local store.
 - Need every flag? The [CLI reference](/reference/cli/) is the full surface.
