@@ -70,6 +70,23 @@ Hello there
 	}
 }
 
+func TestPickVTT(t *testing.T) {
+	// With no requested lang, prefer the plainest tag (original captions)
+	// over auto-translated variants like en-de-DE.
+	got := pickVTT([]string{"/tmp/x.en-de-DE.vtt", "/tmp/x.en.vtt", "/tmp/x.en-orig.vtt"}, "")
+	if got != "/tmp/x.en.vtt" {
+		t.Errorf("pickVTT no-lang = %q, want /tmp/x.en.vtt", got)
+	}
+	// An explicit lang wins outright.
+	got = pickVTT([]string{"/tmp/x.en.vtt", "/tmp/x.fr.vtt"}, "fr")
+	if got != "/tmp/x.fr.vtt" {
+		t.Errorf("pickVTT lang=fr = %q, want /tmp/x.fr.vtt", got)
+	}
+	if pickVTT(nil, "en") != "" {
+		t.Errorf("pickVTT(nil) should be empty")
+	}
+}
+
 func TestJoinSegmentText(t *testing.T) {
 	got := joinSegmentText([]youtube.TranscriptSegment{
 		{Text: "first"},

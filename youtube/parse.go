@@ -619,6 +619,22 @@ func ParseSearchPage(data *PageData, query string) ([]SearchResult, []Video, []C
 				results = append(results, SearchResult{EntityType: EntityPlaylist, ID: p.PlaylistID, Title: p.Title, URL: p.URL})
 			}
 		}
+		// Newer search results render playlists (and some videos) as
+		// lockupViewModel rather than the legacy *Renderer shapes.
+		if r, ok := m["lockupViewModel"].(map[string]any); ok {
+			switch stringValue(r["contentType"]) {
+			case "LOCKUP_CONTENT_TYPE_PLAYLIST":
+				if p := parseLockupPlaylist(r); p.PlaylistID != "" {
+					playlists = append(playlists, p)
+					results = append(results, SearchResult{EntityType: EntityPlaylist, ID: p.PlaylistID, Title: p.Title, URL: p.URL})
+				}
+			case "LOCKUP_CONTENT_TYPE_VIDEO":
+				if v := parseLockupViewModel(r); v.VideoID != "" {
+					videos = append(videos, v)
+					results = append(results, SearchResult{EntityType: EntityVideo, ID: v.VideoID, Title: v.Title, URL: v.URL})
+				}
+			}
+		}
 	})
 	contToken := extractContinuationToken(data.InitialData)
 	if len(results) == 0 {

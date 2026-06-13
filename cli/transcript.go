@@ -118,13 +118,17 @@ func (a *App) transcriptViaYtDlp(cmd *cobra.Command, target, lang string) ([]you
 	}
 	c := exec.CommandContext(cmd.Context(), bin, ytArgs...)
 	c.Stdout, c.Stderr = cmdErr, cmdErr // yt-dlp progress goes to stderr, never stdout
-	if err := c.Run(); err != nil {
-		return nil, err
-	}
+	// yt-dlp exits non-zero when any one of the requested language variants
+	// fails, even if the track we want downloaded fine. Treat the presence of a
+	// usable .vtt as success and only surface the error when nothing landed.
+	runErr := c.Run()
 
 	matches, _ := filepath.Glob(filepath.Join(dir, "*.vtt"))
 	vtt := pickVTT(matches, lang)
 	if vtt == "" {
+		if runErr != nil {
+			return nil, runErr
+		}
 		return nil, nil
 	}
 	f, err := os.Open(vtt)
@@ -135,7 +139,9 @@ func (a *App) transcriptViaYtDlp(cmd *cobra.Command, target, lang string) ([]you
 	return parseVTT(f), nil
 }
 
-// pickVTT chooses the subtitle file best matching lang, else the first.
+// pickVTT chooses the subtitle file best matching lang. With no lang, it
+// prefers the plainest track (shortest language tag, e.g. "en" over the
+// auto-translated "en-de-DE") so the result is the original captions.
 func pickVTT(paths []string, lang string) string {
 	if len(paths) == 0 {
 		return ""
@@ -147,7 +153,22 @@ func pickVTT(paths []string, lang string) string {
 			}
 		}
 	}
-	return paths[0]
+	best := paths[0]
+	for _, p := range paths[1:] {
+		if len(vttLangTag(p)) < len(vttLangTag(best)) {
+			best = p
+		}
+	}
+	return best
+}
+
+// vttLangTag returns the language segment of a "<id>.<lang>.vtt" filename.
+func vttLangTag(path string) string {
+	base := strings.TrimSuffix(filepath.Base(path), ".vtt")
+	if i := strings.LastIndex(base, "."); i >= 0 {
+		return base[i+1:]
+	}
+	return base
 }
 
 // parseVTT turns a WebVTT cue stream into timed segments, dropping the styling
