@@ -1,19 +1,23 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"runtime"
 
-	"github.com/spf13/cobra"
+	"github.com/tamnd/any-cli/kit"
 )
 
-func newVersionCmd() *cobra.Command {
+func newVersionCmd() kit.Command {
 	var short bool
-	cmd := &cobra.Command{
+	return kit.Command{
 		Use:   "version",
 		Short: "Print version information",
-		Args:  cobra.NoArgs,
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Args:  kit.NoArgs,
+		Flags: func(f *kit.FlagSet) {
+			f.BoolVar(&short, "short", false, "print just the version number")
+		},
+		Run: func(_ context.Context, _ []string) error {
 			if short {
 				_, _ = fmt.Fprintln(cmdOut, Version)
 				return nil
@@ -23,6 +27,4 @@ func newVersionCmd() *cobra.Command {
 			return nil
 		},
 	}
-	cmd.Flags().BoolVar(&short, "short", false, "print just the version number")
-	return cmd
 }

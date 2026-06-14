@@ -2,17 +2,18 @@ package cli
 
 import (
 	"bufio"
+	"context"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
 
-	"github.com/spf13/cobra"
+	"github.com/tamnd/any-cli/kit"
 	"github.com/tamnd/ytb-cli/youtube"
 )
 
-func newTranscriptCmd(app *App) *cobra.Command {
+func newTranscriptCmd() kit.Command {
 	var (
 		lang       string
 		list       bool
@@ -20,7 +21,7 @@ func newTranscriptCmd(app *App) *cobra.Command {
 		subFormat  string
 		out        string
 	)
-	cmd := &cobra.Command{
+	return kit.Command{
 		Use:   "transcript <video-id|url>",
 		Short: "Captions as text",
 		Long: `List caption tracks (--list), or fetch the chosen track's timed text and print
@@ -30,13 +31,16 @@ language; auto-generated tracks are marked.
 YouTube now gates the raw caption endpoints behind a proof-of-origin token, so
 direct text fetches often come back empty. When that happens and yt-dlp is on
 PATH, the transcript is recovered through it automatically.`,
-		Args: cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := cmd.Context()
-			store, err := app.Store()
-			if err != nil {
-				return err
-			}
+		Args: kit.ExactArgs(1),
+		Flags: func(f *kit.FlagSet) {
+			f.StringVar(&lang, "lang", "", "preferred caption language")
+			f.BoolVar(&list, "list", false, "list available caption tracks")
+			f.BoolVar(&timestamps, "timestamps", false, "emit timed segments instead of joined text")
+			f.StringVar(&subFormat, "format", "", "render as subtitles: srt|vtt|txt")
+			f.StringVar(&out, "out", "", "write the transcript/subtitles to this file")
+		},
+		Run: func(ctx context.Context, args []string) error {
+			app := appFromCtx(ctx)
 			if list {
 				tracks, err := app.Client.Captions(ctx, args[0])
 				if err != nil {
@@ -46,9 +50,6 @@ PATH, the transcript is recovered through it automatically.`,
 					return noResults("no caption tracks")
 				}
 				for _, t := range tracks {
-					if store != nil {
-						_ = store.UpsertCaptionTrack(t)
-					}
 					if err := app.Out.Emit(captionRow(t)); err != nil {
 						return err
 					}
@@ -62,7 +63,7 @@ PATH, the transcript is recovered through it automatically.`,
 			}
 			if text == "" && len(segments) == 0 {
 				// The direct endpoint was gated (empty body). Recover via yt-dlp.
-				segments, err = app.transcriptViaYtDlp(cmd, args[0], lang)
+				segments, err = app.transcriptViaYtDlp(ctx, args[0], lang)
 				if err != nil {
 					return err
 				}
@@ -80,7 +81,7 @@ PATH, the transcript is recovered through it automatically.`,
 					_, _ = cmdErr.Write([]byte("saved " + out + "\n"))
 					return nil
 				}
-				return app.Out.Line(rendered)
+				return app.Line(rendered)
 			}
 			if timestamps {
 				for _, s := range segments {
@@ -97,21 +98,14 @@ PATH, the transcript is recovered through it automatically.`,
 				_, _ = cmdErr.Write([]byte("saved " + out + "\n"))
 				return nil
 			}
-			return app.Out.Line(text)
+			return app.Line(text)
 		},
 	}
-	f := cmd.Flags()
-	f.StringVar(&lang, "lang", "", "preferred caption language")
-	f.BoolVar(&list, "list", false, "list available caption tracks")
-	f.BoolVar(&timestamps, "timestamps", false, "emit timed segments instead of joined text")
-	f.StringVar(&subFormat, "format", "", "render as subtitles: srt|vtt|txt")
-	f.StringVar(&out, "out", "", "write the transcript/subtitles to this file")
-	return cmd
 }
 
 // transcriptViaYtDlp recovers a transcript through yt-dlp's subtitle writer,
 // which negotiates the proof-of-origin token the bare endpoints now require.
-func (a *App) transcriptViaYtDlp(cmd *cobra.Command, target, lang string) ([]youtube.TranscriptSegment, error) {
+func (a *App) transcriptViaYtDlp(ctx context.Context, target, lang string) ([]youtube.TranscriptSegment, error) {
 	bin, err := a.resolveYtDlp()
 	if err != nil {
 		return nil, missingTool("transcript endpoint is gated and yt-dlp is not on PATH; install yt-dlp or pass --yt-dlp-bin to recover captions")
@@ -138,7 +132,7 @@ func (a *App) transcriptViaYtDlp(cmd *cobra.Command, target, lang string) ([]you
 		a.logf("would run: %s %v", bin, ytArgs)
 		return nil, nil
 	}
-	c := exec.CommandContext(cmd.Context(), bin, ytArgs...)
+	c := exec.CommandContext(ctx, bin, ytArgs...)
 	c.Stdout, c.Stderr = cmdErr, cmdErr // yt-dlp progress goes to stderr, never stdout
 	// yt-dlp exits non-zero when any one of the requested language variants
 	// fails, even if the track we want downloaded fine. Treat the presence of a
@@ -275,7 +269,7 @@ func vttClean(s string) string {
 			b.WriteRune(r)
 		}
 	}
-	out := strings.ReplaceAll(b.String(), " ", " ")
+	out := strings.ReplaceAll(b.String(), " ", " ")
 	return strings.Join(strings.Fields(out), " ")
 }
 

@@ -1,36 +1,39 @@
 package cli
 
 import (
+	"context"
 	"strings"
 
-	"github.com/spf13/cobra"
+	"github.com/tamnd/any-cli/kit"
 	"github.com/tamnd/ytb-cli/youtube"
 )
 
-func newMusicCmd(app *App) *cobra.Command {
-	cmd := &cobra.Command{
+func newMusicCmd() kit.Command {
+	return kit.Command{
 		Use:   "music",
 		Short: "YouTube Music (artists, albums, songs)",
 		Long:  `Search and browse YouTube Music via the WEB_REMIX client context.`,
+		Sub: []kit.Command{
+			newMusicSearchCmd(),
+			newMusicArtistCmd(),
+			newMusicAlbumCmd(),
+			newMusicPlaylistCmd(),
+			newMusicSongCmd(),
+		},
 	}
-	cmd.AddCommand(
-		newMusicSearchCmd(app),
-		newMusicArtistCmd(app),
-		newMusicAlbumCmd(app),
-		newMusicPlaylistCmd(app),
-		newMusicSongCmd(app),
-	)
-	return cmd
 }
 
-func newMusicSearchCmd(app *App) *cobra.Command {
+func newMusicSearchCmd() kit.Command {
 	var typ string
-	cmd := &cobra.Command{
+	return kit.Command{
 		Use:   "search <query>",
 		Short: "Search artists, albums and songs",
-		Args:  cobra.MinimumNArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := cmd.Context()
+		Args:  kit.MinimumNArgs(1),
+		Flags: func(f *kit.FlagSet) {
+			f.StringVar(&typ, "type", "", "song|video|album|artist|playlist (default song)")
+		},
+		Run: func(ctx context.Context, args []string) error {
+			app := appFromCtx(ctx)
 			query := strings.Join(args, " ")
 			// The unfiltered "all" results page returns items under
 			// itemSectionRenderer with no shelf titles to classify by, so it
@@ -52,17 +55,16 @@ func newMusicSearchCmd(app *App) *cobra.Command {
 			return app.Out.Flush()
 		},
 	}
-	cmd.Flags().StringVar(&typ, "type", "", "song|video|album|artist|playlist (default song)")
-	return cmd
 }
 
-func newMusicArtistCmd(app *App) *cobra.Command {
-	return &cobra.Command{
+func newMusicArtistCmd() kit.Command {
+	return kit.Command{
 		Use:   "artist <browseId|url>",
 		Short: "Artist profile with albums and top songs",
-		Args:  cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			artist, albums, songs, err := app.Client.FetchArtist(cmd.Context(), args[0])
+		Args:  kit.ExactArgs(1),
+		Run: func(ctx context.Context, args []string) error {
+			app := appFromCtx(ctx)
+			artist, albums, songs, err := app.Client.FetchArtist(ctx, args[0])
 			if err != nil {
 				return err
 			}
@@ -87,13 +89,14 @@ func newMusicArtistCmd(app *App) *cobra.Command {
 	}
 }
 
-func newMusicAlbumCmd(app *App) *cobra.Command {
-	return &cobra.Command{
+func newMusicAlbumCmd() kit.Command {
+	return kit.Command{
 		Use:   "album <browseId|url>",
 		Short: "Album header and track list",
-		Args:  cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			album, songs, err := app.Client.FetchAlbum(cmd.Context(), args[0])
+		Args:  kit.ExactArgs(1),
+		Run: func(ctx context.Context, args []string) error {
+			app := appFromCtx(ctx)
+			album, songs, err := app.Client.FetchAlbum(ctx, args[0])
 			if err != nil {
 				return err
 			}
@@ -113,13 +116,14 @@ func newMusicAlbumCmd(app *App) *cobra.Command {
 	}
 }
 
-func newMusicPlaylistCmd(app *App) *cobra.Command {
-	return &cobra.Command{
+func newMusicPlaylistCmd() kit.Command {
+	return kit.Command{
 		Use:   "playlist <id|url>",
 		Short: "Music playlist and tracks",
-		Args:  cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			header, songs, err := app.Client.FetchMusicPlaylist(cmd.Context(), args[0])
+		Args:  kit.ExactArgs(1),
+		Run: func(ctx context.Context, args []string) error {
+			app := appFromCtx(ctx)
+			header, songs, err := app.Client.FetchMusicPlaylist(ctx, args[0])
 			if err != nil {
 				return err
 			}
@@ -141,14 +145,18 @@ func newMusicPlaylistCmd(app *App) *cobra.Command {
 	}
 }
 
-func newMusicSongCmd(app *App) *cobra.Command {
+func newMusicSongCmd() kit.Command {
 	var lyrics bool
-	cmd := &cobra.Command{
+	return kit.Command{
 		Use:   "song <video-id>",
 		Short: "Song detail (with --lyrics if available)",
-		Args:  cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			song, err := app.Client.FetchSong(cmd.Context(), args[0], lyrics)
+		Args:  kit.ExactArgs(1),
+		Flags: func(f *kit.FlagSet) {
+			f.BoolVar(&lyrics, "lyrics", false, "fetch lyrics if available")
+		},
+		Run: func(ctx context.Context, args []string) error {
+			app := appFromCtx(ctx)
+			song, err := app.Client.FetchSong(ctx, args[0], lyrics)
 			if err != nil {
 				return err
 			}
@@ -162,11 +170,9 @@ func newMusicSongCmd(app *App) *cobra.Command {
 				return err
 			}
 			if lyrics && song.Lyrics != "" {
-				return app.Out.Line(song.Lyrics)
+				return app.Line(song.Lyrics)
 			}
 			return nil
 		},
 	}
-	cmd.Flags().BoolVar(&lyrics, "lyrics", false, "fetch lyrics if available")
-	return cmd
 }

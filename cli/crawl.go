@@ -1,26 +1,33 @@
 package cli
 
 import (
+	"context"
 	"os"
 
-	"github.com/spf13/cobra"
+	"github.com/tamnd/any-cli/kit"
 	"github.com/tamnd/ytb-cli/youtube"
 )
 
-func newSeedCmd(app *App) *cobra.Command {
+func newSeedCmd() kit.Command {
 	var (
 		file     string
 		entity   string
 		priority int
 	)
-	cmd := &cobra.Command{
+	return kit.Command{
 		Use:   "seed [item]",
-		Short: "Load a worklist into the crawl queue (needs --db)",
+		Short: "Load a worklist into the crawl queue",
 		Long: `Enqueue items for the crawler. Pass a single item argument, or --file to load a
 newline-delimited worklist. --entity tags the kind
 (video|channel|playlist|search|hashtag|community).`,
-		Args: cobra.MaximumNArgs(1),
-		RunE: func(_ *cobra.Command, args []string) error {
+		Args: kit.MaximumNArgs(1),
+		Flags: func(f *kit.FlagSet) {
+			f.StringVar(&file, "file", "", "newline-delimited worklist file")
+			f.StringVar(&entity, "entity", "", "entity kind for the seeded items")
+			f.IntVar(&priority, "priority", 0, "queue priority (higher runs first)")
+		},
+		Run: func(ctx context.Context, args []string) error {
+			app := appFromCtx(ctx)
 			store, err := app.RequireStore()
 			if err != nil {
 				return err
@@ -64,23 +71,23 @@ newline-delimited worklist. --entity tags the kind
 			return nil
 		},
 	}
-	f := cmd.Flags()
-	f.StringVar(&file, "file", "", "newline-delimited worklist file")
-	f.StringVar(&entity, "entity", "", "entity kind for the seeded items")
-	f.IntVar(&priority, "priority", 0, "queue priority (higher runs first)")
-	return cmd
 }
 
-func newCrawlCmd(app *App) *cobra.Command {
+func newCrawlCmd() kit.Command {
 	var (
 		entity     string
 		maxPerItem int
 	)
-	cmd := &cobra.Command{
+	return kit.Command{
 		Use:   "crawl",
-		Short: "Process the crawl queue with workers (needs --db)",
-		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		Short: "Process the crawl queue with workers",
+		Args:  kit.NoArgs,
+		Flags: func(f *kit.FlagSet) {
+			f.StringVar(&entity, "entity", "", "only crawl one entity kind")
+			f.IntVar(&maxPerItem, "max-per-item", 0, "cap items fetched per queue entry")
+		},
+		Run: func(ctx context.Context, _ []string) error {
+			app := appFromCtx(ctx)
 			store, err := app.RequireStore()
 			if err != nil {
 				return err
@@ -94,22 +101,22 @@ func newCrawlCmd(app *App) *cobra.Command {
 			if !app.quiet {
 				logf = func(s string) { app.logf("%s", s) }
 			}
-			return youtube.Crawl(cmd.Context(), app.Client, store, opt, logf)
+			return youtube.Crawl(ctx, app.Client, store, opt, logf)
 		},
 	}
-	f := cmd.Flags()
-	f.StringVar(&entity, "entity", "", "only crawl one entity kind")
-	f.IntVar(&maxPerItem, "max-per-item", 0, "cap items fetched per queue entry")
-	return cmd
 }
 
-func newQueueCmd(app *App) *cobra.Command {
+func newQueueCmd() kit.Command {
 	var status string
-	cmd := &cobra.Command{
+	return kit.Command{
 		Use:   "queue",
-		Short: "Inspect the crawl queue (needs --db)",
-		Args:  cobra.NoArgs,
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Short: "Inspect the crawl queue",
+		Args:  kit.NoArgs,
+		Flags: func(f *kit.FlagSet) {
+			f.StringVar(&status, "status", "", "filter by status (pending|done|failed)")
+		},
+		Run: func(ctx context.Context, _ []string) error {
+			app := appFromCtx(ctx)
 			store, err := app.RequireStore()
 			if err != nil {
 				return err
@@ -130,16 +137,15 @@ func newQueueCmd(app *App) *cobra.Command {
 			return app.Out.Flush()
 		},
 	}
-	cmd.Flags().StringVar(&status, "status", "", "filter by status (pending|done|failed)")
-	return cmd
 }
 
-func newJobsCmd(app *App) *cobra.Command {
-	cmd := &cobra.Command{
+func newJobsCmd() kit.Command {
+	return kit.Command{
 		Use:   "jobs",
-		Short: "Recent crawl job history (needs --db)",
-		Args:  cobra.NoArgs,
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Short: "Recent crawl job history",
+		Args:  kit.NoArgs,
+		Run: func(ctx context.Context, _ []string) error {
+			app := appFromCtx(ctx)
 			store, err := app.RequireStore()
 			if err != nil {
 				return err
@@ -163,5 +169,4 @@ func newJobsCmd(app *App) *cobra.Command {
 			return app.Out.Flush()
 		},
 	}
-	return cmd
 }

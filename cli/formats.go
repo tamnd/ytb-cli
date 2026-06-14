@@ -5,32 +5,35 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/spf13/cobra"
+	"github.com/tamnd/any-cli/kit"
 	"github.com/tamnd/ytb-cli/youtube"
 )
 
-func newFormatsCmd(app *App) *cobra.Command {
+func newFormatsCmd() kit.Command {
 	var (
 		audio bool
 		video bool
 		muxed bool
 		urls  bool
 	)
-	cmd := &cobra.Command{
+	return kit.Command{
 		Use:   "formats <video-id|url>",
 		Short: "Streaming formats (metadata only)",
 		Long: `List the muxed and adaptive formats from /player streamingData, deduped by
 itag. --audio/--video filter by track type, --muxed shows only progressive
-formats. This lists metadata only; it does not resolve playable URLs.`,
-		Args: cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := cmd.Context()
+formats. This lists metadata only; it does not resolve playable URLs unless you
+pass --urls.`,
+		Args: kit.ExactArgs(1),
+		Flags: func(f *kit.FlagSet) {
+			f.BoolVar(&audio, "audio", false, "audio-only adaptive formats")
+			f.BoolVar(&video, "video", false, "video-only adaptive formats")
+			f.BoolVar(&muxed, "muxed", false, "progressive (muxed) formats only")
+			f.BoolVar(&urls, "urls", false, "resolve playable stream URLs via the native engine (deciphered)")
+		},
+		Run: func(ctx context.Context, args []string) error {
+			app := appFromCtx(ctx)
 			if urls {
 				return emitStreamURLs(ctx, app, args[0], audio, video, muxed)
-			}
-			store, err := app.Store()
-			if err != nil {
-				return err
 			}
 			formats, err := app.Client.Formats(ctx, args[0])
 			if err != nil {
@@ -43,9 +46,6 @@ formats. This lists metadata only; it does not resolve playable URLs.`,
 			for _, f := range formats {
 				if !formatMatches(f, audio, video, muxed) {
 					continue
-				}
-				if store != nil {
-					_ = store.UpsertVideoFormat(f)
 				}
 				if err := app.Out.Emit(formatRow(f)); err != nil {
 					return err
@@ -61,12 +61,6 @@ formats. This lists metadata only; it does not resolve playable URLs.`,
 			return app.Out.Flush()
 		},
 	}
-	f := cmd.Flags()
-	f.BoolVar(&audio, "audio", false, "audio-only adaptive formats")
-	f.BoolVar(&video, "video", false, "video-only adaptive formats")
-	f.BoolVar(&muxed, "muxed", false, "progressive (muxed) formats only")
-	f.BoolVar(&urls, "urls", false, "resolve playable stream URLs via the native engine (deciphered)")
-	return cmd
 }
 
 // emitStreamURLs resolves and prints the deciphered, directly-fetchable URL for

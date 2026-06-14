@@ -8,11 +8,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/spf13/cobra"
+	"github.com/tamnd/any-cli/kit"
 	"github.com/tamnd/ytb-cli/youtube"
 )
 
-// resolveYtDlp returns the yt-dlp binary path or a coded error (exit 6) if absent.
+// resolveYtDlp returns the yt-dlp binary path or a coded error (exit 7) if absent.
 func (a *App) resolveYtDlp() (string, error) {
 	bin := a.YtDlpBin
 	if bin == "" {
@@ -29,7 +29,7 @@ func (a *App) resolveYtDlp() (string, error) {
 }
 
 // runYtDlp prints the ToS note, then execs yt-dlp with args, streaming its output.
-func (a *App) runYtDlp(cmd *cobra.Command, args []string) error {
+func (a *App) runYtDlp(ctx context.Context, args []string) error {
 	bin, err := a.resolveYtDlp()
 	if err != nil {
 		return err
@@ -39,7 +39,7 @@ func (a *App) runYtDlp(cmd *cobra.Command, args []string) error {
 		_, _ = fmt.Fprintf(cmdErr, "would run: %s %v\n", bin, args)
 		return nil
 	}
-	c := exec.CommandContext(cmd.Context(), bin, args...)
+	c := exec.CommandContext(ctx, bin, args...)
 	c.Stdout = cmdOut
 	c.Stderr = cmdErr
 	c.Stdin = os.Stdin
@@ -67,9 +67,9 @@ type downloadOpts struct {
 	useYtDlp    bool
 }
 
-func newDownloadCmd(app *App) *cobra.Command {
+func newDownloadCmd() kit.Command {
 	var o downloadOpts
-	cmd := &cobra.Command{
+	return kit.Command{
 		Use:   "download <id|url>...",
 		Short: "Download media with the native engine (or yt-dlp via --use-yt-dlp)",
 		Long: `Download videos with the built-in pure-Go engine.
@@ -81,36 +81,36 @@ and thumbnail embedding use ffmpeg when it is available; without ffmpeg the
 engine still downloads any single progressive or adaptive stream.
 
 Pass --use-yt-dlp to delegate to a yt-dlp binary instead.`,
-		Args: cobra.MinimumNArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Args: kit.MinimumNArgs(1),
+		Flags: func(f *kit.FlagSet) {
+			f.BoolVarP(&o.audio, "audio", "x", false, "download audio only")
+			f.StringVar(&o.audioFormat, "audio-format", "", "convert audio to this codec (mp3|m4a|opus|flac), needs ffmpeg")
+			f.StringVar(&o.out, "out", ".", "output directory")
+			f.StringVar(&o.tmpl, "output-template", "%(title)s [%(id)s].%(ext)s", "yt-dlp-style output filename template")
+			f.StringVarP(&o.format, "format", "f", "", "format selector (e.g. best, 22, bv*+ba, bv[height<=720]+ba)")
+			f.StringVar(&o.quality, "quality", "", "max video height shorthand (e.g. 1080)")
+			f.StringVar(&o.items, "playlist-items", "", "playlist item selection (e.g. 1,3,5-7,10-)")
+			f.StringVar(&o.subLangs, "sub-langs", "", "subtitle language to write (e.g. en)")
+			f.StringVar(&o.subFormat, "sub-format", "srt", "subtitle format to write (srt|vtt|txt)")
+			f.BoolVar(&o.writeSubs, "write-subs", false, "write the subtitle sidecar file")
+			f.IntVar(&o.concurrency, "concurrent-fragments", 4, "parallel byte-range workers")
+			f.BoolVar(&o.embedThumb, "embed-thumbnail", false, "embed the thumbnail as cover art (mp4/m4a, needs ffmpeg)")
+			f.StringVar(&o.archivePath, "download-archive", "", "record downloaded ids here and skip ones already present")
+			f.BoolVar(&o.useYtDlp, "use-yt-dlp", false, "delegate to a yt-dlp binary instead of the native engine")
+		},
+		Run: func(ctx context.Context, args []string) error {
+			app := appFromCtx(ctx)
 			if o.useYtDlp {
-				return app.runYtDlpDownload(cmd, o, args)
+				return app.runYtDlpDownload(ctx, o, args)
 			}
-			return app.runNativeDownload(cmd, o, args)
+			return app.runNativeDownload(ctx, o, args)
 		},
 	}
-	f := cmd.Flags()
-	f.BoolVarP(&o.audio, "audio", "x", false, "download audio only")
-	f.StringVar(&o.audioFormat, "audio-format", "", "convert audio to this codec (mp3|m4a|opus|flac), needs ffmpeg")
-	f.StringVar(&o.out, "out", ".", "output directory")
-	f.StringVar(&o.tmpl, "output-template", "%(title)s [%(id)s].%(ext)s", "yt-dlp-style output filename template")
-	f.StringVarP(&o.format, "format", "f", "", "format selector (e.g. best, 22, bv*+ba, bv[height<=720]+ba)")
-	f.StringVar(&o.quality, "quality", "", "max video height shorthand (e.g. 1080)")
-	f.StringVar(&o.items, "playlist-items", "", "playlist item selection (e.g. 1,3,5-7,10-)")
-	f.StringVar(&o.subLangs, "sub-langs", "", "subtitle language to write (e.g. en)")
-	f.StringVar(&o.subFormat, "sub-format", "srt", "subtitle format to write (srt|vtt|txt)")
-	f.BoolVar(&o.writeSubs, "write-subs", false, "write the subtitle sidecar file")
-	f.IntVar(&o.concurrency, "concurrent-fragments", 4, "parallel byte-range workers")
-	f.BoolVar(&o.embedThumb, "embed-thumbnail", false, "embed the thumbnail as cover art (mp4/m4a, needs ffmpeg)")
-	f.StringVar(&o.archivePath, "download-archive", "", "record downloaded ids here and skip ones already present")
-	f.BoolVar(&o.useYtDlp, "use-yt-dlp", false, "delegate to a yt-dlp binary instead of the native engine")
-	return cmd
 }
 
 // runNativeDownload expands inputs (videos and playlists) and downloads each.
-func (a *App) runNativeDownload(cmd *cobra.Command, o downloadOpts, args []string) error {
+func (a *App) runNativeDownload(ctx context.Context, o downloadOpts, args []string) error {
 	_, _ = fmt.Fprintln(cmdErr, "note: media download is your responsibility; respect YouTube's Terms of Service and copyright.")
-	ctx := cmd.Context()
 
 	archive, err := youtube.OpenArchive(o.archivePath)
 	if err != nil {
@@ -392,7 +392,7 @@ func (a *App) writeSubtitle(ctx context.Context, videoID string, o downloadOpts,
 }
 
 // runYtDlpDownload preserves the original yt-dlp delegation path.
-func (a *App) runYtDlpDownload(cmd *cobra.Command, o downloadOpts, args []string) error {
+func (a *App) runYtDlpDownload(ctx context.Context, o downloadOpts, args []string) error {
 	var ytArgs []string
 	if o.audio {
 		ytArgs = append(ytArgs, "-x")
@@ -424,20 +424,26 @@ func (a *App) runYtDlpDownload(cmd *cobra.Command, o downloadOpts, args []string
 		ytArgs = append(ytArgs, "--download-archive", o.archivePath)
 	}
 	ytArgs = append(ytArgs, args...)
-	return a.runYtDlp(cmd, ytArgs)
+	return a.runYtDlp(ctx, ytArgs)
 }
 
-func newExtractCmd(app *App) *cobra.Command {
+func newExtractCmd() kit.Command {
 	var (
 		out     string
 		format  string
 		quality string
 	)
-	cmd := &cobra.Command{
+	return kit.Command{
 		Use:   "extract <audio|video|transcript|all> <id|url>",
 		Short: "Extract a specific stream via yt-dlp",
-		Args:  cobra.ExactArgs(2),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Args:  kit.ExactArgs(2),
+		Flags: func(f *kit.FlagSet) {
+			f.StringVar(&out, "out", ".", "output directory")
+			f.StringVar(&format, "format", "", "audio format for extract audio (e.g. mp3)")
+			f.StringVar(&quality, "quality", "", "max video height for extract video (e.g. 1080)")
+		},
+		Run: func(ctx context.Context, args []string) error {
+			app := appFromCtx(ctx)
 			kind, target := args[0], args[1]
 			var ytArgs []string
 			switch kind {
@@ -463,14 +469,9 @@ func newExtractCmd(app *App) *cobra.Command {
 				ytArgs = append(ytArgs, "-o", out+"/%(title)s [%(id)s].%(ext)s")
 			}
 			ytArgs = append(ytArgs, target)
-			return app.runYtDlp(cmd, ytArgs)
+			return app.runYtDlp(ctx, ytArgs)
 		},
 	}
-	f := cmd.Flags()
-	f.StringVar(&out, "out", ".", "output directory")
-	f.StringVar(&format, "format", "", "audio format for extract audio (e.g. mp3)")
-	f.StringVar(&quality, "quality", "", "max video height for extract video (e.g. 1080)")
-	return cmd
 }
 
 func resolutionLabel(s youtube.Stream) string {
