@@ -1,255 +1,206 @@
 # ytb
 
-A fast, friendly command line for [YouTube](https://www.youtube.com). One binary
-that resolves a video to its full metadata, streams a channel's uploads, pages a
-playlist, searches with the full filter grid, pulls comments and transcripts,
-follows hashtags and community posts, browses YouTube Music, and optionally
-persists everything into a local SQLite store.
+[![CI](https://github.com/tamnd/ytb-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/tamnd/ytb-cli/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/tamnd/ytb-cli)](https://github.com/tamnd/ytb-cli/releases/latest)
+[![Go Reference](https://pkg.go.dev/badge/github.com/tamnd/ytb-cli.svg)](https://pkg.go.dev/github.com/tamnd/ytb-cli)
+[![Go Report Card](https://goreportcard.com/badge/github.com/tamnd/ytb-cli)](https://goreportcard.com/report/github.com/tamnd/ytb-cli)
+[![License](https://img.shields.io/github/license/tamnd/ytb-cli)](./LICENSE)
 
-```
-ytb video dQw4w9WgXcQ --fields title,channel,views -o table
-```
+A command line for [YouTube](https://www.youtube.com). `ytb` resolves any video,
+channel, playlist, comment thread, transcript, or YouTube Music record into clean
+structured data. One pure-Go binary, no API key, no quota.
 
-```
-TITLE                                                  CHANNEL      VIEWS
-Rick Astley - Never Gonna Give You Up (Official Video) Rick Astley  1782393180
-```
+[Install](#install) • [Commands](#commands) • [Usage](#usage) • [The local store](#the-local-store)
 
-Full documentation: [ytb-cli.tamnd.com](https://ytb-cli.tamnd.com).
+![ytb searching YouTube and reading a video record from the command line](docs/static/demo.gif)
 
-## Why
+It talks to the same public InnerTube endpoints the YouTube site uses, so there
+is no key to register and no quota to budget. Responses are cached on disk, so a
+repeat call is instant. Pass `--db` and every record is also upserted into a
+local SQLite store you can query with SQL.
 
-Working with YouTube programmatically usually means an API key, a quota that runs
-out by lunch, and a Data API whose shape barely resembles what you see in the
-browser. ytb talks to the same public InnerTube endpoints the site itself
-uses, so there is no key to register and no quota to budget. It puts the whole
-surface (videos, channels, playlists, search, comments, transcripts, hashtags,
-community posts, and YouTube Music) behind one tool with real output formats and
-pipelines that compose.
+`ytb` is an independent tool. It is not affiliated with YouTube or Google.
 
 ## Install
 
-```sh
+```bash
 go install github.com/tamnd/ytb-cli/cmd/ytb@latest
 ```
 
-Or grab a prebuilt binary from the [releases page](https://github.com/tamnd/ytb-cli/releases).
-The binary is pure Go with no runtime dependencies. yt-dlp is optional and only
-needed for the `download`/`extract` commands and for recovering transcripts when
-YouTube gates the caption endpoints (see [Transcripts](#transcripts)).
+Or grab a prebuilt binary, a Linux package (`deb`/`rpm`/`apk`), or a container
+image from the [releases](https://github.com/tamnd/ytb-cli/releases):
 
-Build from source:
-
-```sh
-git clone https://github.com/tamnd/ytb-cli
-cd ytb-cli
-make build      # produces ./bin/ytb
+```bash
+brew install tamnd/tap/ytb
+docker run --rm ghcr.io/tamnd/ytb:latest search 'lofi hip hop' -n 10
 ```
 
-## Quick start
+Shell completion is built in: `ytb completion bash|zsh|fish|powershell`.
 
-```sh
-ytb video dQw4w9WgXcQ                  # full metadata for a video
-ytb channel @MrBeast --videos          # stream a channel's uploads
-ytb playlist PLFgquLnL59alCl_2TQvOiD5Vgm1hCaGSI  # page a playlist's items
-ytb search "lofi hip hop" -n 50        # search with continuation paging
-ytb transcript dQw4w9WgXcQ             # the video's transcript as text
-ytb trending --category music          # what's hot right now
-```
-
-Anywhere a command takes an id or URL it also accepts `-` to read a list from
-stdin, so commands chain:
-
-```sh
-ytb search "go programming" -o id | ytb video -   # batch lookups
-```
-
-## How it works
-
-YouTube renders every page from a JSON document (`ytInitialData`) and serves the
-same data to its own JavaScript through the InnerTube API at
-`youtubei/v1/*`, the endpoints behind `/player`, `/next`, `/browse`, and
-`/search`. ytb bootstraps a session from a watch page (visitor data, client
-version), then walks those renderer trees the same way the website does, follows
-the opaque continuation tokens for pagination, and maps everything onto clean
-data models. No API key, no quota.
+`yt-dlp` is optional and only needed for `download`, `extract`, and as a
+transcript fallback when YouTube gates the caption endpoints.
 
 ## Commands
 
-| Command | What it does |
+| Command | Reads |
 | --- | --- |
-| `video` | Resolve one or more videos to full metadata |
-| `channel` | Channel metadata and its content (videos, shorts, streams, playlists) |
-| `playlist` | Playlist header and its items |
-| `search` | Search with the full filter grid (type, duration, features, sort) |
-| `trending` | What is hot right now, by category |
-| `comments` | Comments and replies for a video |
-| `community` | A channel's community / posts tab |
-| `hashtag` | A hashtag feed |
-| `related` | The related-videos graph for a video |
-| `suggest` | Search autocomplete suggestions |
-| `transcript` | Caption tracks and transcript text |
-| `formats` | Streaming format metadata for a video |
-| `music` | YouTube Music: search, artists, albums, playlists, songs |
-| `download` | Download media via yt-dlp |
-| `extract` | Extract a specific stream (audio, video, transcript) via yt-dlp |
-| `seed` | Load a worklist into the crawl queue (needs `--db`) |
-| `crawl` | Process the crawl queue with workers (needs `--db`) |
-| `queue` | Inspect the crawl queue (needs `--db`) |
-| `jobs` | Recent crawl job history (needs `--db`) |
-| `export` | Render the store as interlinked Markdown (needs `--db`) |
-| `db` | The local SQLite store: stats, query, search, vacuum |
-| `config` | Show and manage configuration |
+| `ytb video <id\|url>...` | one or more videos; full metadata |
+| `ytb channel <handle\|url>` | channel metadata; `--videos`, `--shorts`, `--streams`, `--playlists` |
+| `ytb playlist <id\|url>` | a playlist's header and items |
+| `ytb search <query>` | search with type, duration, features, and sort filters |
+| `ytb trending` | what is hot right now; `--category` |
+| `ytb comments <id\|url>` | a video's comments and replies; `--sort` |
+| `ytb community <handle\|url>` | a channel's community / posts tab |
+| `ytb hashtag <tag>` | a hashtag feed |
+| `ytb related <id\|url>` | related videos for a video |
+| `ytb suggest <term>` | search autocomplete terms |
+| `ytb transcript <id\|url>` | caption tracks and transcript text; `--timestamps`, `--lang` |
+| `ytb formats <id\|url>` | streaming format metadata; `--audio`, `--video`, `--muxed` |
+| `ytb music search <query>` | YouTube Music search |
+| `ytb music artist <id\|url>` | a Music artist's profile and releases |
+| `ytb music album <id\|url>` | a Music album |
+| `ytb music playlist <id\|url>` | a Music playlist |
+| `ytb music song <id\|url>` | a Music track |
+| `ytb download <id\|url>` | download media via yt-dlp |
+| `ytb extract <id\|url>` | extract a specific stream via yt-dlp; `--audio`, `--video` |
+| `ytb seed <query\|url>...` | load a worklist into the crawl queue |
+| `ytb crawl` | drain the crawl queue with workers |
+| `ytb queue` | inspect the crawl queue |
+| `ytb jobs` | recent crawl job history |
+| `ytb export <handle\|id>` | render the store as interlinked Markdown |
+| `ytb db stats\|query\|search\|vacuum` | work with the local SQLite store |
+| `ytb config show\|init\|path` | show or reset configuration |
+| `ytb cache path\|info\|clear` | inspect or clear the on-disk cache |
+| `ytb serve` | serve all operations over HTTP |
+| `ytb mcp` | run as an MCP server over stdio |
+| `ytb version` | print version, commit, and build date |
 
-Run `ytb <command> --help` for the full flag list on any command.
+Full reference and guides live at [ytb-cli.tamnd.com](https://ytb-cli.tamnd.com).
 
-## Recipes
+## Usage
 
-Pull a channel's entire upload history as JSONL:
+```bash
+ytb video dQw4w9WgXcQ                         # full video metadata
+ytb channel @MrBeast --videos -n 20            # a channel's uploads
+ytb search 'lofi hip hop' -n 50               # search
+ytb comments dQw4w9WgXcQ --sort new -n 100   # newest 100 comments
+ytb transcript dQw4w9WgXcQ                    # transcript as text
+ytb trending --category music                 # what is hot right now
+ytb music search 'rick astley'                # YouTube Music search
+```
 
-```sh
+Records come out as a table (the default on a terminal), list, markdown, JSON,
+JSONL, CSV, TSV, url, or raw. The table uses rounded borders and a colored header
+on a true-color terminal; JSON and JSONL are syntax-highlighted too:
+
+```bash
+ytb search 'lofi hip hop' --fields id,title,channel,views -o table
+ytb video dQw4w9WgXcQ -o json
+ytb search 'go' -n 50 -o jsonl | jq 'select(.views > 100000)'
+ytb search 'go' -o url
 ytb channel @MrBeast --videos -o jsonl > mrbeast.jsonl
+ytb playlist PLFgquLnL59alCl_2TQvOiD5Vgm1hCaGSI -o url | ytb video -
 ```
 
-Get the title and view count of every video a search returns:
+Chain commands through stdin with `-` for batch lookups:
 
-```sh
-ytb search "rust tutorial" -n 100 --fields title,views
+```bash
+ytb search 'go programming' -o id | ytb video -
 ```
 
-Read the transcript of a video and count the words:
+### Global flags
 
-```sh
-ytb transcript dQw4w9WgXcQ | wc -w
 ```
-
-Find a playlist's videos and resolve each to full metadata:
-
-```sh
-ytb playlist PLFgquLnL59alCl_2TQvOiD5Vgm1hCaGSI -o id | ytb video -
-```
-
-Search only for long, 4K, creative-commons videos sorted by date:
-
-```sh
-ytb search drone --duration long --4k --creative-commons --sort date
-```
-
-Pull the top-level comments of a video, newest first:
-
-```sh
-ytb comments dQw4w9WgXcQ --sort new -n 50
-```
-
-## Output formats
-
-Every list command renders through the same formatter. Pick a format with `-o`,
-or let ytb choose: a table when writing to a terminal, JSONL when piped.
-
-```sh
-ytb search example -o table   # aligned columns for reading
-ytb search example -o jsonl   # one JSON object per line, for piping
-ytb search example -o json    # a single JSON array
-ytb search example -o csv     # spreadsheet friendly
-ytb search example -o url     # just the canonical URL
-ytb search example -o id      # just the id, ideal for stdin chaining
-```
-
-Narrow the columns with `--fields`, or template each row:
-
-```sh
-ytb search example --fields title,channel,views
-ytb search example --template '{{.Title}} — {{.Views}}'
+-o, --output       list|table|markdown|json|jsonl|csv|tsv|url|id|raw   (auto: table on a TTY, jsonl when piped)
+    --fields       comma-separated columns to keep, in order
+    --no-header    omit the header row
+    --template     Go text/template applied per record
+-n, --limit        max records (0 = unlimited)
+    --max-pages    max continuation pages (0 = unlimited)
+-j, --workers      concurrency for detail fetches (default 4)
+    --rate         min delay between requests (default 500ms)
+    --timeout      per-request timeout (default 30s)
+    --retries      retry attempts on 429/5xx (default 4)
+    --hl           InnerTube interface language (default en)
+    --gl           InnerTube content country (default US)
+-q, --quiet        suppress progress output
+    --color        auto|always|never
+    --db           path to the optional SQLite store
+    --no-cache     bypass the on-disk cache
+    --dry-run      print the requests that would be made
 ```
 
 ## The local store
 
-Most commands are stateless and stream straight to stdout. Pass `--db <path>`
-and ytb also persists everything it fetches into a SQLite database: videos,
-channels, playlists, comments, caption tracks, formats, and the relationships
-between them. That turns the same commands into a crawler and gives you SQL over
-what you have collected.
+Pass `--db <path>` and `ytb` also upserts every record it fetches into a SQLite
+database: videos, channels, playlists, comments, caption tracks, formats, and the
+relationships between them. That turns the same commands into a crawler and gives
+you SQL over what you have collected.
 
-```sh
-ytb channel @MrBeast --videos --db yt.db    # stream and persist in one pass
-ytb db stats --db yt.db                      # row counts per table
-ytb db search videos "mukbang" --db yt.db    # full-text over stored titles
+```bash
+ytb channel @MrBeast --videos --db yt.db     # stream and persist in one pass
+ytb db stats --db yt.db                       # row counts per table
 ytb db query "select title, views from videos order by views desc limit 10" --db yt.db
-ytb export @MrBeast --db yt.db --out site/   # render the store as Markdown
+ytb db search videos "lofi" --db yt.db        # full-text search
+ytb export @MrBeast --db yt.db --out site/    # render the store as Markdown
 ```
 
 For larger collection runs, the `seed`/`crawl`/`queue`/`jobs` commands turn the
-store into a work queue that a pool of workers drains:
+store into a work queue:
 
-```sh
-ytb search "podcast" -o id --enqueue --db yt.db   # seed the queue from a search
-ytb crawl --db yt.db -j 8                          # drain it with 8 workers
-ytb queue --db yt.db                               # see what is pending
+```bash
+ytb search 'podcast' -o id --enqueue --db yt.db  # seed from a search
+ytb crawl --db yt.db -j 8                         # drain with 8 workers
+ytb queue --db yt.db                              # see what is pending
 ```
 
-The store is pure Go (modernc.org/sqlite), so nothing links libsqlite and the
-binary stays static. Without `--db`, no database is ever created.
+## Exit codes
 
-## Transcripts
-
-`ytb transcript <video> --list` shows every caption track a video has.
-Fetching the text is harder than it used to be: YouTube now gates the raw
-`timedtext` endpoint behind a proof-of-origin token, so direct text fetches often
-come back empty. When that happens and `yt-dlp` is on your `PATH`, ytb
-recovers the transcript through it automatically and parses the result back into
-timed segments:
-
-```sh
-ytb transcript dQw4w9WgXcQ --list           # available tracks
-ytb transcript dQw4w9WgXcQ                   # joined text
-ytb transcript dQw4w9WgXcQ --timestamps      # {start, dur, text} segments
-ytb transcript dQw4w9WgXcQ --lang es         # a specific language
 ```
-
-Install yt-dlp from [its releases](https://github.com/yt-dlp/yt-dlp) if you want
-transcript text and media downloads. Everything else works without it.
-
-## Configuration
-
-ytb needs no configuration to run. Defaults live in code; a config file is
-optional and mirrors the global flags. See the resolved settings any time:
-
-```sh
-ytb config show
-ytb config init     # write a commented template to the XDG config path
+0  success
+1  error
+2  usage error
+3  no results
+4  auth required
+5  rate limited
+6  not found
+7  unsupported (missing optional tool such as yt-dlp)
 ```
-
-Useful global flags (all have sensible defaults):
-
-| Flag | Meaning |
-| --- | --- |
-| `-o, --output` | Output format (default auto) |
-| `-n, --limit` | Maximum rows emitted (`0` means unlimited) |
-| `--max-pages` | Maximum continuation pages to fetch (`0` means unlimited) |
-| `-j, --workers` | Concurrency for detail fetches and the crawler |
-| `--rate` | Minimum delay between requests, to stay polite |
-| `--hl, --gl` | InnerTube interface language and content country |
-| `--db` | Path to the optional SQLite store |
-| `--fields`, `--template` | Narrow or reshape each emitted row |
 
 ## Development
 
-```sh
-make test    # run the test suite
-make vet     # go vet
-make build   # build ./bin/ytb
+```
+cmd/ytb/     thin main entry point
+cli/         cobra commands and output rendering
+youtube/     HTTP client, InnerTube transport, parsers, models, optional store
+docs/        documentation site (Hugo, tago-doks theme)
 ```
 
-The code is two packages: `ytb/` is the library (client, InnerTube transport,
-renderer-walking parsers, data models, optional store), and `cli/` is the command
-tree built on Cobra and [fang](https://github.com/charmbracelet/fang). The
-library has no dependency on the CLI, so it is usable on its own.
+```bash
+make build   # ./bin/ytb
+make test    # go test ./...
+make vet     # go vet ./...
+make fmt     # gofmt -s -w .
+```
+
+Requires Go 1.23+. yt-dlp is optional; install it from
+[its releases](https://github.com/yt-dlp/yt-dlp) if you want `download`,
+`extract`, and transcript recovery.
+
+## Releasing
+
+Push a version tag and GitHub Actions runs GoReleaser:
+
+```bash
+git tag -a v0.3.2 -m "v0.3.2"
+git push --tags
+```
+
+The image tag carries no `v` prefix (`ghcr.io/tamnd/ytb:0.3.2`).
 
 ## License
 
-[Apache 2.0](LICENSE).
+Apache-2.0. See [LICENSE](LICENSE).
 
-YouTube is a trademark of Google LLC. This project is an independent client that
-talks to publicly served endpoints and is not affiliated with or endorsed by
-YouTube or Google. Respect [YouTube's Terms of Service](https://www.youtube.com/t/terms)
-and the rights of content owners when you use it.
+`ytb` is an independent client. Use it to access public data responsibly and
+within YouTube's Terms of Service. YouTube is a trademark of Google LLC.
