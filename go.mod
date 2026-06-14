@@ -6,7 +6,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.10.0
 	github.com/dop251/goja v0.0.0-20260607120635-348e6bea910d
 	github.com/mattn/go-isatty v0.0.22
-	github.com/tamnd/any-cli v0.3.2
+	github.com/tamnd/any-cli v0.4.0
 	golang.org/x/sync v0.21.0
 	modernc.org/sqlite v1.52.0
 )
