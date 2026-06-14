@@ -11,6 +11,12 @@ signature. Grab one from the [releases page] or install the latest with
 
 [releases page]: https://github.com/tamnd/ytb-cli/releases
 
+## v0.3.1
+
+Documentation release. Adds this release notes page and documents the v0.3.0
+output work: the `markdown` format, the color rules, and shrink-to-fit tables.
+No behavior changed.
+
 ## v0.3.0
 
 Output got a face-lift. Every list command renders through a redrawn formatter
