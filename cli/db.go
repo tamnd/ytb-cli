@@ -1,36 +1,37 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
 
-	"github.com/spf13/cobra"
+	"github.com/tamnd/any-cli/kit"
 )
 
-func newDBCmd(app *App) *cobra.Command {
-	cmd := &cobra.Command{
+func newDBCmd() kit.Command {
+	return kit.Command{
 		Use:   "db",
 		Short: "The local SQLite store",
-		Long:  `Inspect and query the optional SQLite store (--db). Pure-Go, no cgo.`,
+		Long:  `Inspect and query the local SQLite store at <data-dir>/ytb.db. Pure-Go, no cgo.`,
+		Sub: []kit.Command{
+			newDBStatsCmd(),
+			newDBQueryCmd(),
+			newDBSearchCmd(),
+			newDBPathCmd(),
+			newDBVacuumCmd(),
+			newDBResetCmd(),
+		},
 	}
-	cmd.AddCommand(
-		newDBStatsCmd(app),
-		newDBQueryCmd(app),
-		newDBSearchCmd(app),
-		newDBPathCmd(app),
-		newDBVacuumCmd(app),
-		newDBResetCmd(app),
-	)
-	return cmd
 }
 
-func newDBStatsCmd(app *App) *cobra.Command {
-	return &cobra.Command{
+func newDBStatsCmd() kit.Command {
+	return kit.Command{
 		Use:   "stats",
 		Short: "Row counts per table",
-		Args:  cobra.NoArgs,
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Args:  kit.NoArgs,
+		Run: func(ctx context.Context, _ []string) error {
+			app := appFromCtx(ctx)
 			store, err := app.RequireStore()
 			if err != nil {
 				return err
@@ -58,12 +59,13 @@ func newDBStatsCmd(app *App) *cobra.Command {
 	}
 }
 
-func newDBQueryCmd(app *App) *cobra.Command {
-	return &cobra.Command{
+func newDBQueryCmd() kit.Command {
+	return kit.Command{
 		Use:   "query <sql>",
 		Short: "Run a read-only SQL query",
-		Args:  cobra.ExactArgs(1),
-		RunE: func(_ *cobra.Command, args []string) error {
+		Args:  kit.ExactArgs(1),
+		Run: func(ctx context.Context, args []string) error {
+			app := appFromCtx(ctx)
 			store, err := app.RequireStore()
 			if err != nil {
 				return err
@@ -93,13 +95,17 @@ func newDBQueryCmd(app *App) *cobra.Command {
 	}
 }
 
-func newDBSearchCmd(app *App) *cobra.Command {
+func newDBSearchCmd() kit.Command {
 	var channels bool
-	cmd := &cobra.Command{
+	return kit.Command{
 		Use:   "search <query>",
 		Short: "Full-text search over stored data",
-		Args:  cobra.MinimumNArgs(1),
-		RunE: func(_ *cobra.Command, args []string) error {
+		Args:  kit.MinimumNArgs(1),
+		Flags: func(f *kit.FlagSet) {
+			f.BoolVar(&channels, "channels", false, "search channels instead of videos")
+		},
+		Run: func(ctx context.Context, args []string) error {
+			app := appFromCtx(ctx)
 			store, err := app.RequireStore()
 			if err != nil {
 				return err
@@ -139,31 +145,31 @@ func newDBSearchCmd(app *App) *cobra.Command {
 			return app.Out.Flush()
 		},
 	}
-	cmd.Flags().BoolVar(&channels, "channels", false, "search channels instead of videos")
-	return cmd
 }
 
-func newDBPathCmd(app *App) *cobra.Command {
-	return &cobra.Command{
+func newDBPathCmd() kit.Command {
+	return kit.Command{
 		Use:   "path",
 		Short: "Print the db file location",
-		Args:  cobra.NoArgs,
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Args:  kit.NoArgs,
+		Run: func(ctx context.Context, _ []string) error {
+			app := appFromCtx(ctx)
 			store, err := app.RequireStore()
 			if err != nil {
 				return err
 			}
-			return app.Out.Line(store.Path())
+			return app.Line(store.Path())
 		},
 	}
 }
 
-func newDBVacuumCmd(app *App) *cobra.Command {
-	return &cobra.Command{
+func newDBVacuumCmd() kit.Command {
+	return kit.Command{
 		Use:   "vacuum",
 		Short: "Compact the database file",
-		Args:  cobra.NoArgs,
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Args:  kit.NoArgs,
+		Run: func(ctx context.Context, _ []string) error {
+			app := appFromCtx(ctx)
 			store, err := app.RequireStore()
 			if err != nil {
 				return err
@@ -173,12 +179,13 @@ func newDBVacuumCmd(app *App) *cobra.Command {
 	}
 }
 
-func newDBResetCmd(app *App) *cobra.Command {
-	return &cobra.Command{
+func newDBResetCmd() kit.Command {
+	return kit.Command{
 		Use:   "reset",
 		Short: "Drop and recreate all tables",
-		Args:  cobra.NoArgs,
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Args:  kit.NoArgs,
+		Run: func(ctx context.Context, _ []string) error {
+			app := appFromCtx(ctx)
 			store, err := app.RequireStore()
 			if err != nil {
 				return err

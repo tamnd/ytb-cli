@@ -1,13 +1,13 @@
-// Package cli builds the ytb command tree on top of the youtube library.
+// Package cli assembles the ytb command tree on top of the youtube library and
+// the any-cli/kit framework. The record operations are declared once in the
+// youtube domain (so the same definitions drive the CLI, the serve and mcp
+// surfaces, and an ant host); the media, transcript, local-store, and config
+// commands are escape-hatch kit.Command commands that share the run state
+// through the context with appFromCtx.
 package cli
 
 import (
-	"context"
-	"fmt"
-	"os"
-	"time"
-
-	"github.com/spf13/cobra"
+	"github.com/tamnd/any-cli/kit"
 	"github.com/tamnd/ytb-cli/youtube"
 )
 
@@ -18,239 +18,96 @@ var (
 	Date    = "unknown"
 )
 
-// App carries the resolved configuration and shared clients for a command run.
-type App struct {
-	Cfg       youtube.Config
-	Client    *youtube.Client
-	Out       *Output
-	DBPath    string
-	store     *youtube.Store // lazily opened when DBPath is set
-	Limit     int
-	MaxPages  int
-	Workers   int
-	quiet     bool
-	verbose   int
-	yes       bool
-	dryRun    bool
-	YtDlpBin  string
-	FFmpegBin string
+// builder holds the youtube-specific globals and defaults while a kit.App is
+// assembled. The globals hook binds the flags to it; the finalize hook reads
+// them back onto the resolved Config so the client factory and escape hatches
+// see them.
+type builder struct {
+	def      youtube.Config
+	workers  int
+	maxPages int
+	hl       string
+	gl       string
+	yes      bool
+	ytDlpBin string
+	ffmpeg   string
 }
 
-// globalFlags holds the persistent flag values before they are folded into Cfg.
-type globalFlags struct {
-	output    string
-	fields    string
-	limit     int
-	maxPages  int
-	workers   int
-	rate      time.Duration
-	retries   int
-	timeout   time.Duration
-	hl        string
-	gl        string
-	db        string
-	quiet     bool
-	verbose   int
-	color     string
-	template  string
-	noHeader  bool
-	config    string
-	yes       bool
-	dryRun    bool
-	ytDlpBin  string
-	ffmpegBin string
-}
+// NewApp builds the kit application: identity, the youtube global flags, the
+// record operations and client factory (installed by the domain, the same as an
+// ant host gets), and the escape-hatch commands.
+func NewApp() *kit.App {
+	b := &builder{def: youtube.DefaultConfig()}
 
-// Root builds the root command and its whole subtree.
-func Root() *cobra.Command {
-	g := &globalFlags{}
-	app := &App{}
-
-	root := &cobra.Command{
-		Use:   "ytb",
-		Short: "A delightful command line for YouTube",
+	app := kit.New(kit.Identity{
+		Binary:  "ytb",
+		Version: Version,
+		Short:   "A delightful command line for YouTube",
 		Long: `ytb is the fastest way to work with YouTube from your terminal.
 
 Resolve a video to its full metadata, stream a channel's uploads, page a
 playlist, search with the full filter grid, pull comments and transcripts,
-follow hashtags and community posts, and optionally persist everything into a
-local SQLite store, all from one binary and with no API key.
+follow hashtags and community posts, download media with a pure-Go engine, and
+build a local dataset, all from one binary and with no API key.
 
 Quick start:
   ytb video dQw4w9WgXcQ                  full metadata for a video
-  ytb channel @MrBeast --videos          stream a channel's uploads
+  ytb uploads @MrBeast -n 50             stream a channel's uploads
   ytb search "lofi hip hop" -n 50        search with continuation paging
   ytb transcript dQw4w9WgXcQ             the video's transcript as text
-  ytb search "go" -o id | ytb video -    batch from stdin`,
-		SilenceUsage:  true,
-		SilenceErrors: true,
-		PersistentPreRunE: func(_ *cobra.Command, _ []string) error {
-			return app.init(g)
-		},
-	}
+  ytb search "go" -o url | ytb video -   batch from stdin`,
+		Site: "https://www.youtube.com",
+		Repo: "https://github.com/tamnd/ytb-cli",
+	}, kit.WithDefaults(b.defaults))
 
-	pf := root.PersistentFlags()
-	def := youtube.DefaultConfig()
-	pf.StringVarP(&g.output, "output", "o", "auto", "table|json|jsonl|csv|tsv|url|id|raw")
-	pf.StringVar(&g.fields, "fields", "", "comma-separated columns to show")
-	pf.IntVarP(&g.limit, "limit", "n", 0, "max rows emitted (0 = unlimited)")
-	pf.IntVar(&g.maxPages, "max-pages", 0, "max continuation pages fetched (0 = unlimited)")
-	pf.IntVarP(&g.workers, "workers", "j", def.Workers, "concurrency for detail fetches")
-	pf.DurationVar(&g.rate, "rate", def.Delay, "minimum delay between requests")
-	pf.IntVar(&g.retries, "retries", def.Retries, "retry attempts on 429/5xx")
-	pf.DurationVar(&g.timeout, "timeout", def.Timeout, "per-request timeout")
-	pf.StringVar(&g.hl, "hl", def.HL, "InnerTube interface language")
-	pf.StringVar(&g.gl, "gl", def.GL, "InnerTube content country")
-	pf.StringVar(&g.db, "db", "", "optional SQLite store; persist everything fetched")
-	pf.BoolVarP(&g.quiet, "quiet", "q", false, "suppress progress output")
-	pf.CountVarP(&g.verbose, "verbose", "v", "increase verbosity (repeatable)")
-	pf.StringVar(&g.color, "color", "auto", "color output: auto|always|never")
-	pf.StringVar(&g.template, "template", "", "Go text/template applied per row")
-	pf.BoolVar(&g.noHeader, "no-header", false, "omit the header row in table/csv/tsv")
-	pf.StringVar(&g.config, "config", "", "config file (default: XDG config)")
-	pf.BoolVarP(&g.yes, "yes", "y", false, "assume yes to prompts")
-	pf.BoolVar(&g.dryRun, "dry-run", false, "print actions without performing them")
-	pf.StringVar(&g.ytDlpBin, "yt-dlp-bin", "", "path to the yt-dlp binary (download --use-yt-dlp)")
-	pf.StringVar(&g.ffmpegBin, "ffmpeg-bin", "", "path to ffmpeg (used to merge/convert when present)")
+	app.GlobalFlags(b.globals)
+	app.Finalize(b.finalize)
 
-	root.AddCommand(
-		newVideoCmd(app),
-		newChannelCmd(app),
-		newPlaylistCmd(app),
-		newSearchCmd(app),
-		newTrendingCmd(app),
-		newCommentsCmd(app),
-		newCommunityCmd(app),
-		newHashtagCmd(app),
-		newSuggestCmd(app),
-		newFormatsCmd(app),
-		newTranscriptCmd(app),
-		newRelatedCmd(app),
-		newSeedCmd(app),
-		newCrawlCmd(app),
-		newQueueCmd(app),
-		newJobsCmd(app),
-		newDBCmd(app),
-		newExportCmd(app),
-		newMusicCmd(app),
-		newDownloadCmd(app),
-		newExtractCmd(app),
-		newSponsorBlockCmd(app),
-		newThumbnailCmd(app),
-		newChaptersCmd(app),
-		newConfigCmd(app),
-		newVersionCmd(),
-	)
-	return root
+	// The domain installs the client factory and every record operation, exactly
+	// as it does inside an ant host. The escape hatches are the binary's own.
+	(youtube.Domain{}).Register(app)
+	registerEscapeHatches(app)
+	return app
 }
 
-func (a *App) init(g *globalFlags) error {
-	cfg := youtube.DefaultConfig()
-	cfg.Workers = g.workers
-	cfg.Delay = g.rate
-	cfg.Retries = g.retries
-	cfg.Timeout = g.timeout
-	if g.hl != "" {
-		cfg.HL = g.hl
-	}
-	if g.gl != "" {
-		cfg.GL = g.gl
-	}
-
-	a.Cfg = cfg
-	a.Client = youtube.NewClient(cfg)
-	a.Limit = g.limit
-	a.MaxPages = g.maxPages
-	a.Workers = g.workers
-	a.quiet = g.quiet
-	a.verbose = g.verbose
-	a.yes = g.yes
-	a.dryRun = g.dryRun
-	a.YtDlpBin = g.ytDlpBin
-	a.FFmpegBin = g.ffmpegBin
-	a.Out = newOutput(g)
-
-	// --db wins over YTB_DB.
-	a.DBPath = g.db
-	if a.DBPath == "" {
-		a.DBPath = os.Getenv("YTB_DB")
-	}
-	return nil
+// defaults seeds the framework baseline from the youtube defaults, so an unset
+// --rate/--retries/--timeout keeps youtube's own values.
+func (b *builder) defaults(c *kit.Config) {
+	c.Rate = b.def.Delay
+	c.Retries = b.def.Retries
+	c.Timeout = b.def.Timeout
+	c.Workers = b.def.Workers
 }
 
-// Store opens (once) and returns the optional SQLite store, or nil if --db is unset.
-func (a *App) Store() (*youtube.Store, error) {
-	if a.DBPath == "" {
-		return nil, nil
-	}
-	if a.store != nil {
-		return a.store, nil
-	}
-	s, err := youtube.OpenStore(a.DBPath)
-	if err != nil {
-		return nil, fmt.Errorf("open store %q: %w", a.DBPath, err)
-	}
-	a.store = s
-	return s, nil
+// globals registers the youtube-specific persistent flags on top of the kit
+// framework globals (-o, --fields, -n, --rate, --retries, --timeout, --db, and
+// the rest).
+func (b *builder) globals(f *kit.FlagSet) {
+	f.IntVarP(&b.workers, "workers", "j", b.def.Workers, "concurrency for detail fetches")
+	f.IntVar(&b.maxPages, "max-pages", 0, "max continuation pages fetched (0 = unlimited)")
+	f.StringVar(&b.hl, "hl", b.def.HL, "InnerTube interface language")
+	f.StringVar(&b.gl, "gl", b.def.GL, "InnerTube content country")
+	f.BoolVarP(&b.yes, "yes", "y", false, "assume yes to prompts")
+	f.StringVar(&b.ytDlpBin, "yt-dlp-bin", "", "path to the yt-dlp binary (download --use-yt-dlp, transcript fallback)")
+	f.StringVar(&b.ffmpeg, "ffmpeg-bin", "", "path to ffmpeg (used to merge and convert when present)")
 }
 
-// RequireStore returns the store or a usage error if --db is unset.
-func (a *App) RequireStore() (*youtube.Store, error) {
-	s, err := a.Store()
-	if err != nil {
-		return nil, err
+// finalize folds the youtube globals onto the resolved Config: the worker count
+// becomes the framework worker count, and the site and tool settings travel in
+// Config.Extra, where both the client factory and the escape hatches read them.
+func (b *builder) finalize(c *kit.Config) {
+	if b.workers > 0 {
+		c.Workers = b.workers
 	}
-	if s == nil {
-		return nil, usageErr("this command needs a store: pass --db <path> (or set YTB_DB)")
+	if c.Extra == nil {
+		c.Extra = map[string]string{}
 	}
-	return s, nil
-}
-
-// PageOptions builds a PageOptions from the global -n / --max-pages flags.
-func (a *App) PageOptions(enrich bool) youtube.PageOptions {
-	return youtube.PageOptions{Max: a.Limit, MaxPages: a.MaxPages, Enrich: enrich}
-}
-
-// logf writes a progress line to stderr unless --quiet.
-func (a *App) logf(format string, args ...any) {
-	if a.quiet {
-		return
+	c.Extra["hl"] = b.hl
+	c.Extra["gl"] = b.gl
+	c.Extra["max-pages"] = itoa(b.maxPages)
+	c.Extra["yt-dlp-bin"] = b.ytDlpBin
+	c.Extra["ffmpeg-bin"] = b.ffmpeg
+	if b.yes {
+		c.Extra["yes"] = "true"
 	}
-	_, _ = fmt.Fprintf(cmdErr, format+"\n", args...)
 }
-
-// Execute runs the root command, mapping errors to exit codes.
-func Execute(ctx context.Context, cmd *cobra.Command) int {
-	if err := cmd.ExecuteContext(ctx); err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, "youtube: "+err.Error())
-		return ExitCode(err)
-	}
-	return 0
-}
-
-// ExitCode maps an error to a process exit code per the documented table.
-func ExitCode(err error) int {
-	if err == nil {
-		return 0
-	}
-	if ec, ok := err.(exitCoder); ok {
-		return ec.ExitCode()
-	}
-	return 1
-}
-
-type exitCoder interface{ ExitCode() int }
-
-type codedError struct {
-	err  error
-	code int
-}
-
-func (e codedError) Error() string { return e.err.Error() }
-func (e codedError) ExitCode() int { return e.code }
-func (e codedError) Unwrap() error { return e.err }
-
-func noResults(msg string) error   { return codedError{fmt.Errorf("%s", msg), 3} }
-func usageErr(msg string) error    { return codedError{fmt.Errorf("%s", msg), 2} }
-func partialErr(msg string) error  { return codedError{fmt.Errorf("%s", msg), 4} }
-func missingTool(msg string) error { return codedError{fmt.Errorf("%s", msg), 6} }

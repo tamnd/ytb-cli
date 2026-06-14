@@ -2,80 +2,82 @@ package youtube
 
 import "time"
 
-// Video is the central record: one YouTube video with full metadata.
+// Video is the central record: one YouTube video with full metadata. The kit
+// tags make it addressable by a host (id, body, links) and the table tags pick
+// the columns the aligned table shows; every other field stays in the JSON.
 type Video struct {
-	VideoID            string    `json:"video_id"`
-	Title              string    `json:"title"`
-	Description        string    `json:"description"`
-	ChannelID          string    `json:"channel_id"`
-	ChannelName        string    `json:"channel_name"`
-	DurationSeconds    int       `json:"duration_seconds"`
-	DurationText       string    `json:"duration_text"`
-	ViewCount          int64     `json:"view_count"`
-	CommentCount       int64     `json:"comment_count"`
-	LikeCount          int64     `json:"like_count"`
-	PublishedText      string    `json:"published_text"`
-	PublishedAt        time.Time `json:"published_at"`
-	UploadDate         string    `json:"upload_date"`
-	IsLive             bool      `json:"is_live"`
-	IsShort            bool      `json:"is_short"`
-	Category           string    `json:"category"`
-	Tags               []string  `json:"tags"`
-	ThumbnailURL       string    `json:"thumbnail_url"`
-	URL                string    `json:"url"`
-	EmbedURL           string    `json:"embed_url"`
-	Transcript         string    `json:"transcript"`
-	TranscriptLanguage string    `json:"transcript_language"`
+	VideoID            string    `json:"video_id" kit:"id" table:"id"`
+	Title              string    `json:"title" table:"title,truncate"`
+	Description        string    `json:"description" kit:"body" table:"-"`
+	ChannelID          string    `json:"channel_id" kit:"link,kind=youtube/channel" table:"-"`
+	ChannelName        string    `json:"channel_name" table:"channel,truncate"`
+	DurationSeconds    int       `json:"duration_seconds" table:"-"`
+	DurationText       string    `json:"duration_text" table:"duration"`
+	ViewCount          int64     `json:"view_count" table:"views"`
+	CommentCount       int64     `json:"comment_count" table:"-"`
+	LikeCount          int64     `json:"like_count" table:"-"`
+	PublishedText      string    `json:"published_text" table:"published"`
+	PublishedAt        time.Time `json:"published_at" table:"-"`
+	UploadDate         string    `json:"upload_date" table:"-"`
+	IsLive             bool      `json:"is_live" table:"-"`
+	IsShort            bool      `json:"is_short" table:"-"`
+	Category           string    `json:"category" table:"-"`
+	Tags               []string  `json:"tags" table:"-"`
+	ThumbnailURL       string    `json:"thumbnail_url" table:"-"`
+	URL                string    `json:"url" table:"url,url"`
+	EmbedURL           string    `json:"embed_url" table:"-"`
+	Transcript         string    `json:"transcript" table:"-"`
+	TranscriptLanguage string    `json:"transcript_language" table:"-"`
 	// Extended metadata from microformat / videoDetails.
-	AvailableCountries  []string  `json:"available_countries"`
-	IsFamilySafe        bool      `json:"is_family_safe"`
-	AllowRatings        bool      `json:"allow_ratings"`
-	AgeRestricted       bool      `json:"age_restricted"`
-	LocationDescription string    `json:"location_description"`
-	Hashtags            []string  `json:"hashtags"`
-	FetchedAt           time.Time `json:"fetched_at"`
+	AvailableCountries  []string  `json:"available_countries" table:"-"`
+	IsFamilySafe        bool      `json:"is_family_safe" table:"-"`
+	AllowRatings        bool      `json:"allow_ratings" table:"-"`
+	AgeRestricted       bool      `json:"age_restricted" table:"-"`
+	LocationDescription string    `json:"location_description" table:"-"`
+	Hashtags            []string  `json:"hashtags" table:"-"`
+	FetchedAt           time.Time `json:"fetched_at" table:"-"`
 }
 
 // Channel is one YouTube channel.
 type Channel struct {
-	ChannelID         string    `json:"channel_id"`
-	Handle            string    `json:"handle"`
-	Title             string    `json:"title"`
-	Description       string    `json:"description"`
-	AvatarURL         string    `json:"avatar_url"`
-	BannerURL         string    `json:"banner_url"`
-	SubscribersText   string    `json:"subscribers_text"`
-	VideosText        string    `json:"videos_text"`
-	ViewsText         string    `json:"views_text"`
-	Country           string    `json:"country"`
-	JoinedDateText    string    `json:"joined_date_text"`
-	UploadsPlaylistID string    `json:"uploads_playlist_id"`
-	URL               string    `json:"url"`
-	SubscriberCount   int64     `json:"subscriber_count"`
-	VideoCount        int64     `json:"video_count"`
-	ViewCount         int64     `json:"view_count"`
-	Keywords          []string  `json:"keywords"`
-	TrailerVideoID    string    `json:"trailer_video_id"`
-	IsVerified        bool      `json:"is_verified"`
-	FetchedAt         time.Time `json:"fetched_at"`
+	ChannelID         string    `json:"channel_id" kit:"id" table:"id"`
+	Handle            string    `json:"handle" table:"handle"`
+	Title             string    `json:"title" table:"title,truncate"`
+	Description       string    `json:"description" kit:"body" table:"-"`
+	AvatarURL         string    `json:"avatar_url" table:"-"`
+	BannerURL         string    `json:"banner_url" table:"-"`
+	SubscribersText   string    `json:"subscribers_text" table:"subscribers"`
+	VideosText        string    `json:"videos_text" table:"videos"`
+	ViewsText         string    `json:"views_text" table:"-"`
+	Country           string    `json:"country" table:"-"`
+	JoinedDateText    string    `json:"joined_date_text" table:"-"`
+	UploadsPlaylistID string    `json:"uploads_playlist_id" table:"-"`
+	URL               string    `json:"url" table:"url,url"`
+	SubscriberCount   int64     `json:"subscriber_count" table:"-"`
+	VideoCount        int64     `json:"video_count" table:"-"`
+	ViewCount         int64     `json:"view_count" table:"-"`
+	Keywords          []string  `json:"keywords" table:"-"`
+	TrailerVideoID    string    `json:"trailer_video_id" table:"-"`
+	IsVerified        bool      `json:"is_verified" table:"-"`
+	FetchedAt         time.Time `json:"fetched_at" table:"-"`
 }
 
 // Comment is one comment or reply. Replies carry the parent comment id in ParentID.
 type Comment struct {
-	ID                 string    `json:"id"`
-	VideoID            string    `json:"video_id"`
-	ParentID           string    `json:"parent_id"`
-	AuthorChannelID    string    `json:"author_channel_id"`
-	AuthorDisplayName  string    `json:"author_display_name"`
-	AuthorProfileImage string    `json:"author_profile_image_url"`
-	TextDisplay        string    `json:"text_display"`
-	LikeCount          int64     `json:"like_count"`
-	ReplyCount         int       `json:"reply_count"`
-	IsOwnerComment     bool      `json:"is_owner_comment"`
-	PublishedText      string    `json:"published_text"`
-	PublishedAt        time.Time `json:"published_at"`
-	UpdatedAt          time.Time `json:"updated_at"`
-	FetchedAt          time.Time `json:"fetched_at"`
+	ID                 string    `json:"id" kit:"id" table:"id"`
+	VideoID            string    `json:"video_id" kit:"link,kind=youtube/video" table:"-"`
+	ParentID           string    `json:"parent_id" table:"-"`
+	AuthorChannelID    string    `json:"author_channel_id" kit:"link,kind=youtube/channel" table:"-"`
+	AuthorDisplayName  string    `json:"author_display_name" table:"author,truncate"`
+	AuthorProfileImage string    `json:"author_profile_image_url" table:"-"`
+	TextDisplay        string    `json:"text_display" kit:"body" table:"text,truncate"`
+	LikeCount          int64     `json:"like_count" table:"likes"`
+	ReplyCount         int       `json:"reply_count" table:"replies"`
+	IsOwnerComment     bool      `json:"is_owner_comment" table:"-"`
+	PublishedText      string    `json:"published_text" table:"published"`
+	PublishedAt        time.Time `json:"published_at" table:"-"`
+	UpdatedAt          time.Time `json:"updated_at" table:"-"`
+	FetchedAt          time.Time `json:"fetched_at" table:"-"`
 }
 
 // Chapter is one chapter marker on a video.
@@ -89,17 +91,17 @@ type Chapter struct {
 
 // CommunityPost is one community/posts-tab post. Attachments is a JSON array.
 type CommunityPost struct {
-	PostID        string    `json:"post_id"`
-	ChannelID     string    `json:"channel_id"`
-	AuthorName    string    `json:"author_name"`
-	AuthorAvatar  string    `json:"author_avatar_url"`
-	ContentText   string    `json:"content_text"`
-	LikeCount     int64     `json:"like_count"`
-	ReplyCount    int       `json:"reply_count"`
-	VoteCount     string    `json:"vote_count_text"`
-	PublishedText string    `json:"published_text"`
-	Attachments   string    `json:"attachments"`
-	FetchedAt     time.Time `json:"fetched_at"`
+	PostID        string    `json:"post_id" kit:"id" table:"id"`
+	ChannelID     string    `json:"channel_id" kit:"link,kind=youtube/channel" table:"-"`
+	AuthorName    string    `json:"author_name" table:"author,truncate"`
+	AuthorAvatar  string    `json:"author_avatar_url" table:"-"`
+	ContentText   string    `json:"content_text" kit:"body" table:"text,truncate"`
+	LikeCount     int64     `json:"like_count" table:"likes"`
+	ReplyCount    int       `json:"reply_count" table:"-"`
+	VoteCount     string    `json:"vote_count_text" table:"-"`
+	PublishedText string    `json:"published_text" table:"published"`
+	Attachments   string    `json:"attachments" table:"-"`
+	FetchedAt     time.Time `json:"fetched_at" table:"-"`
 }
 
 // VideoFormat is one streaming format (muxed or adaptive) of a video.
@@ -120,16 +122,16 @@ type VideoFormat struct {
 
 // Playlist is one playlist's header.
 type Playlist struct {
-	PlaylistID      string    `json:"playlist_id"`
-	Title           string    `json:"title"`
-	Description     string    `json:"description"`
-	ChannelID       string    `json:"channel_id"`
-	ChannelName     string    `json:"channel_name"`
-	VideoCount      int       `json:"video_count"`
-	ViewCountText   string    `json:"view_count_text"`
-	LastUpdatedText string    `json:"last_updated_text"`
-	URL             string    `json:"url"`
-	FetchedAt       time.Time `json:"fetched_at"`
+	PlaylistID      string    `json:"playlist_id" kit:"id" table:"id"`
+	Title           string    `json:"title" table:"title,truncate"`
+	Description     string    `json:"description" kit:"body" table:"-"`
+	ChannelID       string    `json:"channel_id" kit:"link,kind=youtube/channel" table:"-"`
+	ChannelName     string    `json:"channel_name" table:"channel,truncate"`
+	VideoCount      int       `json:"video_count" table:"videos"`
+	ViewCountText   string    `json:"view_count_text" table:"-"`
+	LastUpdatedText string    `json:"last_updated_text" table:"-"`
+	URL             string    `json:"url" table:"url,url"`
+	FetchedAt       time.Time `json:"fetched_at" table:"-"`
 }
 
 // PlaylistVideo is the playlist↔video membership join with position.
@@ -170,6 +172,12 @@ type SearchResult struct {
 	ID         string `json:"id"`
 	Title      string `json:"title"`
 	URL        string `json:"url"`
+}
+
+// Suggestion is one search-autocomplete suggestion, wrapped so the suggest
+// operation emits a record the renderer and a host can both address.
+type Suggestion struct {
+	Text string `json:"suggestion" kit:"id" table:"suggestion"`
 }
 
 // QueueItem is one pending crawl-queue entry.

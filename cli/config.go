@@ -1,12 +1,13 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 
-	"github.com/spf13/cobra"
+	"github.com/tamnd/any-cli/kit"
 )
 
 // configPath returns the resolved config file path (XDG config dir).
@@ -29,31 +30,31 @@ const configTemplate = `# ytb CLI configuration
 # timeout   = "30s"
 # hl        = "en"
 # gl        = "US"
-# db        = ""           # path to the optional SQLite store
+# data_dir  = ""           # holds the typed crawl store (ytb.db)
 # user_agent = ""
 # yt_dlp_bin = "yt-dlp"
 `
 
-func newConfigCmd(app *App) *cobra.Command {
-	cmd := &cobra.Command{
+func newConfigCmd() kit.Command {
+	return kit.Command{
 		Use:   "config",
 		Short: "View and manage configuration",
+		Sub: []kit.Command{
+			newConfigShowCmd(),
+			newConfigPathCmd(),
+			newConfigInitCmd(),
+			newConfigEditCmd(),
+		},
 	}
-	cmd.AddCommand(
-		newConfigShowCmd(app),
-		newConfigPathCmd(app),
-		newConfigInitCmd(app),
-		newConfigEditCmd(app),
-	)
-	return cmd
 }
 
-func newConfigShowCmd(app *App) *cobra.Command {
-	return &cobra.Command{
+func newConfigShowCmd() kit.Command {
+	return kit.Command{
 		Use:   "show",
 		Short: "Print the resolved configuration",
-		Args:  cobra.NoArgs,
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Args:  kit.NoArgs,
+		Run: func(ctx context.Context, _ []string) error {
+			app := appFromCtx(ctx)
 			c := app.Cfg
 			_, _ = fmt.Fprintf(cmdOut, "workers = %d\n", c.Workers)
 			_, _ = fmt.Fprintf(cmdOut, "rate    = %s\n", c.Delay)
@@ -61,30 +62,31 @@ func newConfigShowCmd(app *App) *cobra.Command {
 			_, _ = fmt.Fprintf(cmdOut, "timeout = %s\n", c.Timeout)
 			_, _ = fmt.Fprintf(cmdOut, "hl      = %s\n", c.HL)
 			_, _ = fmt.Fprintf(cmdOut, "gl      = %s\n", c.GL)
-			_, _ = fmt.Fprintf(cmdOut, "db      = %s\n", app.DBPath)
+			_, _ = fmt.Fprintf(cmdOut, "store   = %s\n", app.StorePath())
 			return nil
 		},
 	}
 }
 
-func newConfigPathCmd(app *App) *cobra.Command {
-	return &cobra.Command{
+func newConfigPathCmd() kit.Command {
+	return kit.Command{
 		Use:   "path",
 		Short: "Print the config file path",
-		Args:  cobra.NoArgs,
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Args:  kit.NoArgs,
+		Run: func(_ context.Context, _ []string) error {
 			_, _ = fmt.Fprintln(cmdOut, configPath())
 			return nil
 		},
 	}
 }
 
-func newConfigInitCmd(app *App) *cobra.Command {
-	return &cobra.Command{
+func newConfigInitCmd() kit.Command {
+	return kit.Command{
 		Use:   "init",
 		Short: "Write a commented config template",
-		Args:  cobra.NoArgs,
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Args:  kit.NoArgs,
+		Run: func(ctx context.Context, _ []string) error {
+			app := appFromCtx(ctx)
 			path := configPath()
 			if _, err := os.Stat(path); err == nil {
 				if !confirm(app.yes, "Config already exists at "+path+". Overwrite?") {
@@ -103,12 +105,12 @@ func newConfigInitCmd(app *App) *cobra.Command {
 	}
 }
 
-func newConfigEditCmd(app *App) *cobra.Command {
-	return &cobra.Command{
+func newConfigEditCmd() kit.Command {
+	return kit.Command{
 		Use:   "edit",
 		Short: "Open the config file in $EDITOR",
-		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		Args:  kit.NoArgs,
+		Run: func(ctx context.Context, _ []string) error {
 			editor := os.Getenv("EDITOR")
 			if editor == "" {
 				editor = "vi"
@@ -122,7 +124,7 @@ func newConfigEditCmd(app *App) *cobra.Command {
 					return err
 				}
 			}
-			c := exec.CommandContext(cmd.Context(), editor, path)
+			c := exec.CommandContext(ctx, editor, path)
 			c.Stdin, c.Stdout, c.Stderr = os.Stdin, cmdOut, cmdErr
 			return c.Run()
 		},

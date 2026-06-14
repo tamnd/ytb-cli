@@ -1,21 +1,27 @@
 package cli
 
 import (
-	"github.com/spf13/cobra"
+	"context"
+
+	"github.com/tamnd/any-cli/kit"
 	"github.com/tamnd/ytb-cli/youtube"
 )
 
-func newExportCmd(app *App) *cobra.Command {
+func newExportCmd() kit.Command {
 	var out string
-	cmd := &cobra.Command{
+	return kit.Command{
 		Use:   "export [channel-id|@handle]",
-		Short: "Render the store as interlinked Markdown (needs --db)",
+		Short: "Render the store as interlinked Markdown",
 		Long: `Render the stored data as an interlinked Markdown site under --out: per-video
 pages with YAML frontmatter, chapter lists, transcripts, related sidebars, and
 channel/playlist index pages. With no argument, every channel in the store is
 exported.`,
-		Args: cobra.MaximumNArgs(1),
-		RunE: func(_ *cobra.Command, args []string) error {
+		Args: kit.MaximumNArgs(1),
+		Flags: func(f *kit.FlagSet) {
+			f.StringVar(&out, "out", "", "output directory for the Markdown site")
+		},
+		Run: func(ctx context.Context, args []string) error {
+			app := appFromCtx(ctx)
 			store, err := app.RequireStore()
 			if err != nil {
 				return err
@@ -38,8 +44,6 @@ exported.`,
 			return nil
 		},
 	}
-	cmd.Flags().StringVar(&out, "out", "", "output directory for the Markdown site")
-	return cmd
 }
 
 func orAll(s string) string {

@@ -41,56 +41,6 @@ func playlistRow(p youtube.Playlist) Row {
 	}
 }
 
-func playlistVideoRow(pv youtube.PlaylistVideo, v youtube.Video) Row {
-	title := v.Title
-	url := v.URL
-	if url == "" {
-		url = "https://www.youtube.com/watch?v=" + pv.VideoID
-	}
-	return Row{
-		Cols: []string{"position", "id", "title", "channel", "duration", "url"},
-		Vals: []string{
-			itoa(pv.Position), pv.VideoID, title, v.ChannelName, v.DurationText, url,
-		},
-		Value: struct {
-			youtube.PlaylistVideo
-			Video youtube.Video `json:"video"`
-		}{pv, v},
-	}
-}
-
-func relatedRow(r youtube.RelatedVideo) Row {
-	return Row{
-		Cols: []string{"position", "id", "url"},
-		Vals: []string{
-			itoa(r.Position), r.RelatedVideoID,
-			"https://www.youtube.com/watch?v=" + r.RelatedVideoID,
-		},
-		Value: r,
-	}
-}
-
-func commentRow(c youtube.Comment) Row {
-	return Row{
-		Cols: []string{"id", "author", "likes", "replies", "published", "text"},
-		Vals: []string{
-			c.ID, c.AuthorDisplayName, i64a(c.LikeCount), itoa(c.ReplyCount),
-			c.PublishedText, c.TextDisplay,
-		},
-		Value: c,
-	}
-}
-
-func communityRow(p youtube.CommunityPost) Row {
-	return Row{
-		Cols: []string{"id", "author", "likes", "published", "text"},
-		Vals: []string{
-			p.PostID, p.AuthorName, i64a(p.LikeCount), p.PublishedText, p.ContentText,
-		},
-		Value: p,
-	}
-}
-
 func formatRow(f youtube.VideoFormat) Row {
 	res := f.QualityLabel
 	if res == "" {
@@ -124,18 +74,6 @@ func segmentRow(s youtube.TranscriptSegment) Row {
 		},
 		Value: s,
 	}
-}
-
-func chapterRow(c youtube.Chapter) Row {
-	return Row{
-		Cols:  []string{"start", "title"},
-		Vals:  []string{itoa(c.StartSeconds), c.Title},
-		Value: c,
-	}
-}
-
-func suggestRow(s string) Row {
-	return Row{Cols: []string{"suggestion"}, Vals: []string{s}, Value: s}
 }
 
 func queueRow(q youtube.QueueItem) Row {

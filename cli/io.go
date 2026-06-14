@@ -58,17 +58,3 @@ func readLines(r io.Reader, fn func(string) error) error {
 	}
 	return sc.Err()
 }
-
-// argsOrStdin expands a "-" argument into lines read from stdin, otherwise
-// returns the literal args. This powers `... -o id | ytb video -`.
-func argsOrStdin(args []string) ([]string, error) {
-	if len(args) == 1 && args[0] == "-" {
-		var out []string
-		err := readLines(cmdIn, func(s string) error {
-			out = append(out, s)
-			return nil
-		})
-		return out, err
-	}
-	return args, nil
-}
