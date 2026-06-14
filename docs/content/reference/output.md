@@ -18,19 +18,33 @@ in a shell and piping into another program both do the right thing with no flag.
 Override it with `-o`:
 
 ```sh
-ytb search example -o table   # aligned columns for reading
-ytb search example -o json    # a single JSON array
-ytb search example -o jsonl   # one JSON object per line, for piping
-ytb search example -o csv     # comma-separated, spreadsheet friendly
-ytb search example -o tsv     # tab-separated
-ytb search example -o url     # just the canonical URL, one per line
-ytb search example -o id      # just the id, one per line
-ytb search example -o raw     # the raw underlying value
+ytb search example -o table    # a rounded, color-aware grid for reading
+ytb search example -o markdown # a GitHub pipe table to paste into docs (alias: md)
+ytb search example -o json     # a single JSON array
+ytb search example -o jsonl    # one JSON object per line, for piping
+ytb search example -o csv      # comma-separated, spreadsheet friendly
+ytb search example -o tsv      # tab-separated
+ytb search example -o url      # just the canonical URL, one per line
+ytb search example -o id       # just the id, one per line
+ytb search example -o raw      # the raw underlying value
 ```
 
-`table`, `csv`, and `tsv` carry a header row; pass `--no-header` to drop it.
-`json` emits one array for the whole result, while `jsonl` emits one object per
-line so it streams and composes with tools like `jq -c`.
+`table`, `markdown`, `csv`, and `tsv` carry a header row; pass `--no-header` to
+drop it. `json` emits one array for the whole result, while `jsonl` emits one
+object per line so it streams and composes with tools like `jq -c`. `markdown`
+escapes any pipe in a cell, so a title like `Go in 100 Seconds | Fireship`
+stays a valid table.
+
+## Color
+
+On an interactive terminal the `table` and `json`/`jsonl` formats are colored:
+the table draws a dim rounded border with an accented bold header, and JSON keys,
+strings, numbers, and literals are highlighted. Color is suppressed the moment
+output is not a terminal, so a pipe always gets plain, parseable bytes and
+`ytb ... | jq` is never affected. Force the choice with `--color always|never`
+(or set `NO_COLOR`). `markdown`, `csv`, `tsv`, `url`, `id`, and `raw` are never
+colored, so they stay safe to redirect into a file. A too-wide `table` shrinks to
+fit the terminal instead of wrapping at the edge.
 
 ## Selecting columns with --fields
 
