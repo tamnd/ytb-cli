@@ -16,6 +16,7 @@ func registerEscapeHatches(app *kit.App) {
 	app.AddCommand(newDownloadCmd())
 	app.AddCommand(newExtractCmd())
 	app.AddCommand(newMusicCmd())
+	app.AddCommand(newDiscoverCmd())
 	app.AddCommand(newSeedCmd())
 	app.AddCommand(newCrawlCmd())
 	app.AddCommand(newQueueCmd())

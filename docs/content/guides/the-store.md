@@ -19,6 +19,22 @@ The store is pure Go (modernc.org/sqlite), so nothing links libsqlite and the
 binary stays static. Without `--db`, no database is ever created: the flag is the
 only thing that turns persistence on.
 
+## Persist a walk
+
+`ytb discover --store` tees a breadth-first walk into the store as a side effect,
+so a live walk doubles as a crawl. Every node lands in its typed table and every
+traversed link lands in an `edges` table, so the graph is queryable afterwards:
+
+```sh
+ytb discover @MrBeast --follow all --depth 2 --store
+ytb db query "select kind, count(*) from edges group by kind order by 2 desc"
+```
+
+See [graph discovery](/guides/graph-discovery/) for the full edge and preset
+vocabulary. The difference from the crawl queue below is direction: `discover`
+finds the worklist by walking the graph, while `seed`/`crawl` drain a worklist
+you load yourself.
+
 ## Building a crawl queue
 
 For larger collection runs, `seed`, `crawl`, `queue`, and `jobs` turn the store
