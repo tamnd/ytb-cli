@@ -201,6 +201,14 @@ func (s *Store) initSchema() error {
 			started_at   TEXT,
 			completed_at TEXT
 		)`,
+		`CREATE TABLE IF NOT EXISTS edges (
+			src        TEXT NOT NULL,
+			dst        TEXT NOT NULL,
+			kind       TEXT NOT NULL,
+			created_at TEXT,
+			PRIMARY KEY (src, dst, kind)
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_edges_kind ON edges(kind)`,
 	}
 	for _, stmt := range stmts {
 		if _, err := s.db.Exec(stmt); err != nil {
@@ -352,6 +360,50 @@ func (s *Store) UpsertCommunityPost(p CommunityPost) error {
 	return err
 }
 
+// --- Graph edges and nodes ---
+
+// UpsertEdge records one traversed link of the discovery graph, keyed by the
+// (src, dst, kind) triple so re-walking is idempotent. src and dst are entity
+// ids; kind is the Edge string ("channel", "uploads", ...). It is the sink
+// `ytb discover --store` feeds from WalkOptions.OnEdge.
+func (s *Store) UpsertEdge(src, dst, kind string) error {
+	_, err := s.db.Exec(
+		`INSERT OR IGNORE INTO edges (src, dst, kind, created_at) VALUES (?,?,?,?)`,
+		src, dst, kind, storeTime(time.Now()),
+	)
+	return err
+}
+
+// UpsertNode persists a discovered node into its typed table, dispatching on the
+// node kind. It is what `ytb discover --store` calls for every emitted node, so
+// a walk fills videos/channels/playlists/comments/community_posts exactly as the
+// per-object reads do, with the edges table joining them.
+func (s *Store) UpsertNode(n *Node) error {
+	switch n.Kind {
+	case KindVideo:
+		if n.Video != nil {
+			return s.UpsertVideo(*n.Video)
+		}
+	case KindChannel:
+		if n.Channel != nil {
+			return s.UpsertChannel(*n.Channel)
+		}
+	case KindPlaylist:
+		if n.Playlist != nil {
+			return s.UpsertPlaylist(*n.Playlist)
+		}
+	case KindComment:
+		if n.Comment != nil {
+			return s.UpsertComment(*n.Comment)
+		}
+	case KindPost:
+		if n.Post != nil {
+			return s.UpsertCommunityPost(*n.Post)
+		}
+	}
+	return nil
+}
+
 // --- VideoFormat ---
 
 func (s *Store) UpsertVideoFormat(f VideoFormat) error {
@@ -498,7 +550,7 @@ func (s *Store) Stats() (map[string]int64, error) {
 	tables := []string{
 		"videos", "channels", "playlists", "playlist_videos", "related_videos",
 		"caption_tracks", "comments", "chapters", "community_posts", "video_formats",
-		"queue", "jobs",
+		"queue", "jobs", "edges",
 	}
 	out := make(map[string]int64, len(tables))
 	for _, t := range tables {
@@ -618,7 +670,7 @@ func (s *Store) Reset() error {
 	tables := []string{
 		"videos", "channels", "playlists", "playlist_videos", "related_videos",
 		"caption_tracks", "comments", "chapters", "community_posts", "video_formats",
-		"queue", "jobs",
+		"queue", "jobs", "edges",
 	}
 	for _, t := range tables {
 		if _, err := s.db.Exec(`DROP TABLE IF EXISTS ` + t); err != nil {

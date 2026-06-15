@@ -2,6 +2,7 @@ package cli
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/tamnd/ytb-cli/youtube"
 )
@@ -9,6 +10,65 @@ import (
 func itoa(n int) string   { return strconv.Itoa(n) }
 func i64a(n int64) string { return strconv.FormatInt(n, 10) }
 func boola(b bool) string { return strconv.FormatBool(b) }
+
+// oneline flattens a value to a single short line for a curated column, so a
+// multi-line title or comment body never breaks the list and table layouts.
+func oneline(s string) string {
+	s = strings.Join(strings.Fields(s), " ")
+	if len(s) > 80 {
+		return s[:79] + "..."
+	}
+	return s
+}
+
+// nodeRow renders a graph node discovered by `ytb discover`. The curated columns
+// read the walk at a glance (how deep, by which edge, and a one-line who/what)
+// while the full typed node (with the nested video, channel, playlist, comment,
+// or post) rides in Value for json, jsonl, and templates.
+func nodeRow(n *youtube.Node) Row {
+	var id, who, summary, url string
+	switch n.Kind {
+	case youtube.KindVideo:
+		v := n.Video
+		id = v.VideoID
+		who = v.ChannelName
+		summary = oneline(v.Title)
+		url = v.URL
+		if url == "" {
+			url = "https://www.youtube.com/watch?v=" + v.VideoID
+		}
+	case youtube.KindChannel:
+		c := n.Channel
+		id = c.ChannelID
+		who = c.Handle
+		if who == "" {
+			who = c.Title
+		}
+		summary = oneline(c.Title)
+		url = c.URL
+	case youtube.KindPlaylist:
+		p := n.Playlist
+		id = p.PlaylistID
+		who = p.ChannelName
+		summary = oneline(p.Title)
+		url = p.URL
+	case youtube.KindComment:
+		c := n.Comment
+		id = c.ID
+		who = c.AuthorDisplayName
+		summary = oneline(c.TextDisplay)
+	case youtube.KindPost:
+		p := n.Post
+		id = p.PostID
+		who = p.AuthorName
+		summary = oneline(p.ContentText)
+	}
+	return Row{
+		Cols:  []string{"depth", "via", "kind", "id", "who", "summary", "url"},
+		Vals:  []string{itoa(n.Depth), string(n.Via), string(n.Kind), id, who, summary, url},
+		Value: n,
+	}
+}
 
 func videoRow(v youtube.Video) Row {
 	return Row{

@@ -51,6 +51,7 @@ Persistent flags accepted by every command.
 | `community` | Community / posts tab |
 | `hashtag` | A hashtag feed |
 | `related` | The related-videos graph |
+| `discover` | Breadth-first walk of the graph linked from a video, channel, or playlist |
 | `suggest` | Search autocomplete suggestions |
 | `transcript` | Captions as text |
 | `formats` | Streaming formats (metadata only) |
@@ -154,6 +155,19 @@ Persistent flags accepted by every command.
 ## related
 
 `ytb related <video-id|url> [--flags]`. The related-videos graph. No notable flags beyond the globals.
+
+## discover
+
+`ytb discover <seed>... [--flags]` (aliases `walk`, `graph`). Walk the graph of linked objects breadth-first from one or more seeds (a video, channel, or playlist reference), streaming one row per node reached. See [graph discovery](/guides/graph-discovery/).
+
+| Flag | Meaning |
+| --- | --- |
+| `--follow` | Edges to follow: a preset (`content`, `feed`, `comments`, `all`) or a comma-separated edge list (`channel`, `related`, `comments`, `uploads`, `playlists`, `community`, `items`, `owner`, `commenter`). Default `content` |
+| `--depth` | Hops to follow from each seed (default `1`; `0` = seeds only) |
+| `--fanout` | Max neighbors to follow per edge (default `25`; `0` = unlimited) |
+| `--store` | Persist every node into its typed table and each traversed edge into the `edges` table |
+
+The comment edges (`comments`, `commenter`) are served only when YouTube is not applying its per-IP Restricted Mode to this network; when it is, they are noted on stderr and skipped and the rest of the walk continues. `-n/--limit` is the total node budget (default `500`).
 
 ## suggest
 
