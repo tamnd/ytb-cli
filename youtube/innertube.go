@@ -10,10 +10,12 @@ import (
 )
 
 const (
-	innertubeURL      = "https://www.youtube.com/youtubei/v1"
-	musicInnertubeURL = "https://music.youtube.com/youtubei/v1"
-	defaultClientVer  = "2.20250401.00.00"
-	musicClientVer    = "1.20250401.01.00"
+	innertubeURL        = "https://www.youtube.com/youtubei/v1"
+	musicInnertubeURL   = "https://music.youtube.com/youtubei/v1"
+	defaultClientVer    = "2.20260114.08.00"
+	musicClientVer      = "1.20260114.03.00"
+	webClientName       = "1"
+	androidVRClientName = "28"
 )
 
 // InnerTubeClient calls YouTube's internal InnerTube API. No API key or auth required.
@@ -98,9 +100,34 @@ func (it *InnerTubeClient) BrowseContinuation(ctx context.Context, continuation 
 
 // Player calls /player.
 func (it *InnerTubeClient) Player(ctx context.Context, videoID string) (map[string]any, error) {
-	return it.c.postJSON(ctx, innertubeURL+"/player", map[string]any{
-		"context": it.context(), "videoId": videoID,
-	})
+	return it.player(ctx, videoID, it.context(), webClientName, it.c.userAgents[0], 0)
+}
+
+const webSafariUA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.5 Safari/605.1.15,gzip(gfe)"
+
+func (it *InnerTubeClient) webSafariContext() map[string]any {
+	return map[string]any{
+		"client": map[string]any{
+			"clientName":    "WEB",
+			"clientVersion": defaultClientVer,
+			"userAgent":     webSafariUA,
+			"hl":            it.hl,
+			"gl":            it.gl,
+		},
+	}
+}
+
+// WebSafariPlayer calls /player with yt-dlp's WEB Safari fallback client. This
+// client often retains progressive/HLS entries when the plain WEB player response
+// is SABR-only.
+func (it *InnerTubeClient) WebSafariPlayer(ctx context.Context, videoID, visitorData string, signatureTimestamp int) (map[string]any, error) {
+	ytctx := it.webSafariContext()
+	if visitorData != "" {
+		if client, ok := ytctx["client"].(map[string]any); ok {
+			client["visitorData"] = visitorData
+		}
+	}
+	return it.player(ctx, videoID, ytctx, webClientName, webSafariUA, signatureTimestamp)
 }
 
 const androidVRClientVer = "1.65.10"
@@ -115,26 +142,62 @@ const androidVRUA = "com.google.android.apps.youtube.vr.oculus/" + androidVRClie
 // AndroidVRPlayer calls /player with the ANDROID_VR client. Unlike the WEB
 // /player call, the formats it returns carry plain `url` fields rather than a
 // signatureCipher, so only the `n` throttling parameter still needs solving.
-func (it *InnerTubeClient) AndroidVRPlayer(ctx context.Context, videoID string) (map[string]any, error) {
-	body := map[string]any{
-		"context": map[string]any{
-			"client": map[string]any{
-				"clientName":        "ANDROID_VR",
-				"clientVersion":     androidVRClientVer,
-				"deviceMake":        "Oculus",
-				"deviceModel":       "Quest 3",
-				"androidSdkVersion": 32,
-				"osName":            "Android",
-				"osVersion":         "12L",
-				"hl":                it.hl,
-				"gl":                it.gl,
-			},
+func (it *InnerTubeClient) AndroidVRPlayer(ctx context.Context, videoID, visitorData string, signatureTimestamp int) (map[string]any, error) {
+	ytctx := map[string]any{
+		"client": map[string]any{
+			"clientName":        "ANDROID_VR",
+			"clientVersion":     androidVRClientVer,
+			"deviceMake":        "Oculus",
+			"deviceModel":       "Quest 3",
+			"androidSdkVersion": 32,
+			"userAgent":         androidVRUA,
+			"osName":            "Android",
+			"osVersion":         "12L",
+			"hl":                it.hl,
+			"timeZone":          "UTC",
+			"utcOffsetMinutes":  0,
 		},
-		"videoId":        videoID,
+	}
+	if visitorData != "" {
+		if client, ok := ytctx["client"].(map[string]any); ok {
+			client["visitorData"] = visitorData
+		}
+	}
+	return it.player(ctx, videoID, ytctx, androidVRClientName, androidVRUA, signatureTimestamp)
+}
+
+func (it *InnerTubeClient) player(ctx context.Context, videoID string, ytctx map[string]any, clientName, ua string, signatureTimestamp int) (map[string]any, error) {
+	clientVersion := defaultClientVer
+	if client, ok := ytctx["client"].(map[string]any); ok {
+		if v := stringValue(client["clientVersion"]); v != "" {
+			clientVersion = v
+		}
+	}
+	contentPlaybackContext := map[string]any{
+		"html5Preference": "HTML5_PREF_WANTS",
+	}
+	if signatureTimestamp > 0 {
+		contentPlaybackContext["signatureTimestamp"] = signatureTimestamp
+	}
+	body := map[string]any{
+		"context": ytctx,
+		"videoId": videoID,
+		"playbackContext": map[string]any{
+			"contentPlaybackContext": contentPlaybackContext,
+		},
 		"contentCheckOk": true,
 		"racyCheckOk":    true,
 	}
-	return it.c.postJSONUA(ctx, innertubeURL+"/player", body, androidVRUA)
+	headers := map[string]string{
+		"User-Agent":               ua,
+		"Origin":                   BaseURL,
+		"X-YouTube-Client-Name":    clientName,
+		"X-YouTube-Client-Version": clientVersion,
+	}
+	if client, ok := ytctx["client"].(map[string]any); ok {
+		headers["X-Goog-Visitor-Id"] = stringValue(client["visitorData"])
+	}
+	return it.c.postJSONHeaders(ctx, innertubeURL+"/player", body, headers)
 }
 
 // Next calls /next.

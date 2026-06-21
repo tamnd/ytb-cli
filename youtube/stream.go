@@ -31,6 +31,7 @@ type Stream struct {
 
 	url             string
 	signatureCipher string
+	userAgent       string
 }
 
 // AudioOnly reports a track carrying audio but no video.
@@ -41,6 +42,9 @@ func (s Stream) VideoOnly() bool { return s.HasVideo && !s.HasAudio }
 
 // Muxed reports a progressive track carrying both audio and video.
 func (s Stream) Muxed() bool { return s.HasVideo && s.HasAudio }
+
+// UserAgent returns the client user agent that produced this stream URL.
+func (s Stream) UserAgent() string { return s.userAgent }
 
 // Ext returns the file extension to use when saving this stream on its own.
 func (s Stream) Ext() string {
@@ -83,25 +87,35 @@ func (c *Client) StreamManifest(ctx context.Context, idOrURL string) (*StreamMan
 	}
 
 	var webPR map[string]any
+	var pageData *PageData
 	playerURL := ""
 	if data, _, err := c.FetchPageData(ctx, NormalizeVideoURL(idOrURL)); err == nil && data != nil {
+		pageData = data
 		playerURL = extractPlayerJSURL(data.HTML)
 		if pr, ok := data.PlayerResp.(map[string]any); ok {
 			webPR = pr
 		}
 	}
 
-	avr, _ := NewInnerTube(c).AndroidVRPlayer(ctx, videoID)
-
-	chosen := avr
-	if !hasStreams(chosen) {
-		chosen = webPR
+	it := NewInnerTube(c)
+	signatureTimestamp := c.signatureTimestampFor(ctx, playerURL)
+	visitorData := visitorDataFromPlayer(webPR)
+	if pageData != nil && pageData.VisitorData != "" {
+		visitorData = pageData.VisitorData
 	}
-	if !hasStreams(chosen) {
+	avr, _ := it.AndroidVRPlayer(ctx, videoID, visitorData, signatureTimestamp)
+	safariPR, _ := it.WebSafariPlayer(ctx, videoID, visitorData, signatureTimestamp)
+
+	responses := []map[string]any{avr, webPR, safariPR}
+	chosen := firstPlayerWithStreams(responses...)
+	if chosen == nil {
 		if reason := playabilityReason(avr); reason != "" {
 			return nil, fmt.Errorf("video unavailable: %s", reason)
 		}
 		if reason := playabilityReason(webPR); reason != "" {
+			return nil, fmt.Errorf("video unavailable: %s", reason)
+		}
+		if reason := playabilityReason(safariPR); reason != "" {
 			return nil, fmt.Errorf("video unavailable: %s", reason)
 		}
 		return nil, fmt.Errorf("no downloadable streams for %s (formats may be SABR-only or require a token)", videoID)
@@ -120,7 +134,7 @@ func (c *Client) StreamManifest(ctx context.Context, idOrURL string) (*StreamMan
 		m.HLSURL = stringValue(sd["hlsManifestUrl"])
 		m.DASHURL = stringValue(sd["dashManifestUrl"])
 	}
-	m.Streams = parseStreams(chosen)
+	m.Streams = mergeStreams(streamSource{avr, androidVRUA}, streamSource{webPR, c.userAgents[0]}, streamSource{safariPR, webSafariUA})
 	return m, nil
 }
 
@@ -156,12 +170,35 @@ func hasStreams(pr map[string]any) bool {
 			if !ok {
 				continue
 			}
-			if stringValue(m["url"]) != "" || stringValue(m["signatureCipher"]) != "" || stringValue(m["cipher"]) != "" {
+			if streamMapResolvable(m) {
 				return true
 			}
 		}
 	}
 	return false
+}
+
+func firstPlayerWithStreams(responses ...map[string]any) map[string]any {
+	for _, pr := range responses {
+		if hasStreams(pr) {
+			return pr
+		}
+	}
+	return nil
+}
+
+func streamMapResolvable(m map[string]any) bool {
+	if stringValue(m["url"]) != "" {
+		return true
+	}
+	return strings.Contains(firstNonEmpty(stringValue(m["signatureCipher"]), stringValue(m["cipher"])), "url=")
+}
+
+func visitorDataFromPlayer(pr map[string]any) string {
+	if rc := mapValue(pr, "responseContext"); rc != nil {
+		return stringValue(rc["visitorData"])
+	}
+	return ""
 }
 
 func playabilityReason(pr map[string]any) string {
@@ -178,7 +215,7 @@ func playabilityReason(pr map[string]any) string {
 	return stringValue(ps["status"])
 }
 
-func parseStreams(pr map[string]any) []Stream {
+func parseStreamsWithUserAgent(pr map[string]any, ua string) []Stream {
 	sd := mapValue(pr, "streamingData")
 	if sd == nil {
 		return nil
@@ -186,11 +223,13 @@ func parseStreams(pr map[string]any) []Stream {
 	var out []Stream
 	for _, item := range arrayValue(sd["formats"]) {
 		if s := parseStream(item, false); s != nil {
+			s.userAgent = ua
 			out = append(out, *s)
 		}
 	}
 	for _, item := range arrayValue(sd["adaptiveFormats"]) {
 		if s := parseStream(item, true); s != nil {
+			s.userAgent = ua
 			out = append(out, *s)
 		}
 	}
@@ -203,7 +242,7 @@ func parseStream(item any, adaptive bool) *Stream {
 		return nil
 	}
 	itag := int(int64Value(m["itag"]))
-	if itag == 0 {
+	if itag == 0 || !streamMapResolvable(m) {
 		return nil
 	}
 	s := &Stream{
@@ -229,6 +268,39 @@ func parseStream(item any, adaptive bool) *Stream {
 	s.HasVideo = s.VideoCodec != ""
 	s.HasAudio = s.AudioCodec != ""
 	return s
+}
+
+type streamSource struct {
+	playerResponse map[string]any
+	userAgent      string
+}
+
+func mergeStreams(sources ...streamSource) []Stream {
+	seen := map[int]Stream{}
+	for _, src := range sources {
+		for _, s := range parseStreamsWithUserAgent(src.playerResponse, src.userAgent) {
+			prev, ok := seen[s.ITag]
+			if !ok || streamScore(s) > streamScore(prev) {
+				seen[s.ITag] = s
+			}
+		}
+	}
+	out := make([]Stream, 0, len(seen))
+	for _, s := range seen {
+		out = append(out, s)
+	}
+	return out
+}
+
+func streamScore(s Stream) int64 {
+	score := s.Bitrate
+	if s.ContentLength > 0 {
+		score += s.ContentLength / 1024
+	}
+	if s.url != "" {
+		score += 1 << 40
+	}
+	return score
 }
 
 // parseMime splits `video/mp4; codecs="avc1.4d401f, mp4a.40.2"` into the
