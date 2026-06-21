@@ -8,6 +8,7 @@ import (
 	"io"
 	"math/rand"
 	"net/http"
+	"net/http/cookiejar"
 	"strings"
 	"sync"
 	"time"
@@ -44,9 +45,11 @@ func NewClient(cfg Config) *Client {
 	if cfg.GL == "" {
 		cfg.GL = "US"
 	}
+	jar, _ := cookiejar.New(nil)
 	return &Client{
 		http: &http.Client{
 			Timeout: cfg.Timeout,
+			Jar:     jar,
 			Transport: &http.Transport{
 				MaxIdleConns:        10,
 				MaxConnsPerHost:     cfg.Workers + 2,
@@ -249,16 +252,25 @@ func (c *Client) postJSON(ctx context.Context, url string, body map[string]any) 
 	return c.postJSONUA(ctx, url, body, "")
 }
 
+func (c *Client) postJSONHeaders(ctx context.Context, url string, body map[string]any, headers map[string]string) (map[string]any, error) {
+	return c.postJSONWithHeaders(ctx, url, body, headers)
+}
+
 // postJSONUA is postJSON with an explicit User-Agent. A non-browser client such
 // as ANDROID_VR must send its matching app UA to receive complete, token-free
 // streaming data, so the cipher-free download path overrides the default here.
 func (c *Client) postJSONUA(ctx context.Context, url string, body map[string]any, ua string) (map[string]any, error) {
+	headers := map[string]string{}
+	if ua != "" {
+		headers["User-Agent"] = ua
+	}
+	return c.postJSONWithHeaders(ctx, url, body, headers)
+}
+
+func (c *Client) postJSONWithHeaders(ctx context.Context, url string, body map[string]any, headers map[string]string) (map[string]any, error) {
 	raw, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
-	}
-	if ua == "" {
-		ua = c.userAgents[0]
 	}
 	var lastErr error
 	attempts := c.retries + 1
@@ -279,8 +291,15 @@ func (c *Client) postJSONUA(ctx context.Context, url string, body map[string]any
 			return nil, err
 		}
 		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("User-Agent", ua)
+		if headers["User-Agent"] == "" {
+			req.Header.Set("User-Agent", c.userAgents[0])
+		}
 		req.Header.Set("Accept-Language", "en-US,en;q=0.9")
+		for k, v := range headers {
+			if v != "" {
+				req.Header.Set(k, v)
+			}
+		}
 		req.AddCookie(&http.Cookie{Name: "CONSENT", Value: "YES+"})
 		resp, err := c.http.Do(req)
 		if err != nil {

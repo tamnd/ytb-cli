@@ -26,6 +26,12 @@ type DownloadProgress struct {
 // it downloads ranges concurrently, writing each at its offset; otherwise it
 // streams sequentially. onProgress, if non-nil, is called as bytes land.
 func (c *Client) DownloadToFile(ctx context.Context, rawURL, dst string, total int64, workers int, onProgress func(DownloadProgress)) error {
+	return c.DownloadToFileWithUserAgent(ctx, rawURL, dst, total, workers, "", onProgress)
+}
+
+// DownloadToFileWithUserAgent fetches rawURL into dst using the stream's
+// matching client User-Agent when one is known.
+func (c *Client) DownloadToFileWithUserAgent(ctx context.Context, rawURL, dst string, total int64, workers int, userAgent string, onProgress func(DownloadProgress)) error {
 	f, err := os.Create(dst)
 	if err != nil {
 		return err
@@ -34,7 +40,7 @@ func (c *Client) DownloadToFile(ctx context.Context, rawURL, dst string, total i
 
 	if total <= 0 {
 		// Unknown length: a single streaming GET is the only option.
-		n, err := c.streamTo(ctx, rawURL, f, 0, onProgress)
+		n, err := c.streamTo(ctx, rawURL, f, 0, userAgent, onProgress)
 		if err != nil {
 			return err
 		}
@@ -72,7 +78,7 @@ func (c *Client) DownloadToFile(ctx context.Context, rawURL, dst string, total i
 
 	if workers == 1 {
 		for _, ch := range chunks {
-			if err := c.fetchRangeTo(ctx, rawURL, f, ch.start, ch.end, report); err != nil {
+			if err := c.fetchRangeTo(ctx, rawURL, f, ch.start, ch.end, userAgent, report); err != nil {
 				return err
 			}
 		}
@@ -94,7 +100,7 @@ func (c *Client) DownloadToFile(ctx context.Context, rawURL, dst string, total i
 				if cctx.Err() != nil {
 					return
 				}
-				if err := c.fetchRangeTo(cctx, rawURL, f, ch.start, ch.end, report); err != nil {
+				if err := c.fetchRangeTo(cctx, rawURL, f, ch.start, ch.end, userAgent, report); err != nil {
 					mu.Lock()
 					if firstErr == nil {
 						firstErr = err
@@ -121,7 +127,7 @@ wait:
 
 // fetchRangeTo downloads bytes [start,end] of rawURL and writes them at start
 // using WriteAt, retrying transient failures.
-func (c *Client) fetchRangeTo(ctx context.Context, rawURL string, w io.WriterAt, start, end int64, report func(int64)) error {
+func (c *Client) fetchRangeTo(ctx context.Context, rawURL string, w io.WriterAt, start, end int64, userAgent string, report func(int64)) error {
 	attempts := c.retries + 1
 	if attempts < 1 {
 		attempts = 1
@@ -139,7 +145,7 @@ func (c *Client) fetchRangeTo(ctx context.Context, rawURL string, w io.WriterAt,
 		if err != nil {
 			return err
 		}
-		req.Header.Set("User-Agent", androidVRUA)
+		req.Header.Set("User-Agent", streamUserAgent(userAgent))
 		req.Header.Set("Range", fmt.Sprintf("bytes=%d-%d", start, end))
 		resp, err := c.http.Do(req)
 		if err != nil {
@@ -185,12 +191,12 @@ func (c *Client) fetchRangeTo(ctx context.Context, rawURL string, w io.WriterAt,
 }
 
 // streamTo performs a single GET, copying the body to w starting at offset 0.
-func (c *Client) streamTo(ctx context.Context, rawURL string, w io.Writer, _ int64, onProgress func(DownloadProgress)) (int64, error) {
+func (c *Client) streamTo(ctx context.Context, rawURL string, w io.Writer, _ int64, userAgent string, onProgress func(DownloadProgress)) (int64, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
 	if err != nil {
 		return 0, err
 	}
-	req.Header.Set("User-Agent", androidVRUA)
+	req.Header.Set("User-Agent", streamUserAgent(userAgent))
 	resp, err := c.http.Do(req)
 	if err != nil {
 		return 0, err
@@ -219,4 +225,11 @@ func (c *Client) streamTo(ctx context.Context, rawURL string, w io.Writer, _ int
 			return written, rerr
 		}
 	}
+}
+
+func streamUserAgent(userAgent string) string {
+	if userAgent != "" {
+		return userAgent
+	}
+	return androidVRUA
 }

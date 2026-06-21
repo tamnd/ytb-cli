@@ -327,7 +327,7 @@ func (a *App) downloadStream(ctx context.Context, o downloadOpts, m *youtube.Str
 		return err
 	}
 	prog := a.progressReporter(label)
-	return a.Client.DownloadToFile(ctx, url, dst, s.ContentLength, o.concurrency, prog)
+	return a.Client.DownloadToFileWithUserAgent(ctx, url, dst, s.ContentLength, o.concurrency, s.UserAgent(), prog)
 }
 
 // progressReporter returns a throttled stderr progress callback, or nil when

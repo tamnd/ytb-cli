@@ -11,6 +11,20 @@ signature. Grab one from the [releases page] or install the latest with
 
 [releases page]: https://github.com/tamnd/ytb-cli/releases
 
+## v0.4.1
+
+Restores native media downloads for current YouTube streams. The downloader now
+keeps the watch-page visitor session and uses the stream's matching client
+User-Agent when fetching Googlevideo URLs, so `ytb download` and
+`ytb download -x --audio-format mp3` work again without `--use-yt-dlp` for
+common anonymous streams.
+
+## v0.4.0
+
+Adds `discover`, a breadth-first graph walk from videos, channels, and
+playlists. The command follows uploaders, related videos, uploads, playlists,
+items, owners, community posts, and commenters, with depth and fanout bounds.
+
 ## v0.3.1
 
 Documentation release. Adds this release notes page and documents the v0.3.0

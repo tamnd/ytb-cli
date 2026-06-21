@@ -79,6 +79,7 @@ var (
 	nDirectRe = regexp.MustCompile(`\.get\((?:"n"|[a-zA-Z0-9_$]+)\)\)&&\([a-zA-Z0-9_$]+=([a-zA-Z0-9_$]+)\([a-zA-Z0-9_$]+\)`)
 
 	playerJSRe = regexp.MustCompile(`(/s/player/[0-9a-fA-F]{8,}/[^"\\]+/base\.js)`)
+	stsRe      = regexp.MustCompile(`(?:signatureTimestamp|sts)\s*:\s*(\d{5})`)
 )
 
 // extractPlayerJSURL pulls the base.js player URL out of a watch page. The CLI
@@ -88,6 +89,26 @@ func extractPlayerJSURL(html string) string {
 		return "https://www.youtube.com" + m
 	}
 	return ""
+}
+
+func extractSignatureTimestamp(js []byte) int {
+	m := stsRe.FindSubmatch(js)
+	if len(m) < 2 {
+		return 0
+	}
+	n, _ := strconv.Atoi(string(m[1]))
+	return n
+}
+
+func (c *Client) signatureTimestampFor(ctx context.Context, playerURL string) int {
+	if playerURL == "" {
+		return 0
+	}
+	body, code, err := c.Fetch(ctx, playerURL)
+	if err != nil || code != 200 || len(body) == 0 {
+		return 0
+	}
+	return extractSignatureTimestamp(body)
 }
 
 // cipherFor fetches base.js for playerURL once and builds (and caches) its cipher.
