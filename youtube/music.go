@@ -1020,12 +1020,11 @@ func (c *Client) FetchSong(ctx context.Context, videoID string, withLyrics bool)
 		_ = nextData
 	}
 	// Use a separate /next-style call to retrieve the lyrics browse ID.
-	nextResp, err := c.postJSON(ctx, musicInnertubeURL+"/next", map[string]any{
-		"context":                       NewInnerTube(c).musicContext(),
+	nextResp, err := it.MusicNext(ctx, map[string]any{
 		"videoId":                       videoID,
 		"isAudioOnly":                   true,
 		"enablePersistentPlaylistPanel": true,
-	})
+	}, "lyrics for "+videoID)
 	if err == nil {
 		lyricsID := musicParseLyricsBrowseID(nextResp)
 		if lyricsID != "" {
