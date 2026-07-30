@@ -165,60 +165,65 @@ func (it *InnerTubeClient) CommentContinuationWEB(ctx context.Context, continuat
 	return it.c.Call(ctx, ClientWEB(), "next", map[string]any{"continuation": continuation}, "comment page")
 }
 
-// Community fetches a channel's community tab.
+// Community fetches a channel's community tab. params must come from the
+// channel's own tab strip, which DiscoverCommunityTabParams reads.
 func (it *InnerTubeClient) Community(ctx context.Context, browseID, params, continuation string) (map[string]any, error) {
-	if params == "" {
-		params = "Egljb21tdW5pdHk%3D"
-	}
 	return it.Browse(ctx, browseID, params, continuation)
 }
 
-// DiscoverCommunityTabParams finds the community tab's params for a channel.
+// communityTabSlugs are the names the posts tab has gone by. Both are read off
+// the response; neither is a params blob.
+var communityTabSlugs = []string{"posts", "community"}
+
+// DiscoverCommunityTabParams finds the posts tab's params for a channel.
 //
-// The tab is found by its endpoint rather than its title. Titles are translated:
-// on a page fetched from an address YouTube reads as Vietnamese the tab strip
-// came back as "Trang chu / Video / Shorts / Phat truc tiep / Danh sach phat",
-// and a title match would have found nothing and reported no community tab.
+// The params come off the response every time. This used to compare against two
+// blobs written down here, and one of them had gone stale: @RickAstleyYT's posts
+// tab answers to EgVwb3N0c_IGBAoCSgA%3D and the list held EgVwb3N0c_IGBAoCEgA, so
+// the match failed and the tool reported no posts tab on a channel that has one.
+//
+// The tab is found by its slug, which is field 2 of the params protobuf and is the
+// same in every language. A title match never worked: fetched from an address
+// YouTube reads as Vietnamese the strip comes back "Trang chu / Video / Shorts /
+// Phat truc tiep / Danh sach phat", and even in English the tab titled Home is
+// featured and the one titled Live is streams.
 func (it *InnerTubeClient) DiscoverCommunityTabParams(ctx context.Context, browseID string) (string, error) {
 	data, err := it.Browse(ctx, browseID, "", "")
 	if err != nil {
 		return "", err
 	}
-	return findTabParams(data, communityTabParams), nil
+	for _, slug := range communityTabSlugs {
+		if tab, ok := FindTab(data, slug); ok {
+			return tab.Params, nil
+		}
+	}
+	return "", AssertTab(data, communityTabSlugs[0])
 }
 
-// communityTabParams are the params blobs YouTube uses for the community and
-// posts tabs. They are stable, opaque and language independent, which is exactly
-// what a title is not.
-var communityTabParams = []string{
-	"Egljb21tdW5pdHk%3D",  // community
-	"EgVwb3N0c_IGBAoCEgA", // posts
-}
-
-// findTabParams returns the params of the first tab whose endpoint params matches
-// one of want.
-func findTabParams(resp map[string]any, want []string) string {
-	var found string
-	walkJSON(resp, func(m map[string]any) {
-		if found != "" {
-			return
-		}
-		tr, ok := m["tabRenderer"].(map[string]any)
-		if !ok {
-			return
-		}
-		params := stringValue(mapValue(mapValue(tr, "endpoint"), "browseEndpoint")["params"])
-		if params == "" {
-			return
-		}
-		for _, w := range want {
-			if params == w {
-				found = params
-				return
-			}
-		}
-	})
-	return found
+// ChannelTab browses one tab of a channel by name, with the params read off the
+// channel's own tab strip, and checks afterwards that the response is the tab that
+// was asked for.
+//
+// The check is not paranoia. YouTube does not error on a tab a channel does not
+// have, it serves the home tab, and the videos on that page are real videos, so
+// nothing downstream can tell that the wrong question was answered.
+func (it *InnerTubeClient) ChannelTab(ctx context.Context, browseID, slug string) (map[string]any, error) {
+	strip, err := it.Browse(ctx, browseID, "", "")
+	if err != nil {
+		return nil, err
+	}
+	tab, ok := FindTab(strip, slug)
+	if !ok {
+		return nil, AssertTab(strip, slug)
+	}
+	resp, err := it.Browse(ctx, browseID, tab.Params, "")
+	if err != nil {
+		return nil, err
+	}
+	if err := AssertTab(resp, slug); err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
 
 // ResolveURL resolves any youtube.com URL to the endpoint that serves it.

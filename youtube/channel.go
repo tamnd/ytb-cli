@@ -49,6 +49,16 @@ func (c *Client) StreamChannelTab(ctx context.Context, idOrURL, tab string, opt 
 		return fmt.Errorf("channel tab not found: %s", channelURL)
 	}
 
+	// The page arrived, which says nothing about which tab is on it. A channel with
+	// no shorts answers /shorts with its featured page and a 200, and the videos on
+	// that page are real videos, so this is the only place the difference is still
+	// visible. The strip on the page names the tab it selected.
+	if initial, ok := data.InitialData.(map[string]any); ok {
+		if err := AssertTab(initial, tabSlugFor(tab)); err != nil {
+			return err
+		}
+	}
+
 	ch, videos, contToken, err := ParseChannelPage(data, channelURL)
 	if err != nil {
 		return err
@@ -166,6 +176,11 @@ func (c *Client) StreamChannelPlaylists(ctx context.Context, idOrURL string, opt
 	}
 	if code == 404 || data == nil {
 		return fmt.Errorf("channel playlists not found: %s", idOrURL)
+	}
+	if initial, ok := data.InitialData.(map[string]any); ok {
+		if err := AssertTab(initial, "playlists"); err != nil {
+			return err
+		}
 	}
 
 	// Resolve channel ID for enrichment.
