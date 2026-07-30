@@ -137,7 +137,7 @@ func crawlItem(ctx context.Context, c *Client, store *Store, item QueueItem, opt
 // --- per-entity crawlers ---
 
 func crawlVideo(ctx context.Context, c *Client, store *Store, url string, opt CrawlOptions) error {
-	result, err := c.FetchVideo(ctx, url, VideoOptions{Player: true, Next: true})
+	result, err := c.FetchVideo(ctx, url, VideoOptions{Next: true})
 	if err != nil {
 		return err
 	}

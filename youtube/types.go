@@ -2,40 +2,162 @@ package youtube
 
 import "time"
 
-// Video is the central record: one YouTube video with full metadata. The kit
-// tags make it addressable by a host (id, body, links) and the table tags pick
-// the columns the aligned table shows; every other field stays in the JSON.
+// Video is one YouTube video: the fullest record in the model and the one whose
+// shape varies most by which surface answered. Doc 03 section 2.
+//
+// A Video from `ytb video` is complete. A Video from `ytb uploads` or `ytb search`
+// is a listing row, and the difference is stated rather than hidden: the envelope's
+// surfaces name the reads that contributed, a field the listing had no answer for
+// is absent from the JSON instead of zero, and missed says in a sentence what a
+// full read would add.
+//
+// Every optional field is omitempty or omitzero, and the flags are *bool. Absent
+// and false are different claims: is_family_safe missing means nobody asked,
+// is_family_safe false means YouTube answered no. Writing false for both is the
+// single defect this record model exists to remove, because a dataset cannot tell
+// them apart afterwards.
+//
+// The kit tags make the record addressable by a host (id, body, links) and the
+// table tags pick the columns the aligned table shows. Everything else is JSON only.
 type Video struct {
-	VideoID            string    `json:"video_id" kit:"id" table:"id"`
-	Title              string    `json:"title" table:"title,truncate"`
-	Description        string    `json:"description" kit:"body" table:"-"`
-	ChannelID          string    `json:"channel_id" kit:"link,kind=youtube/channel" table:"-"`
-	ChannelName        string    `json:"channel_name" table:"channel,truncate"`
-	DurationSeconds    int       `json:"duration_seconds" table:"-"`
-	DurationText       string    `json:"duration_text" table:"duration"`
-	ViewCount          int64     `json:"view_count" table:"views"`
-	CommentCount       int64     `json:"comment_count" table:"-"`
-	LikeCount          int64     `json:"like_count" table:"-"`
-	PublishedText      string    `json:"published_text" table:"published"`
-	PublishedAt        time.Time `json:"published_at" table:"-"`
-	UploadDate         string    `json:"upload_date" table:"-"`
-	IsLive             bool      `json:"is_live" table:"-"`
-	IsShort            bool      `json:"is_short" table:"-"`
-	Category           string    `json:"category" table:"-"`
-	Tags               []string  `json:"tags" table:"-"`
-	ThumbnailURL       string    `json:"thumbnail_url" table:"-"`
-	URL                string    `json:"url" table:"url,url"`
-	EmbedURL           string    `json:"embed_url" table:"-"`
-	Transcript         string    `json:"transcript" table:"-"`
-	TranscriptLanguage string    `json:"transcript_language" table:"-"`
-	// Extended metadata from microformat / videoDetails.
-	AvailableCountries  []string  `json:"available_countries" table:"-"`
-	IsFamilySafe        bool      `json:"is_family_safe" table:"-"`
-	AllowRatings        bool      `json:"allow_ratings" table:"-"`
-	AgeRestricted       bool      `json:"age_restricted" table:"-"`
-	LocationDescription string    `json:"location_description" table:"-"`
-	Hashtags            []string  `json:"hashtags" table:"-"`
-	FetchedAt           time.Time `json:"fetched_at" table:"-"`
+	// --- identity, doc 03 section 2.1 ---
+
+	VideoID string `json:"id" kit:"id" table:"id"`
+	// URL is the watch URL, and ShortURL the youtu.be form. Both are derived.
+	URL      string `json:"url,omitempty" table:"url,url"`
+	ShortURL string `json:"short_url,omitempty" table:"-"`
+	// EmbedURL and CanonicalURL come off microformat rather than being built, so
+	// canonical_url is /shorts/<id> on a short and /watch?v= on everything else,
+	// which is YouTube stating what kind of thing this is.
+	EmbedURL     string `json:"embed_url,omitempty" table:"-"`
+	CanonicalURL string `json:"canonical_url,omitempty" table:"-"`
+
+	// --- content, doc 03 section 2.2 ---
+
+	Title string `json:"title,omitempty" table:"title,truncate"`
+	// Description is videoDetails.shortDescription: plain text, authoritative,
+	// already unescaped.
+	Description string `json:"description,omitempty" kit:"body" table:"-"`
+	// DescriptionRuns is the same description with its endpoints intact, which is
+	// where Links, Mentions and Hashtags come from. See runs.go.
+	DescriptionRuns []TextRun `json:"description_runs,omitempty" table:"-"`
+	// Keywords is the uploader's own tag list, absent on most videos.
+	Keywords []string `json:"keywords,omitempty" table:"-"`
+	// Category is English whatever language the page was fetched in.
+	Category string   `json:"category,omitempty" table:"-"`
+	Hashtags []string `json:"hashtags,omitempty" table:"-"`
+	// Mentions are channel ids the description linked to.
+	Mentions []string `json:"mentions,omitempty" table:"-"`
+	Links    []Link   `json:"links,omitempty" table:"-"`
+
+	// --- counts, doc 03 section 2.3 ---
+
+	// ViewCount is exact and ViewCountText is what a lockup rendered, e.g.
+	// "1.8B views". Both are kept: rounding is lossy and irreversible.
+	ViewCount     int64  `json:"view_count,omitempty" table:"views"`
+	ViewCountText string `json:"view_count_text,omitempty" table:"-"`
+	LikeCount     int64  `json:"like_count,omitempty" table:"-"`
+	// CommentCount is absent rather than zero when the comment section was not
+	// read, and missed says so.
+	CommentCount int64 `json:"comment_count,omitempty" table:"-"`
+	// DislikeCount only ever comes from a third party and is an estimate. Via says
+	// where it came from.
+	DislikeCount int64 `json:"dislike_count,omitempty" table:"-"`
+
+	// --- time, doc 03 section 2.4 ---
+
+	// DurationSeconds comes from microformat, which agrees with the page's own
+	// microdata where videoDetails is a second out. Via records which block won.
+	DurationSeconds int    `json:"duration_seconds,omitempty" table:"-"`
+	DurationText    string `json:"duration_text,omitempty" table:"duration"`
+	// PublishedAt is exact to the second with the uploader's UTC offset.
+	// PublishedText is the rendered "1 month ago", and it is never parsed into
+	// PublishedAt because "1 month ago" is not a timestamp.
+	PublishedText string    `json:"published_text,omitempty" table:"published"`
+	PublishedAt   time.Time `json:"published_at,omitzero" table:"-"`
+	// UpdatedAt only ever comes from the Atom feed.
+	UpdatedAt time.Time `json:"updated_at,omitzero" table:"-"`
+	// UploadDate differs from PublishedAt on a premiere, which is why it is a field
+	// of its own rather than the same value twice.
+	UploadDate time.Time `json:"upload_date,omitzero" table:"-"`
+
+	// --- channel, doc 03 section 2.5 ---
+
+	// ChannelID is mandatory on a Video from every surface.
+	ChannelID     string `json:"channel_id,omitempty" kit:"link,kind=youtube/channel" table:"-"`
+	ChannelTitle  string `json:"channel_title,omitempty" table:"channel,truncate"`
+	ChannelHandle string `json:"channel_handle,omitempty" table:"-"`
+	ChannelURL    string `json:"channel_url,omitempty" table:"-"`
+
+	// --- flags and availability, doc 03 section 2.6 ---
+
+	// IsShort means this is a short, not that it is eligible to be one. Those are
+	// different fields on the payload and only one of them is an answer.
+	IsShort *bool `json:"is_short,omitempty" table:"-"`
+	// IsLiveContent is true for a past stream too, so it is not "is live now".
+	// LiveState is the badge, and it is the field that says now: live, upcoming,
+	// ended, or absent on a normal upload.
+	IsLiveContent *bool  `json:"is_live_content,omitempty" table:"-"`
+	LiveState     string `json:"live_state,omitempty" table:"-"`
+	IsPrivate     *bool  `json:"is_private,omitempty" table:"-"`
+	IsUnlisted    *bool  `json:"is_unlisted,omitempty" table:"-"`
+	IsFamilySafe  *bool  `json:"is_family_safe,omitempty" table:"-"`
+	AgeRestricted *bool  `json:"age_restricted,omitempty" table:"-"`
+	AllowRatings  *bool  `json:"allow_ratings,omitempty" table:"-"`
+	IsCrawlable   *bool  `json:"is_crawlable,omitempty" table:"-"`
+	// AvailableCountries is 249 ISO codes on an unrestricted video and is kept
+	// whole. It is the only tier 0 answer to "is this blocked where I am", and a
+	// count instead of the list would destroy that.
+	AvailableCountries []string `json:"available_countries,omitempty" table:"-"`
+	// Playability is playabilityStatus verbatim: the status, and YouTube's own
+	// sentence when the answer is no.
+	Playability *Playability `json:"playability,omitempty" table:"-"`
+	// LocationDescription is microformat's own field, set on the videos that
+	// carry a place.
+	LocationDescription string `json:"location_description,omitempty" table:"-"`
+
+	// --- media and text pointers, doc 03 section 2.7 ---
+
+	// Thumbnails are the ones the payload named plus any constructed rendition a
+	// HEAD confirmed. Each one says which it was.
+	Thumbnails []Thumbnail `json:"thumbnails,omitempty" table:"-"`
+	// ThumbnailURL is the largest thumbnail this read saw, kept because a row in a
+	// table, a Markdown export and a SQL column all want one URL rather than a list.
+	ThumbnailURL string `json:"thumbnail_url,omitempty" table:"-"`
+	// Formats is the stream list, and it is absent unless --formats asked for it,
+	// because it costs an s3 request per video and a crawl of a thousand videos
+	// should not make a thousand extra calls nobody asked for.
+	Formats []VideoFormat `json:"formats,omitempty" table:"-"`
+	// CaptionTracks is name and language only. The text is a separate read.
+	CaptionTracks []CaptionTrack `json:"caption_tracks,omitempty" table:"-"`
+	Chapters      []Chapter      `json:"chapters,omitempty" table:"-"`
+	// Player is the base.js URL from ytcfg, kept for provenance: it names the
+	// player build that served this response.
+	Player string `json:"player,omitempty" table:"-"`
+	// Transcript and TranscriptLanguage are filled only by --transcript. The
+	// transcript is its own record kind and this is the attached copy.
+	Transcript         string `json:"transcript,omitempty" table:"-"`
+	TranscriptLanguage string `json:"transcript_language,omitempty" table:"-"`
+
+	// Microdata is what the page's own schema.org markup says about this video,
+	// filled only by --microdata. It is a second opinion and never a replacement:
+	// the markup is generated for crawlers and rounds where the payload does not.
+	Microdata *Microdata `json:"microdata,omitempty" table:"-"`
+
+	Envelope
+}
+
+// Playability is playabilityStatus, verbatim. It is a struct rather than three
+// fields on Video because the three only mean anything together: a Reason with no
+// Status is a sentence with nothing to attach it to.
+type Playability struct {
+	Status string `json:"status,omitempty"`
+	// Reason is YouTube's own sentence, in the language of the read.
+	Reason string `json:"reason,omitempty"`
+	// ReasonDetail is the second line the error screen adds, e.g. the sign-in
+	// prompt under an age gate.
+	ReasonDetail    string `json:"reason_detail,omitempty"`
+	PlayableInEmbed *bool  `json:"playable_in_embed,omitempty"`
 }
 
 // Channel is one YouTube channel.
@@ -81,13 +203,35 @@ type Comment struct {
 }
 
 // Chapter is one chapter marker on a video.
+//
+// Origin is the field that stops two different things being reported as one. A
+// macro marker is a chapter YouTube itself recognised, with a title and a preview
+// frame, and it appears in the player's scrubber. A timestamped line in the
+// description is a convention some uploaders follow and YouTube did not act on,
+// and reading it produces a list that looks identical and is not the same claim. A
+// consumer that wants only real chapters can filter on origin; one that wants
+// everything gets everything and knows which is which.
 type Chapter struct {
-	VideoID      string `json:"video_id"`
-	Title        string `json:"title"`
-	StartSeconds int    `json:"start_seconds"`
-	ThumbnailURL string `json:"thumbnail_url"`
+	VideoID string `json:"video_id"`
+	Title   string `json:"title"`
+	// StartSeconds is where the chapter begins. The first chapter starts at 0.
+	StartSeconds int `json:"start_seconds"`
+	// ThumbnailURL is the preview frame, which only a macro marker has.
+	ThumbnailURL string `json:"thumbnail_url,omitempty"`
 	Position     int    `json:"position"`
+	// Origin is ChapterFromMarkers or ChapterFromDescription.
+	Origin string `json:"origin,omitempty"`
 }
+
+// Where a chapter came from.
+const (
+	// ChapterFromMarkers means YouTube served a macroMarkersListRenderer, so the
+	// site itself treats these as chapters.
+	ChapterFromMarkers = "markers"
+	// ChapterFromDescription means the list was read off timestamp links in the
+	// description, which YouTube linked but did not turn into chapters.
+	ChapterFromDescription = "description"
+)
 
 // CommunityPost is one community/posts-tab post. Attachments is a JSON array.
 type CommunityPost struct {
@@ -106,18 +250,71 @@ type CommunityPost struct {
 
 // VideoFormat is one streaming format (muxed or adaptive) of a video.
 type VideoFormat struct {
-	VideoID       string `json:"video_id"`
-	ITag          int    `json:"itag"`
-	MimeType      string `json:"mime_type"`
-	Quality       string `json:"quality"`
-	QualityLabel  string `json:"quality_label"`
-	Width         int    `json:"width"`
-	Height        int    `json:"height"`
-	FPS           int    `json:"fps"`
-	Bitrate       int64  `json:"bitrate"`
-	ContentLength int64  `json:"content_length"`
+	VideoID  string `json:"video_id"`
+	ITag     int    `json:"itag"`
+	MimeType string `json:"mime_type"`
+	// Kind, Container and Codec are parsed out of MimeType at read time rather
+	// than derived by whoever consumes the record, because -o json is the record
+	// and a consumer should not have to re-implement the same three splits.
+	// Container comes off the mime type and never off an itag table: the table is
+	// folklore, the mime type is what the response said.
+	Kind      string `json:"kind,omitempty"`
+	Container string `json:"container,omitempty"`
+	Codec     string `json:"codec,omitempty"`
+	Quality   string `json:"quality"`
+	// The video-only and audio-only fields are omitempty because an audio format
+	// with "width": 0 and "fps": 0 on it is a record claiming to know things it
+	// never read. Absent means this kind of format has no such field.
+	QualityLabel string `json:"quality_label,omitempty"`
+	Width        int    `json:"width,omitempty"`
+	Height       int    `json:"height,omitempty"`
+	FPS          int    `json:"fps,omitempty"`
+	Bitrate      int64  `json:"bitrate"`
+	// AverageBitrate is only on the adaptive formats. The muxed one carries a peak
+	// bitrate and nothing else, measured on dQw4w9WgXcQ.
+	AverageBitrate  int64 `json:"average_bitrate,omitempty"`
+	AudioChannels   int   `json:"audio_channels,omitempty"`
+	AudioSampleRate int   `json:"audio_sample_rate,omitempty"`
+	// ContentLength is absent rather than zero when the response did not carry one,
+	// which the ANDROID player does on every muxed format. Zero is a claim of an
+	// empty file and Note says what absent means.
+	ContentLength int64  `json:"content_length,omitempty"`
 	IsAdaptive    bool   `json:"is_adaptive"`
-	AudioQuality  string `json:"audio_quality"`
+	AudioQuality  string `json:"audio_quality,omitempty"`
+	// ApproxDurationMS is the format's own duration, and it disagrees with the
+	// video's by a few tens of milliseconds between formats: 213089 on itag 18
+	// against 213040 on itag 313. It is per stream, not per video.
+	ApproxDurationMS int64 `json:"approx_duration_ms,omitempty"`
+	// InitRange and IndexRange are the two byte ranges a DASH player reads before
+	// it reads any media, and they are absent on a muxed format.
+	InitRange  *ByteRange `json:"init_range,omitempty"`
+	IndexRange *ByteRange `json:"index_range,omitempty"`
+	// LastModified is when this rendition was encoded, off lastModified, which the
+	// response gives in microseconds and the URL repeats as lmt.
+	LastModified time.Time `json:"last_modified,omitzero"`
+	// URL is only ever set from a mobile player. The watch page lists the same
+	// itags with no url and no signatureCipher, so there is nothing to fetch.
+	// Doc 01 section 3.2.
+	URL string `json:"url,omitempty"`
+	// ExpiresAt is the deadline the CDN enforces, off the URL's own expire, not the
+	// response's expiresInSeconds: those two disagree by a minute.
+	ExpiresAt time.Time `json:"expires_at,omitzero"`
+	// IsThrottledUnranged is true on every format, which is the point of it. It is
+	// the one fact a consumer of ytb formats -o json most needs and cannot discover
+	// from the payload: a plain GET of this URL runs at 32 KiB/s and the same URL
+	// fetched in ranges runs at 4 MiB/s. Doc 01 section 8.
+	IsThrottledUnranged bool `json:"is_throttled_unranged"`
+	// Note is what is unusual about this one format, empty for a format with
+	// nothing worth saying about it. The ANDROID player answers with no
+	// contentLength on a muxed format, so its row says "size unknown" rather than
+	// showing a 0 that reads as an empty file.
+	Note string `json:"note,omitempty"`
+}
+
+// ByteRange is one of the DASH ranges, which the payload spells as strings.
+type ByteRange struct {
+	Start int64 `json:"start"`
+	End   int64 `json:"end"`
 }
 
 // Playlist is one playlist's header.
@@ -148,15 +345,20 @@ type RelatedVideo struct {
 	Position       int    `json:"position"`
 }
 
-// CaptionTrack is one available caption track for a video.
+// CaptionTrack is one available caption track for a video. The text is a separate
+// read, so this is the index and not the captions.
 type CaptionTrack struct {
-	VideoID         string    `json:"video_id"`
-	LanguageCode    string    `json:"language_code"`
-	Name            string    `json:"name"`
-	BaseURL         string    `json:"base_url"`
-	Kind            string    `json:"kind"`
+	VideoID      string `json:"video_id"`
+	LanguageCode string `json:"language_code"`
+	Name         string `json:"name"`
+	// BaseURL only returns bytes when it came from a mobile player. The watch page
+	// lists the same tracks with URLs that answer 200 and empty. Doc 01 section 3.
+	BaseURL string `json:"base_url"`
+	// Kind is "asr" on an auto-generated track and empty on a human one, which is
+	// why IsAutoGenerated exists: an empty string is not an answer to a question.
+	Kind            string    `json:"kind,omitempty"`
 	IsAutoGenerated bool      `json:"is_auto_generated"`
-	FetchedAt       time.Time `json:"fetched_at"`
+	FetchedAt       time.Time `json:"fetched_at,omitzero"`
 }
 
 // TranscriptSegment is one timed line of a transcript.
@@ -211,11 +413,34 @@ type PageData struct {
 }
 
 // VideoOptions controls what FetchVideo gathers.
+//
+// The zero value is one request. The watch page carries the player response, the
+// initial data, the chapter panel, the related videos and the microdata in one
+// 1.3 MB read, so the default is s1 alone and every field below costs a request
+// that the envelope's surfaces then name. Doc 05 section 2.
 type VideoOptions struct {
-	Player     bool // call /player (default true)
-	Next       bool // call /next for chapters/related/comment token
-	Transcript bool // fetch the transcript text
-	Lang       string
+	// Formats calls the mobile player for the stream list, which no other surface
+	// has: the watch page's twenty six formats carry no URL.
+	Formats bool
+	// Captions calls the mobile player for caption tracks whose baseUrl returns
+	// bytes. The watch page lists the same tracks with URLs that answer empty.
+	Captions bool
+	// Transcript fetches and attaches the transcript text, which implies Captions.
+	Transcript bool
+	// Lang is the preferred transcript language.
+	Lang string
+	// Microdata parses the page's own schema.org markup, for comparing the parser
+	// against the site rather than against a fixture. No extra request.
+	Microdata bool
+	// Thumbnails HEADs the constructed renditions so the list only reports the ones
+	// the CDN actually has. Up to five requests to i.ytimg.com.
+	Thumbnails bool
+	// NoPlayer forbids the mobile player call whatever else was asked for, and the
+	// envelope records what that cost.
+	NoPlayer bool
+	// Next calls /next for the related videos past the first twenty and the comment
+	// continuation token.
+	Next bool
 }
 
 // PageOptions bounds a paginated stream.

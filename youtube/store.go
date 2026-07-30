@@ -230,16 +230,16 @@ func (s *Store) UpsertVideo(v Video) error {
 		location_description, hashtags, fetched_at
 	) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
 		v.VideoID, storeNullStr(v.Title), storeNullStr(v.Description),
-		storeNullStr(v.ChannelID), storeNullStr(v.ChannelName),
+		storeNullStr(v.ChannelID), storeNullStr(v.ChannelTitle),
 		storeNullInt(v.DurationSeconds), storeNullStr(v.DurationText),
 		v.ViewCount, v.CommentCount, v.LikeCount,
 		storeNullStr(v.PublishedText), storeNullTime(v.PublishedAt),
-		storeNullStr(v.UploadDate), storeBool(v.IsLive), storeBool(v.IsShort),
-		storeNullStr(v.Category), jsonString(v.Tags),
+		storeNullTime(v.UploadDate), storeBoolPtr(v.IsLiveContent), storeBoolPtr(v.IsShort),
+		storeNullStr(v.Category), jsonString(v.Keywords),
 		storeNullStr(v.ThumbnailURL), storeNullStr(v.URL), storeNullStr(v.EmbedURL),
 		storeNullStr(v.Transcript), storeNullStr(v.TranscriptLanguage),
 		jsonString(v.AvailableCountries),
-		storeBool(v.IsFamilySafe), storeBool(v.AllowRatings), storeBool(v.AgeRestricted),
+		storeBoolPtr(v.IsFamilySafe), storeBoolPtr(v.AllowRatings), storeBoolPtr(v.AgeRestricted),
 		storeNullStr(v.LocationDescription), jsonString(v.Hashtags),
 		storeTime(v.FetchedAt),
 	)
@@ -587,7 +587,7 @@ func (s *Store) SearchVideos(q string, limit int) ([]Video, error) {
 		var v Video
 		if err := rows.Scan(
 			&v.VideoID, &v.Title, &v.Description,
-			&v.ChannelID, &v.ChannelName,
+			&v.ChannelID, &v.ChannelTitle,
 			&v.DurationSeconds, &v.DurationText,
 			&v.ViewCount, &v.PublishedText, &v.URL,
 		); err != nil {
@@ -752,7 +752,7 @@ func (s *Store) storeGetVideosByChannel(channelID, channelName string) ([]Video,
 		       COALESCE(duration_seconds,0), COALESCE(duration_text,''),
 		       COALESCE(view_count,0), COALESCE(comment_count,0), COALESCE(like_count,0),
 		       COALESCE(published_text,''), COALESCE(upload_date,''),
-		       COALESCE(is_live,0), COALESCE(is_short,0),
+		       is_live, is_short,
 		       COALESCE(tags,'[]'), COALESCE(thumbnail_url,''), COALESCE(url,''),
 		       COALESCE(transcript,''), COALESCE(transcript_language,''),
 		       COALESCE(published_at,'')
@@ -766,14 +766,15 @@ func (s *Store) storeGetVideosByChannel(channelID, channelName string) ([]Video,
 	var out []Video
 	for rows.Next() {
 		var v Video
-		var tags, pubAtStr string
+		var tags, pubAtStr, uploadStr string
+		var isLive, isShort sql.NullBool
 		if err := rows.Scan(
 			&v.VideoID, &v.Title, &v.Description,
-			&v.ChannelID, &v.ChannelName,
+			&v.ChannelID, &v.ChannelTitle,
 			&v.DurationSeconds, &v.DurationText,
 			&v.ViewCount, &v.CommentCount, &v.LikeCount,
-			&v.PublishedText, &v.UploadDate,
-			&v.IsLive, &v.IsShort,
+			&v.PublishedText, &uploadStr,
+			&isLive, &isShort,
 			&tags, &v.ThumbnailURL, &v.URL,
 			&v.Transcript, &v.TranscriptLanguage,
 			&pubAtStr,
@@ -781,9 +782,12 @@ func (s *Store) storeGetVideosByChannel(channelID, channelName string) ([]Video,
 			return out, err
 		}
 		if tags != "" && tags != "[]" {
-			_ = json.Unmarshal([]byte(tags), &v.Tags)
+			_ = json.Unmarshal([]byte(tags), &v.Keywords)
 		}
 		v.PublishedAt, _ = parseStoreTime(pubAtStr)
+		v.UploadDate, _ = parseStoreTime(uploadStr)
+		v.IsLiveContent = storeNullBoolPtr(isLive)
+		v.IsShort = storeNullBoolPtr(isShort)
 		out = append(out, v)
 	}
 	return out, rows.Err()
@@ -838,7 +842,7 @@ func (s *Store) storeGetPlaylistItems(playlistID string) ([]Video, error) {
 	for rows.Next() {
 		var v Video
 		if err := rows.Scan(
-			&v.VideoID, &v.Title, &v.ChannelName,
+			&v.VideoID, &v.Title, &v.ChannelTitle,
 			&v.DurationText, &v.DurationSeconds,
 			&v.ViewCount, &v.ThumbnailURL,
 			&v.Description, &v.PublishedText, &v.UploadDate,
@@ -867,7 +871,7 @@ func (s *Store) storeGetRelated(videoID string) ([]Video, error) {
 	for rows.Next() {
 		var v Video
 		if err := rows.Scan(
-			&v.VideoID, &v.Title, &v.ChannelName, &v.DurationText, &v.ViewCount,
+			&v.VideoID, &v.Title, &v.ChannelTitle, &v.DurationText, &v.ViewCount,
 		); err != nil {
 			return out, err
 		}
@@ -917,6 +921,24 @@ func storeNullInt64(v int64) any {
 		return nil
 	}
 	return v
+}
+
+// storeBoolPtr writes a flag as NULL when nobody answered, so the absent/false
+// distinction the record model keeps survives into SQL rather than being flattened
+// to a 0 that reads as "YouTube said no".
+func storeBoolPtr(b *bool) any {
+	if b == nil {
+		return nil
+	}
+	return storeBool(*b)
+}
+
+// storeNullBoolPtr is the read side of storeBoolPtr.
+func storeNullBoolPtr(b sql.NullBool) *bool {
+	if !b.Valid {
+		return nil
+	}
+	return boolPtr(b.Bool)
 }
 
 func storeBool(b bool) int {

@@ -106,11 +106,11 @@ func (g *fakeGraph) StreamCommunity(_ context.Context, ref string, opt PageOptio
 //	channel UCb (the commenter)
 func newFakeGraph() *fakeGraph {
 	vid1 := &VideoResult{
-		Video:   Video{VideoID: "vid1", Title: "First", ChannelID: "UCa", ChannelName: "Alpha"},
+		Video:   Video{VideoID: "vid1", Title: "First", ChannelID: "UCa", ChannelTitle: "Alpha"},
 		Related: []RelatedVideo{{VideoID: "vid1", RelatedVideoID: "vid2", Position: 0}},
 	}
-	vid2 := &VideoResult{Video: Video{VideoID: "vid2", Title: "Second", ChannelID: "UCa", ChannelName: "Alpha"}}
-	vid3 := &VideoResult{Video: Video{VideoID: "vid3", Title: "Third", ChannelID: "UCa", ChannelName: "Alpha"}}
+	vid2 := &VideoResult{Video: Video{VideoID: "vid2", Title: "Second", ChannelID: "UCa", ChannelTitle: "Alpha"}}
+	vid3 := &VideoResult{Video: Video{VideoID: "vid3", Title: "Third", ChannelID: "UCa", ChannelTitle: "Alpha"}}
 	return &fakeGraph{
 		videos: map[string]*VideoResult{"vid1": vid1, "vid2": vid2, "vid3": vid3},
 		channels: map[string]*Channel{

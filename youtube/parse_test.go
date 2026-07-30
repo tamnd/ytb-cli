@@ -106,8 +106,8 @@ func TestParseLockupViewModelCompactCounts(t *testing.T) {
 	if v.PublishedText != "1mo ago" {
 		t.Errorf("PublishedText = %q, want %q", v.PublishedText, "1mo ago")
 	}
-	if v.ChannelName != "" {
-		t.Errorf("ChannelName = %q, want empty (no owner part present)", v.ChannelName)
+	if v.ChannelTitle != "" {
+		t.Errorf("ChannelTitle = %q, want empty (no owner part present)", v.ChannelTitle)
 	}
 }
 
@@ -142,7 +142,7 @@ func TestParseLockupViewModelFullCounts(t *testing.T) {
 	if v.PublishedText != "3 months ago" {
 		t.Errorf("PublishedText = %q", v.PublishedText)
 	}
-	if v.ChannelName != "Some Channel" {
-		t.Errorf("ChannelName = %q, want %q", v.ChannelName, "Some Channel")
+	if v.ChannelTitle != "Some Channel" {
+		t.Errorf("ChannelTitle = %q, want %q", v.ChannelTitle, "Some Channel")
 	}
 }

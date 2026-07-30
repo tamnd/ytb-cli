@@ -71,38 +71,25 @@ func (c *Client) StreamChannelTab(ctx context.Context, idOrURL, tab string, opt 
 
 	emit1 := func(v Video) error {
 		if isShort {
-			v.IsShort = true
+			v.IsShort = boolPtr(true)
 		}
 		if v.ChannelID == "" {
 			v.ChannelID = ch.ChannelID
 		}
-		if v.ChannelName == "" {
-			v.ChannelName = ch.Title
+		if v.ChannelTitle == "" {
+			v.ChannelTitle = ch.Title
 		}
+		// --enrich turns a listing row into a real read, one /player call per video.
+		// The parser fills in place, so what the row already had survives and the
+		// envelope gains the second surface rather than replacing the first.
 		if opt.Enrich {
-			resp, enrichErr := it.Player(ctx, v.VideoID)
-			if enrichErr == nil && resp != nil {
-				details := ParsePlayerDetails(resp, v.VideoID)
-				if details != nil {
-					if v.Description == "" {
-						v.Description = details.Description
-					}
-					if v.DurationSeconds == 0 {
-						v.DurationSeconds = details.DurationSeconds
-					}
-					if v.ViewCount == 0 {
-						v.ViewCount = details.ViewCount
-					}
-					if v.Category == "" {
-						v.Category = details.Category
-					}
-					if v.UploadDate == "" {
-						v.UploadDate = details.UploadDate
-					}
-					if v.PublishedAt.IsZero() {
-						v.PublishedAt = details.PublishedAt
-					}
-				}
+			if resp, enrichErr := it.Player(ctx, v.VideoID); enrichErr == nil && resp != nil {
+				ParsePlayerResponse(resp, &v, SurfaceInnerTube)
+				v.addClient("WEB")
+				// The lockup's misses no longer hold, and /player has its own: it
+				// carries the description as flat text with no endpoints in it.
+				v.Missed = []string{}
+				v.miss("enriched from /player: no description links, mentions or comment count")
 			}
 		}
 		if err := emit(v); err != nil {

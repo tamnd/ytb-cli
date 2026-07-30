@@ -55,7 +55,7 @@ func exportChannel(store *Store, ch Channel, outDir string) error {
 	// Separate shorts from regular videos.
 	var regular, shorts []Video
 	for _, v := range videos {
-		if v.IsShort {
+		if flagTrue(v.IsShort) {
 			shorts = append(shorts, v)
 		} else {
 			regular = append(regular, v)
@@ -442,12 +442,12 @@ func exportWriteVideoPage(v Video, related []Video, chapters []Chapter, fileMap 
 	ytURL := "https://www.youtube.com/watch?v=" + v.VideoID
 
 	_, _ = fmt.Fprintf(f, "---\nvideo_id: %s\ntitle: %s\n", v.VideoID, exportYAMLStr(v.Title))
-	_, _ = fmt.Fprintf(f, "channel: %s\nchannel_id: %s\n", exportYAMLStr(v.ChannelName), v.ChannelID)
+	_, _ = fmt.Fprintf(f, "channel: %s\nchannel_id: %s\n", exportYAMLStr(v.ChannelTitle), v.ChannelID)
 	if v.DurationText != "" {
 		_, _ = fmt.Fprintf(f, "duration: %s\n", v.DurationText)
 	}
-	if v.UploadDate != "" {
-		_, _ = fmt.Fprintf(f, "date: %s\n", v.UploadDate)
+	if d := exportDate(v.UploadDate); d != "" {
+		_, _ = fmt.Fprintf(f, "date: %s\n", d)
 	}
 	_, _ = fmt.Fprintf(f, "views: %d\nlikes: %d\nurl: %s\n---\n\n", v.ViewCount, v.LikeCount, ytURL)
 
@@ -457,11 +457,11 @@ func exportWriteVideoPage(v Video, related []Video, chapters []Chapter, fileMap 
 	}
 
 	_, _ = fmt.Fprintf(f, "| | |\n|---|---|\n")
-	if v.ChannelName != "" {
-		_, _ = fmt.Fprintf(f, "| **Channel** | [%s](%sREADME.md) |\n", exportEscTbl(v.ChannelName), toRoot)
+	if v.ChannelTitle != "" {
+		_, _ = fmt.Fprintf(f, "| **Channel** | [%s](%sREADME.md) |\n", exportEscTbl(v.ChannelTitle), toRoot)
 	}
-	if v.UploadDate != "" {
-		_, _ = fmt.Fprintf(f, "| **Published** | %s |\n", v.UploadDate)
+	if d := exportDate(v.UploadDate); d != "" {
+		_, _ = fmt.Fprintf(f, "| **Published** | %s |\n", d)
 	} else if v.PublishedText != "" {
 		_, _ = fmt.Fprintf(f, "| **Published** | %s |\n", v.PublishedText)
 	}
@@ -496,9 +496,9 @@ func exportWriteVideoPage(v Video, related []Video, chapters []Chapter, fileMap 
 		_, _ = fmt.Fprintln(f)
 	}
 
-	if len(v.Tags) > 0 {
+	if len(v.Keywords) > 0 {
 		_, _ = fmt.Fprintf(f, "## Tags\n\n")
-		for _, tag := range v.Tags {
+		for _, tag := range v.Keywords {
 			_, _ = fmt.Fprintf(f, "`%s` ", tag)
 		}
 		_, _ = fmt.Fprintf(f, "\n\n")
@@ -517,7 +517,7 @@ func exportWriteVideoPage(v Video, related []Video, chapters []Chapter, fileMap 
 			}
 			_, _ = fmt.Fprintf(f, "| %d | %s | %s | %s |\n",
 				i+1, exportVidLink(fileMap, r.VideoID, title, toRoot+"videos/"),
-				exportEscTbl(r.ChannelName), exportFmtCount(r.ViewCount))
+				exportEscTbl(r.ChannelTitle), exportFmtCount(r.ViewCount))
 		}
 		_, _ = fmt.Fprintln(f)
 	}
@@ -641,8 +641,8 @@ func exportWritePlaylistPage(p Playlist, items []Video, fileMap, plMap map[strin
 		if item.ViewCount > 0 {
 			meta = append(meta, exportFmtCount(item.ViewCount)+" views")
 		}
-		if item.UploadDate != "" {
-			meta = append(meta, item.UploadDate)
+		if d := exportDate(item.UploadDate); d != "" {
+			meta = append(meta, d)
 		} else if item.PublishedText != "" {
 			meta = append(meta, item.PublishedText)
 		}
@@ -806,14 +806,17 @@ func exportVideoRelPath(v Video) string {
 	return dateDir + "/" + exportVideoSlug(v)
 }
 
+// exportDate renders a record time as a plain date, or "" when it is not set.
+func exportDate(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+	return t.Format("2006-01-02")
+}
+
 func exportVideoDate(v Video) string {
-	if v.UploadDate != "" {
-		if t, err := time.Parse(time.RFC3339, v.UploadDate); err == nil {
-			return t.Format("2006-01-02")
-		}
-		if t, err := time.Parse("2006-01-02", v.UploadDate); err == nil {
-			return t.Format("2006-01-02")
-		}
+	if d := exportDate(v.UploadDate); d != "" {
+		return d
 	}
 	if !v.PublishedAt.IsZero() {
 		return v.PublishedAt.Format("2006-01-02")

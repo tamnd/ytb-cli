@@ -190,9 +190,13 @@ func cacheTTL(s string) time.Duration {
 
 type videoRef struct {
 	Refs       []string `kit:"arg,variadic" help:"video id or URL (or - for stdin)"`
+	Formats    bool     `kit:"flag" help:"also read the stream list, one extra request"`
+	Captions   bool     `kit:"flag" help:"also list caption tracks that fetch, one extra request"`
 	Transcript bool     `kit:"flag" help:"fetch and attach the transcript text"`
 	Lang       string   `kit:"flag" help:"preferred caption language for --transcript"`
-	NoPlayer   bool     `kit:"flag,name=no-player" help:"skip /player (HTML-only, faster)"`
+	Microdata  bool     `kit:"flag" help:"include what the page's own schema.org markup says"`
+	Thumbs     bool     `kit:"flag,name=thumbnails" help:"confirm each constructed thumbnail rendition with a HEAD"`
+	NoPlayer   bool     `kit:"flag,name=no-player" help:"never call the mobile player, whatever else was asked"`
 	Client     *Client  `kit:"inject"`
 }
 
@@ -274,10 +278,13 @@ func pageOpts(maxPages int, enrich bool) PageOptions {
 func getVideo(ctx context.Context, in videoRef, emit func(*Video) error) error {
 	refs := expandStdin(in.Refs)
 	opt := VideoOptions{
-		Player:     !in.NoPlayer,
-		Next:       !in.NoPlayer,
+		Formats:    in.Formats,
+		Captions:   in.Captions,
 		Transcript: in.Transcript,
 		Lang:       in.Lang,
+		Microdata:  in.Microdata,
+		Thumbnails: in.Thumbs,
+		NoPlayer:   in.NoPlayer,
 	}
 	single := len(refs) == 1
 	for _, ref := range refs {
@@ -359,7 +366,7 @@ func listItems(ctx context.Context, in pagedRef, emit func(Video) error) error {
 }
 
 func listRelated(ctx context.Context, in playlistRef, emit func(Video) error) error {
-	res, err := in.Client.FetchVideo(ctx, in.Ref, VideoOptions{Player: false, Next: true})
+	res, err := in.Client.FetchVideo(ctx, in.Ref, VideoOptions{Next: true})
 	if err != nil {
 		return mapErr(err)
 	}
