@@ -343,3 +343,81 @@ func TestNoConstructedContinuationToken(t *testing.T) {
 		}
 	}
 }
+
+// tabSlugsThatWereHardcoded are the tab names this package once matched by
+// shipping the params blob for them. One of the two blobs had already gone stale
+// by the time it was noticed: @RickAstleyYT's posts tab answers to
+// EgVwb3N0c_IGBAoCSgA%3D and the shipped blob was EgVwb3N0c_IGBAoCEgA, so the
+// match failed and the tool reported no posts tab on a channel that has one.
+var tabSlugsThatWereHardcoded = []string{
+	"featured", "videos", "shorts", "streams", "releases", "playlists", "posts", "community", "search",
+}
+
+// TestNoHardcodedTabParams asserts no non-test file carries a params blob that
+// decodes to a tab name.
+//
+// A blob is server routing, and YouTube changes it without notice. The tab strip
+// on the response states every tab's params, so there is never a reason to write
+// one down. The check decodes each string literal rather than pattern matching it,
+// because a stale blob does not look stale.
+func TestNoHardcodedTabParams(t *testing.T) {
+	for _, path := range repoFiles(t) {
+		if strings.HasSuffix(path, "_test.go") {
+			continue
+		}
+		for lit, pos := range stringLiterals(t, path) {
+			slug := paramsSlug(lit)
+			if slug == "" {
+				continue
+			}
+			for _, known := range tabSlugsThatWereHardcoded {
+				if slug != known {
+					continue
+				}
+				t.Errorf("%s: %q is the params blob for the %s tab. "+
+					"Read the params off the tab strip with FindTab instead; a written down blob goes stale.",
+					pos, lit, slug)
+			}
+		}
+	}
+}
+
+// pathWalkersAllowed are the files still allowed to walk a continuation path by
+// hand, with why. Both remaining ones scope their walk to a section on purpose,
+// which the general finder cannot do for them.
+var pathWalkersAllowed = map[string]string{
+	"parse.go": "extractCommentContinuationToken is scoped to comment-item-section, because a /next " +
+		"response holds the related-videos token as well and the two are not interchangeable",
+	"comments.go": "comment paging cannot be checked against real data from here: YouTube answers this " +
+		"address with Restricted Mode and hides comments, so the scoped walk stays until milestone 8 " +
+		"rebuilds comments where the responses can be seen",
+}
+
+// TestContinuationTokenSearchIsNotPathWalking asserts the token finder is asked
+// for by key rather than reimplemented at a call site.
+//
+// The four shapes are all live at once: a /next response for dQw4w9WgXcQ carries
+// continuationEndpoint and button.buttonRenderer.command on the same renderer, and
+// channel tabs use continuationItemViewModel with the token two continuationCommand
+// levels down. A parser written against one path pages some lists and stops after
+// page one on the others, which reads as a short playlist rather than as a bug.
+func TestContinuationTokenSearchIsNotPathWalking(t *testing.T) {
+	for _, path := range repoFiles(t) {
+		base := filepath.Base(path)
+		if strings.HasSuffix(path, "_test.go") || base == "continuation.go" {
+			continue
+		}
+		if _, ok := pathWalkersAllowed[base]; ok {
+			continue
+		}
+		src, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatalf("read %s: %v", path, err)
+		}
+		if strings.Contains(string(src), `"continuationEndpoint"`) {
+			t.Errorf("%s walks continuationEndpoint by hand. Call FindContinuationToken, "+
+				"which knows all four shapes and which markers mean a different list. "+
+				"If the walk has to be scoped to a section, add the file to pathWalkersAllowed with the reason.", path)
+		}
+	}
+}
