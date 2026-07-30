@@ -59,7 +59,7 @@ Persistent flags accepted by every command.
 | `download` | Download media with the native engine (or yt-dlp) |
 | `extract` | Extract a specific stream via yt-dlp |
 | `sponsorblock` | List community SponsorBlock segments |
-| `thumbnail` | List or download a video's thumbnails |
+| `thumbnail` | List a video's thumbnails, or fetch the best one |
 | `chapters` | List a video's chapter markers |
 | `seed` | Load a worklist into the crawl queue (needs `--db`) |
 | `crawl` | Process the crawl queue with workers (needs `--db`) |
@@ -78,12 +78,15 @@ Persistent flags accepted by every command.
 | --- | --- |
 | `--captions` | List available caption tracks |
 | `--chapters` | List chapters |
-| `--formats` | List streaming formats |
+| `--formats` | Attach the stream list, one extra request |
 | `--related` | List related videos |
 | `--transcript` | Fetch and attach the transcript text |
 | `--lang` | Preferred caption language (default auto/English) |
 | `--no-player` | Skip `/player` (HTML-only, faster) |
 | `--raw` | Emit the full VideoResult as the value |
+
+`formats` is off by default and stays off, because it costs a mobile player request per video and a crawl of a thousand videos should not make a thousand extra calls nobody asked for.
+The watch page carries a stream list for free and a plain read still leaves it off: 29 formats nobody asked for bury the dozen fields the caller wanted.
 
 ## channel
 
@@ -187,7 +190,17 @@ The comment edges (`comments`, `commenter`) are served only when YouTube is not 
 
 ## formats
 
-`ytb formats <video-id|url> [--flags]`. Lists formats from `/player` streamingData, deduped by itag. Metadata only by default; pass `--urls` to resolve the deciphered, directly-fetchable stream URLs through the native engine.
+`ytb formats <video-id|url> [--flags]`. Lists formats from `/player` streamingData, deduped by itag, audio first then video then muxed. Metadata only by default; pass `--urls` to resolve the deciphered, directly-fetchable stream URLs through the native engine.
+
+The list is read from the ANDROID player, which is the only one that answers with plain URLs.
+On the watch page every adaptive format arrives with a `contentLength` and neither a `url` nor a `signatureCipher`, so there is nothing to fetch, and the read says so when it has to fall back to it.
+
+Under the table is a note naming the client that answered and when its URLs expire, and saying that fetching any of them without a `Range` header runs at 32 KiB/s where the same URL fetched in ranges runs at 4 MiB/s.
+It goes to stderr, so `-o json` stays a clean stream.
+A muxed format comes back from the mobile player with no `contentLength`, so its size column is empty and its note says `size unknown` rather than showing a 0 that reads as an empty file.
+
+The table shows eight columns and `-o json` carries the whole record: `kind`, `container` and `codec` parsed off the mime type, `average_bitrate`, `audio_channels`, `audio_sample_rate`, `approx_duration_ms`, `init_range` and `index_range` for a DASH reader, `last_modified` for when the rendition was encoded, the `url` when a mobile player answered, `expires_at` off the URL's own `expire`, and `is_throttled_unranged`, which is true on every format because it is a fact about googlevideo rather than about the format.
+A field that does not apply is absent rather than zero, so an audio format has no `width` and no `fps` instead of having them set to 0.
 
 | Flag | Meaning |
 | --- | --- |
@@ -260,16 +273,25 @@ The `--format` selector accepts a yt-dlp-style grammar: keywords (`best`, `worst
 
 ## thumbnail
 
-`ytb thumbnail <id|url> [--flags]`. Lists the standard thumbnail renditions, or downloads the best available one.
+`ytb thumbnail <id|url> [--flags]`. Lists the standard thumbnail renditions, or writes the best available one to disk.
+
+Each of the five standard names can be constructed for any video id and only some of them exist, so the list is HEADed before it is printed and a rendition that answers 404 is left out.
+A video with no `maxresdefault` answers that URL with a 1097 byte body that is still `Content-Type: image/jpeg`, so nothing but the status code separates a rendition from a placeholder.
 
 | Flag | Meaning |
 | --- | --- |
-| `--download` | Download the best available rendition |
-| `--out` | Output path or directory for `--download` |
+| `--fetch` | Write the best available rendition to disk |
+| `--unconfirmed` | List the constructed URLs without HEADing them |
+| `--out` | Output path or directory for `--fetch` |
 
 ## chapters
 
-`ytb chapters <id|url>`. Lists a video's chapter markers (position, start time, title). No notable flags beyond the globals.
+`ytb chapters <id|url>`. Lists a video's chapters: position, start time, title and origin. No notable flags beyond the globals.
+
+`origin` is a column because a macro marker and a timestamped description are two different things that produce the same list.
+`markers` means YouTube served a `macroMarkersListRenderer`, so the site itself treats these as chapters, draws them on the scrubber and has a preview frame for each.
+`description` means somebody typed `1:23 Verse 2` and the list is only as good as their typing.
+Both line layouts are read: the timestamp can come first, as in `0:00 Introduction`, or last, as in `Eyes To The Sky - 0:00:00`.
 
 ## seed
 
