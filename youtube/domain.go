@@ -62,6 +62,10 @@ func (Domain) Register(app *kit.App) {
 		Summary: "Resolve a channel to its header metadata",
 		URIType: "channel", Resolver: true,
 		Args: []kit.Arg{{Name: "ref", Help: "channel id, @handle, or URL"}}}, getChannel)
+	kit.Handle(app, kit.OpMeta{Name: "about", Group: "read", Single: true,
+		Summary: "Read a channel's about panel (links, country, join date, bio)",
+		URIType: "channel",
+		Args:    []kit.Arg{{Name: "ref", Help: "channel id, @handle, or URL"}}}, getChannelAbout)
 	kit.Handle(app, kit.OpMeta{Name: "playlist", Group: "read", Single: true,
 		Summary: "Resolve a playlist to its header metadata",
 		URIType: "playlist", Resolver: true,
@@ -301,6 +305,17 @@ func getChannel(ctx context.Context, in channelRef, emit func(*Channel) error) e
 		return errs.NotFound("channel %q not found", in.Ref)
 	}
 	return emit(ch)
+}
+
+func getChannelAbout(ctx context.Context, in channelRef, emit func(*ChannelAbout) error) error {
+	about, err := in.Client.FetchChannelAbout(ctx, in.Ref)
+	if err != nil {
+		return mapErr(err)
+	}
+	if about == nil {
+		return errs.NotFound("channel %q has no about panel", in.Ref)
+	}
+	return emit(about)
 }
 
 func getPlaylist(ctx context.Context, in playlistRef, emit func(*Playlist) error) error {
