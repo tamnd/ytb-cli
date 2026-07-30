@@ -31,7 +31,7 @@ func nodeRow(n *youtube.Node) Row {
 	case youtube.KindVideo:
 		v := n.Video
 		id = v.VideoID
-		who = v.ChannelName
+		who = v.ChannelTitle
 		summary = oneline(v.Title)
 		url = v.URL
 		if url == "" {
@@ -74,7 +74,7 @@ func videoRow(v youtube.Video) Row {
 	return Row{
 		Cols: []string{"id", "title", "channel", "duration", "views", "published", "url"},
 		Vals: []string{
-			v.VideoID, v.Title, v.ChannelName, v.DurationText,
+			v.VideoID, v.Title, v.ChannelTitle, v.DurationText,
 			i64a(v.ViewCount), v.PublishedText, v.URL,
 		},
 		Value: v,
@@ -101,19 +101,44 @@ func playlistRow(p youtube.Playlist) Row {
 	}
 }
 
+// formatRow renders one stream. The columns are the ones a person choosing a
+// format reads: what it is, what it plays as, how big it is, and whatever is odd
+// about it. mime and adaptive are gone from the table because kind, container and
+// codec say the same three things in a form that fits, and both are still in the
+// json.
 func formatRow(f youtube.VideoFormat) Row {
-	res := f.QualityLabel
-	if res == "" {
-		res = f.Quality
-	}
 	return Row{
-		Cols: []string{"itag", "mime", "quality", "fps", "bitrate", "size", "adaptive"},
+		Cols: []string{"itag", "kind", "container", "quality", "codec", "bitrate", "size", "note"},
 		Vals: []string{
-			itoa(f.ITag), f.MimeType, res, itoa(f.FPS),
-			i64a(f.Bitrate), i64a(f.ContentLength), boola(f.IsAdaptive),
+			itoa(f.ITag), f.Kind, f.Container, f.QualityText(), f.Codec,
+			bitrateText(f.Bitrate), sizeText(f.ContentLength), f.Note,
 		},
 		Value: f,
 	}
+}
+
+// bitrateText renders bits per second the way a codec table does: 129k, 4.3M.
+func bitrateText(bps int64) string {
+	switch {
+	case bps <= 0:
+		return ""
+	case bps >= 1_000_000:
+		return strconv.FormatFloat(float64(bps)/1_000_000, 'f', 1, 64) + "M"
+	case bps >= 1_000:
+		return strconv.FormatInt(bps/1_000, 10) + "k"
+	default:
+		return i64a(bps)
+	}
+}
+
+// sizeText renders a content length, and renders an absent one as nothing rather
+// than as 0B. See VideoFormat.Note: a muxed format has no contentLength on the
+// mobile player, and a 0 there would read as an empty file.
+func sizeText(n int64) string {
+	if n <= 0 {
+		return ""
+	}
+	return humanBytes(n)
 }
 
 func captionRow(t youtube.CaptionTrack) Row {

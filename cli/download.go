@@ -504,5 +504,8 @@ func humanBytes(n int64) string {
 		div *= unit
 		exp++
 	}
-	return fmt.Sprintf("%.1f%cB", float64(n)/float64(div), "KMGTPE"[exp])
+	// The divisor is 1024, so the unit is MiB and not MB. The two differ by 5% at
+	// megabytes and by 10% at gigabytes, which is the difference between a size that
+	// matches what the shell reports afterwards and one that does not.
+	return fmt.Sprintf("%.1f %ciB", float64(n)/float64(div), "KMGTPE"[exp])
 }
