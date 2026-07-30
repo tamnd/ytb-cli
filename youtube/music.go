@@ -7,6 +7,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/tamnd/ytb-cli/pkg/ytid"
 )
 
 const (
@@ -433,17 +435,21 @@ func parseMusicListItemPlaylist(r map[string]any) Album {
 		if alb.AlbumID != "" {
 			return
 		}
+		// A playlist browses under VL<playlistId>, and VL is routing rather than
+		// identity, so it comes off before the id is kept. The two endpoints spell the
+		// same playlist two ways: browseEndpoint carries the wire form, and
+		// watchPlaylistEndpoint carries it bare.
 		if ep, ok := m["browseEndpoint"].(map[string]any); ok {
 			bid := stringValue(ep["browseId"])
 			if strings.HasPrefix(bid, "VL") {
-				alb.AudioPlaylistID = strings.TrimPrefix(bid, "VL")
-				alb.AlbumID = bid
+				alb.AudioPlaylistID = ytid.StripWire(bid)
+				alb.AlbumID = alb.AudioPlaylistID
 			}
 		}
 		if wep, ok := m["watchPlaylistEndpoint"].(map[string]any); ok {
 			if pid := stringValue(wep["playlistId"]); pid != "" && alb.AudioPlaylistID == "" {
 				alb.AudioPlaylistID = pid
-				alb.AlbumID = "VL" + pid
+				alb.AlbumID = pid
 			}
 		}
 	})
@@ -847,12 +853,11 @@ func (c *Client) FetchMusicPlaylist(ctx context.Context, idOrURL string) (*Album
 		return nil, nil, errors.New("FetchMusicPlaylist: empty playlist ID")
 	}
 
-	// Playlists browse under VL<playlistId>.
-	browseID := rawID
-	if !strings.HasPrefix(rawID, "VL") {
-		browseID = "VL" + rawID
-	}
-	playlistID := strings.TrimPrefix(rawID, "VL")
+	// Playlists browse under VL<playlistId>. The prefix belongs to the request and
+	// nowhere else, so the browse form is built for the call and the record below
+	// keeps the bare id.
+	playlistID := ytid.StripWire(rawID)
+	browseID := ytid.WireID(playlistID)
 
 	it := NewInnerTube(c)
 	data, err := it.MusicBrowse(ctx, browseID, "", "")
@@ -861,7 +866,7 @@ func (c *Client) FetchMusicPlaylist(ctx context.Context, idOrURL string) (*Album
 	}
 
 	alb := &Album{
-		AlbumID:         browseID,
+		AlbumID:         playlistID,
 		AudioPlaylistID: playlistID,
 		URL:             musicBaseURL + "/playlist?list=" + playlistID,
 		AlbumType:       "Playlist",

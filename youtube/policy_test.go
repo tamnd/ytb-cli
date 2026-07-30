@@ -421,3 +421,33 @@ func TestContinuationTokenSearchIsNotPathWalking(t *testing.T) {
 		}
 	}
 }
+
+// TestOnlyYtidBuildsTheWireForm asserts nothing hand-builds a VL browseId.
+//
+// VL in front of a playlist id addresses the browse endpoint and means nothing
+// else: YouTube never shows it, and a record keyed VLUU... is a second node in the
+// graph for a playlist that already has one. Keeping the concatenation in one
+// function is what makes that checkable, and it is also what stops the other half
+// of the bug, a doubled VLVL on an id that already had the prefix.
+//
+// Reading the prefix is fine and stays fine, because responses carry the wire form
+// and it has to come off. Only writing it is the rule.
+func TestOnlyYtidBuildsTheWireForm(t *testing.T) {
+	for _, path := range repoFiles(t) {
+		if strings.HasSuffix(path, "_test.go") || strings.Contains(path, "pkg/ytid") {
+			continue
+		}
+		src, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatalf("read %s: %v", path, err)
+		}
+		for i, line := range strings.Split(string(src), "\n") {
+			if !strings.Contains(line, `"VL" +`) && !strings.Contains(line, `+ "VL"`) {
+				continue
+			}
+			t.Errorf("%s:%d builds a VL browseId by hand: %s\n"+
+				"Call ytid.WireID, which is idempotent, and keep the bare id on the record.",
+				path, i+1, strings.TrimSpace(line))
+		}
+	}
+}
