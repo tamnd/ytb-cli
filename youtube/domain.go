@@ -66,6 +66,11 @@ func (Domain) Register(app *kit.App) {
 		Summary: "Read a channel's about panel (links, country, join date, bio)",
 		URIType: "channel",
 		Args:    []kit.Arg{{Name: "ref", Help: "channel id, @handle, or URL"}}}, getChannelAbout)
+	// id makes no request at all. It is registered next to the reads because that
+	// is where somebody looks for it, and the record says so with needs_request.
+	kit.Handle(app, kit.OpMeta{Name: "id", Group: "read", Single: true,
+		Summary: "Classify any id, handle or URL, and derive what it implies",
+		Args:    []kit.Arg{{Name: "ref", Help: "any id, @handle, or URL"}}}, getID)
 	kit.Handle(app, kit.OpMeta{Name: "playlist", Group: "read", Single: true,
 		Summary: "Resolve a playlist to its header metadata",
 		URIType: "playlist", Resolver: true,
