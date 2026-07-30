@@ -136,8 +136,26 @@ func (c *Client) FetchChannelAbout(ctx context.Context, idOrURL string) (*Channe
 // response. It asks for the token under showEngagementPanelEndpoint, which
 // FindContinuationToken deliberately skips because for paging purposes an
 // engagement panel is a different list.
+//
+// The header is the second marker, and it is what makes this right on a channel
+// with shelves. An engagement panel is not one thing: @Computerphile's page holds
+// five, and three of them belong to a shelf on the featured tab titled "Brady
+// Haran's other channels", whose token answers with 25 KB of channel items and no
+// aboutChannelViewModel. The about panel is the one the header opens, reached from
+// the description preview and from the attribution suffix, and the two tokens under
+// there are equivalent.
+//
+// The panels are not labelled. Each carries an opaque tag and a header title, and
+// the about panel's title is the channel's own name rather than a word like About,
+// so there is nothing to match on but where the token hangs.
 func FindAboutToken(resp map[string]any) string {
-	return FindContinuationTokenUnder(resp, "showEngagementPanelEndpoint")
+	if t := FindContinuationTokenUnder(resp, "showEngagementPanelEndpoint", "pageHeaderViewModel"); t != "" {
+		return t
+	}
+	// A channel that YouTube still serves with the older header. The panel is opened
+	// from the header there too, so the requirement is the same and only the
+	// renderer's name is different.
+	return FindContinuationTokenUnder(resp, "showEngagementPanelEndpoint", "header")
 }
 
 // ParseChannelAbout reads aboutChannelViewModel out of a continuation response.

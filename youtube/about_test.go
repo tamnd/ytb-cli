@@ -112,6 +112,25 @@ func TestFindAboutTokenTakesTheEngagementPanel(t *testing.T) {
 	}
 }
 
+// TestFindAboutTokenIgnoresAShelfPanel is the @Computerphile case.
+//
+// Its page carries five showEngagementPanelEndpoints. Two are the about panel,
+// reached from the header, and three belong to a shelf on the featured tab titled
+// "Brady Haran's other channels". Asking for showEngagementPanelEndpoint alone took
+// the shelf, because /contents sorts before /header, and the about read came back
+// with 25 KB of channel items and no aboutChannelViewModel. The panels are not
+// labelled: each has an opaque tag, and the about panel's header title is the
+// channel's own name, so where the token hangs is the only thing to go on.
+func TestFindAboutTokenIgnoresAShelfPanel(t *testing.T) {
+	page := aboutPanelTree("TOK_ABOUT")
+	for k, v := range shelfPanelTree("TOK_SHELF") {
+		page[k] = v
+	}
+	if got := FindAboutToken(page); got != "TOK_ABOUT" {
+		t.Fatalf("about token = %q, want TOK_ABOUT: a shelf panel is an engagement panel too", got)
+	}
+}
+
 func TestUnwrapRedirect(t *testing.T) {
 	cases := map[string]string{
 		"https://www.youtube.com/redirect?event=channel_description&redir_token=ABC&q=https%3A%2F%2Frickastley.lnk.to%2FRaindrops": "https://rickastley.lnk.to/Raindrops",

@@ -87,15 +87,28 @@ func FindContinuationToken(root any) string {
 	return best
 }
 
-// FindContinuationTokenUnder returns the first token reached through marker,
-// ignoring the list and foreign rules. This is how the about panel is read: its
-// token sits under showEngagementPanelEndpoint, which FindContinuationToken is
-// right to skip and this is right to ask for.
-func FindContinuationTokenUnder(root any, marker string) string {
+// FindContinuationTokenUnder returns the first token whose path walked through
+// every one of markers, ignoring the list and foreign rules. This is how the about
+// panel is read: its token sits under showEngagementPanelEndpoint, which
+// FindContinuationToken is right to skip and this is right to ask for.
+//
+// More than one marker is how two panels of the same kind are told apart. One
+// marker is not always enough: @Computerphile's featured tab carries a shelf of
+// Brady Haran's other channels, and that shelf is an engagement panel too, so
+// asking for showEngagementPanelEndpoint alone found the shelf and the about read
+// came back with a list of channels.
+func FindContinuationTokenUnder(root any, markers ...string) string {
 	best := ""
 	bestPath := ""
 	for _, c := range FindContinuationTokens(root) {
-		if !hasMarker(c.Path, []string{marker}) {
+		missing := false
+		for _, m := range markers {
+			if !hasMarker(c.Path, []string{m}) {
+				missing = true
+				break
+			}
+		}
+		if missing {
 			continue
 		}
 		if bestPath == "" || c.Path < bestPath {

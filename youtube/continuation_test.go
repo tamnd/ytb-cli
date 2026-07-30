@@ -102,6 +102,28 @@ func aboutPanelTree(token string) map[string]any {
 	})
 }
 
+// shelfPanelTree is the other engagement panel on a channel page: a shelf whose
+// title opens a panel of its own. The path is the one measured on
+// @Computerphile's featured tab.
+func shelfPanelTree(token string) map[string]any {
+	return nest([]string{"contents", "twoColumnBrowseResultsRenderer", "tabs"}, []any{
+		map[string]any{"tabRenderer": nest([]string{
+			"content", "sectionListRenderer", "contents",
+		}, []any{
+			map[string]any{"itemSectionRenderer": map[string]any{"contents": []any{
+				map[string]any{"shelfRenderer": nest([]string{
+					"endpoint", "showEngagementPanelEndpoint", "engagementPanel",
+					"engagementPanelSectionListRenderer", "content", "sectionListRenderer", "contents",
+				}, []any{
+					map[string]any{"itemSectionRenderer": map[string]any{
+						"contents": []any{continuationItem(token)},
+					}},
+				})},
+			}}},
+		})},
+	})
+}
+
 func channelGridTree(token string) map[string]any {
 	return nest([]string{"contents", "twoColumnBrowseResultsRenderer", "tabs"}, []any{
 		map[string]any{"tabRenderer": nest([]string{"content", "richGridRenderer", "contents"},
