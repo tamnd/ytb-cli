@@ -1179,29 +1179,14 @@ func musicExtractThumbnail(r map[string]any) string {
 	return ""
 }
 
-// musicExtractContinuation pulls a continuation token from a response.
+// musicExtractContinuation pulls a continuation token from a music response.
+//
+// music.youtube.com is on the older renderers, so this used to look for
+// continuationItemRenderer and nextContinuationData and nothing else, and picked
+// between the two by map iteration order. The finder in continuation.go knows both
+// of those and the two newer shapes, and picks the same one every run.
 func musicExtractContinuation(root any) string {
-	var token string
-	walkJSON(root, func(m map[string]any) {
-		if token != "" {
-			return
-		}
-		if cir, ok := m["continuationItemRenderer"].(map[string]any); ok {
-			if ep, ok := cir["continuationEndpoint"].(map[string]any); ok {
-				if cmd, ok := ep["continuationCommand"].(map[string]any); ok {
-					if t := stringValue(cmd["token"]); t != "" {
-						token = t
-					}
-				}
-			}
-		}
-		if ncd, ok := m["nextContinuationData"].(map[string]any); ok {
-			if t := stringValue(ncd["continuation"]); t != "" && token == "" {
-				token = t
-			}
-		}
-	})
-	return token
+	return FindContinuationToken(root)
 }
 
 // musicCarouselTitle extracts the title from a musicCarouselShelfRenderer.

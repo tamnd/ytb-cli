@@ -37,7 +37,6 @@ func (c *Client) StreamCommunity(ctx context.Context, channel string, opt PageOp
 
 	processCommunityPage := func(resp map[string]any) (int, string) {
 		var count int
-		var nextToken string
 		walkJSON(resp, func(m map[string]any) {
 			if p := ParseCommunityPost(m, channelID); p != nil {
 				if opt.Max > 0 && total+count >= opt.Max {
@@ -48,17 +47,8 @@ func (c *Client) StreamCommunity(ctx context.Context, channel string, opt PageOp
 				}
 				count++
 			}
-			if cir, ok := m["continuationItemRenderer"].(map[string]any); ok {
-				if ep := mapValue(cir, "continuationEndpoint"); ep != nil {
-					if cmd := mapValue(ep, "continuationCommand"); cmd != nil {
-						if tok := stringValue(cmd["token"]); tok != "" && nextToken == "" {
-							nextToken = tok
-						}
-					}
-				}
-			}
 		})
-		return count, nextToken
+		return count, FindContinuationToken(resp)
 	}
 
 	batchCount, contToken := processCommunityPage(resp)

@@ -1624,25 +1624,15 @@ func parsePublishedText(root any) string {
 
 // --- Continuation token extractors ---
 
-// extractContinuationToken finds the first continuation token in a JSON tree
-// from continuationItemRenderer elements.
+// extractContinuationToken finds the token that pages the list in root.
+//
+// The search lives in continuation.go, which knows all four token shapes and
+// which markers mean "more of this list" rather than "start a different one".
+// This used to walk continuationItemRenderer.continuationEndpoint by hand, which
+// found one shape of four and, on a channel page, picked between the grid's token
+// and the about panel's by map iteration order.
 func extractContinuationToken(root any) string {
-	var token string
-	walkJSON(root, func(m map[string]any) {
-		if token != "" {
-			return
-		}
-		if cir, ok := m["continuationItemRenderer"].(map[string]any); ok {
-			if ep := mapValue(cir, "continuationEndpoint"); ep != nil {
-				if cmd := mapValue(ep, "continuationCommand"); cmd != nil {
-					if t := stringValue(cmd["token"]); t != "" {
-						token = t
-					}
-				}
-			}
-		}
-	})
-	return token
+	return FindContinuationToken(root)
 }
 
 // extractRelatedContinuationToken finds the continuation token in the secondaryResults section.
