@@ -26,7 +26,17 @@ type Client struct {
 
 	mu      sync.Mutex
 	lastReq time.Time
+
+	cfgCache *ytcfgCache
+	cache    *Cache
 }
+
+// SetCache attaches a disk cache. Every read goes through it keyed by URL plus
+// claimed client, so a WEB player response is never served to a caption read.
+func (c *Client) SetCache(cache *Cache) { c.cache = cache }
+
+// Cache returns the attached cache, which may be nil.
+func (c *Client) Cache() *Cache { return c.cache }
 
 // NewClient builds a Client from cfg.
 func NewClient(cfg Config) *Client {
@@ -59,6 +69,7 @@ func NewClient(cfg Config) *Client {
 		retries:    cfg.Retries,
 		hl:         cfg.HL,
 		gl:         cfg.GL,
+		cfgCache:   newYTCfgCache(),
 	}
 }
 
@@ -71,7 +82,21 @@ func (c *Client) GL() string { return c.gl }
 
 // Fetch GETs url with browser-like headers and the polite rate limit, retrying
 // transient 429/5xx responses with backoff.
+//
+// HTML reads go through the cache too, not only the InnerTube POSTs. A watch page
+// is 1.9 MB and a channel page the same, so they are the most expensive thing
+// this tool fetches and the most worth not fetching twice. They are keyed under
+// the WEB client, because that is who asked.
 func (c *Client) Fetch(ctx context.Context, url string) ([]byte, int, error) {
+	key := CacheKey{
+		Method: http.MethodGet,
+		URL:    c.localise(url),
+		Client: "WEB/html",
+	}
+	if status, body, ok := c.cache.Get(key); ok && status == 200 {
+		return body, status, nil
+	}
+
 	var lastErr error
 	attempts := c.retries + 1
 	if attempts < 1 {
@@ -87,14 +112,13 @@ func (c *Client) Fetch(ctx context.Context, url string) ([]byte, int, error) {
 			}
 		}
 		c.rateLimit()
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.localise(url), nil)
 		if err != nil {
 			return nil, 0, err
 		}
 		req.Header.Set("User-Agent", c.userAgents[rand.Intn(len(c.userAgents))])
-		req.Header.Set("Accept-Language", "en-US,en;q=0.9")
 		req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-		req.AddCookie(&http.Cookie{Name: "CONSENT", Value: "YES+"})
+		c.setLanguageHeaders(req)
 		resp, err := c.http.Do(req)
 		if err != nil {
 			lastErr = err
@@ -109,6 +133,9 @@ func (c *Client) Fetch(ctx context.Context, url string) ([]byte, int, error) {
 		if resp.StatusCode == 429 || resp.StatusCode >= 500 {
 			lastErr = fmt.Errorf("GET %s: HTTP %d", url, resp.StatusCode)
 			continue
+		}
+		if resp.StatusCode == 200 {
+			c.cache.Put(key, resp.StatusCode, body)
 		}
 		return body, resp.StatusCode, nil
 	}

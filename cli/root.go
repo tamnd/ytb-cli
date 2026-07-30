@@ -31,6 +31,7 @@ type builder struct {
 	yes      bool
 	ytDlpBin string
 	ffmpeg   string
+	cacheTTL string
 }
 
 // NewApp builds the kit application: identity, the youtube global flags, the
@@ -90,6 +91,9 @@ func (b *builder) globals(f *kit.FlagSet) {
 	f.BoolVarP(&b.yes, "yes", "y", false, "assume yes to prompts")
 	f.StringVar(&b.ytDlpBin, "yt-dlp-bin", "", "path to the yt-dlp binary (download --use-yt-dlp, transcript fallback)")
 	f.StringVar(&b.ffmpeg, "ffmpeg-bin", "", "path to ffmpeg (used to merge and convert when present)")
+	// --no-cache is a kit global already, and it lands on Config.NoCache. Only
+	// the ttl is ours.
+	f.StringVar(&b.cacheTTL, "cache-ttl", "15m", "how long a cached response is served before it is refetched")
 }
 
 // finalize folds the youtube globals onto the resolved Config: the worker count
@@ -107,6 +111,7 @@ func (b *builder) finalize(c *kit.Config) {
 	c.Extra["max-pages"] = itoa(b.maxPages)
 	c.Extra["yt-dlp-bin"] = b.ytDlpBin
 	c.Extra["ffmpeg-bin"] = b.ffmpeg
+	c.Extra["cache-ttl"] = b.cacheTTL
 	if b.yes {
 		c.Extra["yes"] = "true"
 	}

@@ -5,7 +5,9 @@ import (
 	"context"
 	"errors"
 	"os"
+	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/tamnd/any-cli/kit"
 	"github.com/tamnd/any-cli/kit/errs"
@@ -133,7 +135,46 @@ func newClient(_ context.Context, cfg kit.Config) (any, error) {
 	if gl := cfg.Extra["gl"]; gl != "" {
 		yc.GL = gl
 	}
-	return NewClient(yc), nil
+	c := NewClient(yc)
+	c.SetCache(NewCache(innertubeCacheDir(cfg), cacheTTL(cfg.Extra["cache-ttl"])))
+	return c, nil
+}
+
+// innertubeCacheDir picks where responses land. An empty path disables the cache,
+// which is what --no-cache gets.
+//
+// kit sets Config.CacheDir once from the default data directory and does not
+// recompute it when --data-dir moves, so --data-dir alone would leave the cache
+// behind in the old place. Deriving it from DataDir keeps the two together, which
+// is what a user passing --data-dir means.
+func innertubeCacheDir(cfg kit.Config) string {
+	if cfg.NoCache {
+		return ""
+	}
+	if cfg.DataDir != "" {
+		return filepath.Join(cfg.DataDir, "cache", "innertube")
+	}
+	if cfg.CacheDir != "" {
+		return filepath.Join(cfg.CacheDir, "innertube")
+	}
+	return ""
+}
+
+// cacheTTL reads the --cache-ttl flag. Zero or negative turns the cache off
+// rather than meaning "cache forever", because a user typing --cache-ttl 0 means
+// off.
+func cacheTTL(s string) time.Duration {
+	if s == "" {
+		return DefaultCacheTTL
+	}
+	d, err := time.ParseDuration(s)
+	if err != nil {
+		return DefaultCacheTTL
+	}
+	if d <= 0 {
+		return -1
+	}
+	return d
 }
 
 // --- inputs ---
