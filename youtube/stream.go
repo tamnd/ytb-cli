@@ -98,13 +98,15 @@ func (c *Client) StreamManifest(ctx context.Context, idOrURL string) (*StreamMan
 	}
 
 	it := NewInnerTube(c)
-	signatureTimestamp := c.signatureTimestampFor(ctx, playerURL)
 	visitorData := visitorDataFromPlayer(webPR)
 	if pageData != nil && pageData.VisitorData != "" {
 		visitorData = pageData.VisitorData
 	}
-	avr, _ := it.AndroidVRPlayer(ctx, videoID, visitorData, signatureTimestamp)
-	safariPR, _ := it.WebSafariPlayer(ctx, videoID, visitorData, signatureTimestamp)
+	// No signature timestamp: it exists to tell the server which base.js the
+	// client will use to solve a cipher, and this client solves none. The mobile
+	// players answer with plain URLs either way.
+	avr, _ := it.AndroidVRPlayer(ctx, videoID, visitorData, 0)
+	safariPR, _ := it.WebSafariPlayer(ctx, videoID, visitorData, 0)
 
 	responses := []map[string]any{avr, webPR, safariPR}
 	chosen := firstPlayerWithStreams(responses...)
@@ -138,25 +140,18 @@ func (c *Client) StreamManifest(ctx context.Context, idOrURL string) (*StreamMan
 	return m, nil
 }
 
-// ResolveStreamURL turns a stream into a fetchable googlevideo URL, deciphering
-// the signature and transforming the n parameter as needed.
-func (c *Client) ResolveStreamURL(ctx context.Context, m *StreamManifest, s *Stream) (string, error) {
-	// A plain URL with no known player can be returned as-is (n untransformed);
-	// it may be throttled but still downloads.
-	if m.playerURL == "" {
-		if s.url != "" {
-			return s.url, nil
-		}
-		return "", fmt.Errorf("format %d needs deciphering but no player JS was found", s.ITag)
+// ResolveStreamURL returns the fetchable googlevideo URL for a stream.
+//
+// Every format that reaches here came from a player response that carried a
+// plain signed `url`, because parseStream drops the ones that do not. A format
+// with only a `signatureCipher` is not resolvable without running YouTube's
+// player JavaScript, which this tool does not do, so it is refused by name
+// rather than half-handled.
+func (c *Client) ResolveStreamURL(_ context.Context, _ *StreamManifest, s *Stream) (string, error) {
+	if s.url != "" {
+		return s.url, nil
 	}
-	pc, err := c.cipherFor(ctx, m.playerURL)
-	if err != nil {
-		if s.url != "" {
-			return s.url, nil
-		}
-		return "", err
-	}
-	return pc.resolveURL(s)
+	return "", fmt.Errorf("format %d arrived with a signatureCipher and no url; ask a mobile client for this video", s.ITag)
 }
 
 func hasStreams(pr map[string]any) bool {

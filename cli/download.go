@@ -75,10 +75,11 @@ func newDownloadCmd() kit.Command {
 		Long: `Download videos with the built-in pure-Go engine.
 
 The native engine fetches streams through the ANDROID_VR client (no API key,
-no token), deciphers signatures and the throttling parameter, and downloads in
-parallel byte ranges. Merging separate video+audio tracks, audio conversion,
-and thumbnail embedding use ffmpeg when it is available; without ffmpeg the
-engine still downloads any single progressive or adaptive stream.
+no token), which answers with plain signed URLs, so there is nothing to
+decipher and no JavaScript to run. Downloads go out as parallel byte ranges.
+Merging separate video+audio tracks, audio conversion, and thumbnail embedding
+use ffmpeg when it is available; without ffmpeg the engine still downloads any
+single progressive or adaptive stream.
 
 Pass --use-yt-dlp to delegate to a yt-dlp binary instead.`,
 		Args: kit.MinimumNArgs(1),

@@ -26,9 +26,6 @@ type Client struct {
 
 	mu      sync.Mutex
 	lastReq time.Time
-
-	cipherMu    sync.Mutex
-	cipherCache map[string]*playerCipher // keyed by base.js player URL
 }
 
 // NewClient builds a Client from cfg.
