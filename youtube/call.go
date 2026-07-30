@@ -64,6 +64,12 @@ func (c *Client) Call(ctx context.Context, spec ClientSpec, verb string, body ma
 	if r := alertRefusal(resp, subject, verb); r != nil {
 		return nil, r
 	}
+	// And a refusal does not always arrive as an alert. The posts tab returns 200
+	// with no alerts at all and puts its no in a messageRenderer where the posts
+	// should be, so that shape is checked too.
+	if r := messageRefusal(resp, subject, verb); r != nil {
+		return nil, r
+	}
 	if r := playabilityRefusal(resp, subject, verb); r != nil {
 		return nil, r
 	}

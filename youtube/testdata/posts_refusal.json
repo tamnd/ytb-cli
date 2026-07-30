@@ -1,0 +1,49 @@
+{
+  "contents": {
+    "twoColumnBrowseResultsRenderer": {
+      "tabs": [
+        {
+          "tabRenderer": {
+            "title": "Posts",
+            "selected": true,
+            "endpoint": {
+              "commandMetadata": {"webCommandMetadata": {"url": "/@Computerphile/posts"}},
+              "browseEndpoint": {"browseId": "UC9-y-6csu5WGm29I7JiwpnA", "params": "EgVwb3N0c_IGBAoCSgA%3D"}
+            },
+            "content": {
+              "sectionListRenderer": {
+                "contents": [
+                  {
+                    "itemSectionRenderer": {
+                      "contents": [
+                        {
+                          "messageRenderer": {
+                            "text": {"runs": [{"text": "Posts aren't currently available on this device"}]},
+                            "trackingParams": "CCcQljsYACITCMe5s922-ZUDFfHjTAId2u8q6A==",
+                            "button": {
+                              "buttonRenderer": {
+                                "navigationEndpoint": {
+                                  "commandMetadata": {"webCommandMetadata": {"url": "https://support.google.com/youtube/?p=community_LML&hl=en"}},
+                                  "applicationHelpEndpoint": {"helpContext": "community_LML"}
+                                }
+                              }
+                            },
+                            "subtext": {
+                              "messageSubtextRenderer": {
+                                "text": {"runs": [{"text": "You can access Posts tab content from your desktop or other supported devices."}]}
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

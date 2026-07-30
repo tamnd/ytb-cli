@@ -149,9 +149,69 @@ func alertWarnings(resp map[string]any) []string {
 	return out
 }
 
+// messageRefusal finds a refusal that arrived as a messageRenderer where the
+// content should have been.
+//
+// A refusal does not always come as an alert. The posts tab is the case that
+// showed it: browsing @Computerphile's posts tab with the params off its own strip
+// selects the tab, returns 200 and 39 KB, carries no alerts at all, and puts
+// "Posts aren't currently available on this device" in a messageRenderer in place
+// of the posts. Read as content that is an empty list, and an empty list is a
+// claim that the channel has no posts, which is not what YouTube said.
+//
+// Only the two phrases measured in this renderer count, and not the whole
+// refusalPhrases list. A messageRenderer is how YouTube says ordinary things too,
+// including "No more results" and the placeholder title of a deleted entry, so
+// matching "Video unavailable" here would turn the end of a list or a gap in a
+// playlist into a failed read.
+//
+// The subtext is quoted alongside the text when there is one. On the posts tab it
+// reads "You can access Posts tab content from your desktop or other supported
+// devices.", which is the half of YouTube's answer that says what to do about it.
+var messageRefusalPhrases = []string{
+	// Measured on @Computerphile's posts tab, selected with the params off its own
+	// strip: 200, no alerts, this in place of the 30 posts the channel has.
+	"Posts aren't currently available on this device",
+	// Measured in the comment section of a watch page from this address, which is
+	// also where CommentsRestricted reads it.
+	"Restricted Mode has hidden comments",
+}
+
+func messageRefusal(resp map[string]any, subject, surface string) *Refusal {
+	var found string
+	walkJSON(resp, func(m map[string]any) {
+		if found != "" {
+			return
+		}
+		mr, ok := m["messageRenderer"].(map[string]any)
+		if !ok {
+			return
+		}
+		text := extractText(mr["text"])
+		matched := false
+		for _, p := range messageRefusalPhrases {
+			if strings.Contains(text, p) {
+				matched = true
+				break
+			}
+		}
+		if !matched {
+			return
+		}
+		if sub := extractText(mapValue(mapValue(mr, "subtext"), "messageSubtextRenderer")["text"]); sub != "" {
+			text += " " + sub
+		}
+		found = text
+	})
+	if found == "" {
+		return nil
+	}
+	return newRefusal(subject, surface, found)
+}
+
 // alertRenderers pulls every alert renderer out of a response. YouTube spells
-// this two ways, a bare `alertRenderer` and an `alertWithButtonRenderer` wrapped
-// in `alertWithButtonRenderer`, so both are collected.
+// this two ways, a bare `alertRenderer` and one wrapped in
+// `alertWithButtonRenderer`, so both are collected.
 func alertRenderers(resp map[string]any) []map[string]any {
 	var out []map[string]any
 	walkJSON(resp, func(m map[string]any) {

@@ -547,6 +547,22 @@ func mapErr(err error) error {
 		return nil
 	case errors.Is(err, ErrCommentsRestricted):
 		return errs.Unsupported("comments are hidden by Restricted Mode; YouTube applies this to some datacenter requests")
+	case IsRefusal(err):
+		// Exit 4 means YouTube answered and the answer was no, per doc 05 section 9,
+		// and the kit's kind for exit 4 is NeedAuth. That name fits most refusals,
+		// since Restricted Mode and an age gate both clear with cookies. The posts
+		// tab is the one where nothing clears it, and it still belongs at 4 rather
+		// than at 3, because 3 says the thing is not there and the posts are.
+		//
+		// The message is built from the Refusal rather than from err.Error(), which
+		// carries the call site's own prefix. "Community first page: browse
+		// UC9-y-6csu5WGm29I7JiwpnA:" in front of YouTube's sentence tells the reader
+		// nothing they asked about.
+		r, _ := AsRefusal(err)
+		if r.Remedy != "" {
+			return errs.NeedAuth("%s\n%s", r.Message, r.Remedy)
+		}
+		return errs.NeedAuth("%s", r.Message)
 	default:
 		return err
 	}
