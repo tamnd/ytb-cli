@@ -550,6 +550,11 @@ func mapErr(err error) error {
 	switch {
 	case err == nil, errors.Is(err, ErrStop):
 		return nil
+	case errors.Is(err, ErrChannelNotFound):
+		// Exit 6 per doc 05 section 9. A vanity URL that nobody claimed is a missing
+		// thing, not a failed read, and the difference matters to a script walking a
+		// list of addresses.
+		return errs.NotFound("%s", err)
 	case errors.Is(err, ErrCommentsRestricted):
 		return errs.Unsupported("comments are hidden by Restricted Mode; YouTube applies this to some datacenter requests")
 	case IsRefusal(err):

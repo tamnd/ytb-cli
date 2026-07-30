@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"math/rand"
@@ -14,6 +15,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/tamnd/ytb-cli/pkg/ytid"
 )
 
 // Client is the rate-limited HTTP front end for YouTube web + InnerTube.
@@ -201,23 +203,45 @@ func (c *Client) FetchTimedText(ctx context.Context, url string) ([]byte, error)
 	return body, nil
 }
 
+// ErrChannelNotFound is the answer when nothing lives at an address that looks
+// like a channel. Both paths have to come up empty before it is returned, and it
+// is a real answer rather than a failure: /c/Vsauce and /c/MrBeast6000 are both
+// 404, because neither channel ever took that vanity path, while /c/veritasium is
+// UCHnyfMqiRRG1u-2MsSQLbXA. The name in a legacy URL says nothing about whether
+// the URL exists.
+var ErrChannelNotFound = errors.New("no channel at that address")
+
 // ResolveChannelID resolves a handle, vanity name, or URL to a UC-style channel ID.
 // A UC... input is returned unchanged.
+//
+// The resolution goes through navigation/resolve_url, which answered in 1577 bytes
+// when this was measured against 1.9 MB for the channel page, and the answer is
+// cached like every other InnerTube call, so a handle costs one small request on the
+// first run and nothing after that. It handles all three alias forms: @handle,
+// /user/name and /c/name. The channel page read is still here as the fallback,
+// because resolve_url answers about the site's own routes and a URL that is not one
+// of those is better read than refused.
 func (c *Client) ResolveChannelID(ctx context.Context, input string) (string, error) {
-	if strings.HasPrefix(input, "UC") && !strings.Contains(input, "/") {
-		return input, nil
+	if id := ytid.Classify(input).ChannelID; id != "" {
+		return id, nil
+	}
+	if id, err := c.resolveChannelIDByURL(ctx, input); err == nil && id != "" {
+		return id, nil
 	}
 	channelURL := NormalizeChannelURL(input)
 	data, _, err := c.FetchPageData(ctx, channelURL)
 	if err != nil {
 		return "", fmt.Errorf("resolve channel %q: %w", input, err)
 	}
+	// Nothing came back, which is what YouTube's 404 page looks like from here after
+	// resolve_url has already said the address routes nowhere. That is not found
+	// rather than broken, and the exit code has to say so.
 	if data == nil || data.InitialData == nil {
-		return "", fmt.Errorf("resolve channel %q: empty page data", input)
+		return "", fmt.Errorf("resolve channel %q: %w", input, ErrChannelNotFound)
 	}
 	id, _ := data.InitialData.(map[string]any)
 	if id == nil {
-		return "", fmt.Errorf("resolve channel %q: no initial data", input)
+		return "", fmt.Errorf("resolve channel %q: %w", input, ErrChannelNotFound)
 	}
 	var channelID string
 	walkJSON(id, func(m map[string]any) {
@@ -232,7 +256,36 @@ func (c *Client) ResolveChannelID(ctx context.Context, input string) (string, er
 		}
 	})
 	if channelID == "" {
-		return "", fmt.Errorf("resolve channel %q: no channel ID found", input)
+		return "", fmt.Errorf("resolve channel %q: %w", input, ErrChannelNotFound)
+	}
+	return channelID, nil
+}
+
+// resolveChannelIDByURL asks navigation/resolve_url what a channel URL routes to.
+// The answer is an endpoint, and the browseId on it is the channel id.
+func (c *Client) resolveChannelIDByURL(ctx context.Context, input string) (string, error) {
+	// NormalizeChannelURL ends every URL with /videos, which is a tab rather than
+	// the channel, and resolve_url answers about the address it is given.
+	pageURL := strings.TrimSuffix(NormalizeChannelURL(input), "/videos")
+	resp, err := NewInnerTube(c).ResolveURL(ctx, pageURL)
+	if err != nil {
+		return "", err
+	}
+	var channelID string
+	walkJSON(resp, func(m map[string]any) {
+		if channelID != "" {
+			return
+		}
+		be, ok := m["browseEndpoint"].(map[string]any)
+		if !ok {
+			return
+		}
+		if id := stringValue(be["browseId"]); ytid.IsChannel(id) {
+			channelID = id
+		}
+	})
+	if channelID == "" {
+		return "", fmt.Errorf("resolve %s: the endpoint carries no channel id", pageURL)
 	}
 	return channelID, nil
 }
