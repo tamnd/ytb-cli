@@ -559,7 +559,7 @@ func exportWritePlaylistsIndex(playlists []Playlist, plItems map[string][]Video,
 	}
 	defer func() { _ = f.Close() }()
 
-	var totalVids int
+	var totalVids int64
 	var totalViews, totalDur int64
 	for _, p := range playlists {
 		totalVids += p.VideoCount
@@ -617,8 +617,8 @@ func exportWritePlaylistPage(p Playlist, items []Video, fileMap, plMap map[strin
 		_, _ = fmt.Fprintf(f, "> %s\n\n", strings.ReplaceAll(strings.TrimSpace(p.Description), "\n", "\n> "))
 	}
 	_, _ = fmt.Fprintf(f, "**%d videos**", p.VideoCount)
-	if p.LastUpdatedText != "" {
-		_, _ = fmt.Fprintf(f, " - Last updated %s", p.LastUpdatedText)
+	if p.UpdatedText != "" {
+		_, _ = fmt.Fprintf(f, " - Last updated %s", p.UpdatedText)
 	}
 	_, _ = fmt.Fprintf(f, "\n\n")
 

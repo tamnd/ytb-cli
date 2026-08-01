@@ -49,7 +49,7 @@ func nodeRow(n *youtube.Node) Row {
 	case youtube.KindPlaylist:
 		p := n.Playlist
 		id = p.PlaylistID
-		who = p.ChannelName
+		who = p.ChannelTitle
 		summary = oneline(p.Title)
 		url = p.URL
 	case youtube.KindComment:
@@ -95,7 +95,7 @@ func playlistRow(p youtube.Playlist) Row {
 	return Row{
 		Cols: []string{"id", "title", "channel", "videos", "url"},
 		Vals: []string{
-			p.PlaylistID, p.Title, p.ChannelName, itoa(p.VideoCount), p.URL,
+			p.PlaylistID, p.Title, p.ChannelTitle, itoa(int(p.VideoCount)), p.URL,
 		},
 		Value: p,
 	}

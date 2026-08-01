@@ -168,7 +168,7 @@ func (a *App) expandPlaylist(ctx context.Context, arg string, sel *youtube.ItemS
 	opt := a.PageOptions(false)
 	err = a.Client.StreamPlaylistItems(ctx, arg, opt, func(pv youtube.PlaylistVideo, _ youtube.Video) error {
 		index++
-		if !sel.Selects(index, pl.VideoCount) {
+		if !sel.Selects(index, int(pl.VideoCount)) {
 			return nil
 		}
 		out = append(out, downloadTarget{

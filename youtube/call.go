@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -133,12 +134,38 @@ func (c *Client) doInnerTube(ctx context.Context, spec ClientSpec, url string, b
 			// and retrying it three times is three ways to be wrong. YouTube's
 			// 400 body names no field, so the caller's subject is the only clue
 			// the user gets and it has to be a good one.
-			return nil, fmt.Errorf("POST %s as %s: HTTP %d: %s", url, spec.Name, resp.StatusCode, firstLine(data, 200))
+			return nil, &statusError{
+				code: resp.StatusCode,
+				msg:  fmt.Sprintf("POST %s as %s: HTTP %d: %s", url, spec.Name, resp.StatusCode, firstLine(data, 200)),
+			}
 		}
 		c.cache.Put(key, resp.StatusCode, data)
 		return data, nil
 	}
 	return nil, lastErr
+}
+
+// statusError carries the HTTP status alongside the message, for the caller that
+// wants to tell one failure from another rather than print both the same way.
+//
+// A browse of a playlist id that does not exist answers 404 and a browse of an
+// id that is not a playlist id at all answers 400. The first is "no playlist
+// there" and the second is "that is not an address", and they are worth
+// different exit codes.
+type statusError struct {
+	code int
+	msg  string
+}
+
+func (e *statusError) Error() string { return e.msg }
+
+// httpStatus reports the status an error carries, or 0 when it carries none.
+func httpStatus(err error) int {
+	var se *statusError
+	if errors.As(err, &se) {
+		return se.code
+	}
+	return 0
 }
 
 // playabilityRefusal turns a non-OK playabilityStatus into a refusal. A player

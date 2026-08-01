@@ -211,6 +211,11 @@ func (c *Client) FetchTimedText(ctx context.Context, url string) ([]byte, error)
 // the URL exists.
 var ErrChannelNotFound = errors.New("no channel at that address")
 
+// ErrPlaylistNotFound is the answer when a browse of VL<id> comes back with
+// neither header shape on it and no alert saying why. A deleted playlist and a
+// fabricated id both land here.
+var ErrPlaylistNotFound = errors.New("no playlist at that address")
+
 // ResolveChannelID resolves a handle, vanity name, or URL to a UC-style channel ID.
 // A UC... input is returned unchanged.
 //

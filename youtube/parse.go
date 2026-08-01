@@ -512,66 +512,6 @@ func ParseContinuationVideos(data map[string]any) ([]Video, string) {
 	return dedupeVideos(videos), contToken
 }
 
-// ParsePlaylistPage parses ytInitialData from a playlist HTML page.
-func ParsePlaylistPage(data *PageData, pageURL string) (*Playlist, []PlaylistVideo, []Video, string, error) {
-	playlistID := extractPlaylistID(pageURL)
-	if playlistID == "" {
-		return nil, nil, nil, "", fmt.Errorf("cannot extract playlist id")
-	}
-	p := &Playlist{
-		PlaylistID: playlistID,
-		URL:        NormalizePlaylistURL(playlistID),
-		FetchedAt:  time.Now(),
-	}
-	walkJSON(data.InitialData, func(m map[string]any) {
-		if r, ok := m["playlistHeaderRenderer"].(map[string]any); ok {
-			p.Title = firstNonEmpty(p.Title, extractText(r["title"]))
-			p.Description = firstNonEmpty(p.Description, extractText(r["descriptionText"]))
-			p.ChannelName = firstNonEmpty(p.ChannelName, extractText(r["ownerText"]))
-			p.ViewCountText = firstNonEmpty(p.ViewCountText, extractText(r["viewCountText"]))
-			p.LastUpdatedText = firstNonEmpty(p.LastUpdatedText, extractText(r["lastUpdatedText"]))
-			p.VideoCount = int(parseCountText(extractText(r["numVideosText"])))
-		}
-		if r, ok := m["playlistSidebarPrimaryInfoRenderer"].(map[string]any); ok {
-			p.Title = firstNonEmpty(p.Title, extractText(r["title"]))
-		}
-		if r, ok := m["playlistSidebarSecondaryInfoRenderer"].(map[string]any); ok {
-			p.ChannelName = firstNonEmpty(p.ChannelName, extractText(r["videoOwner"]))
-		}
-		if r, ok := m["pageHeaderViewModel"].(map[string]any); ok {
-			if dt := mapValue(mapValue(r, "title"), "dynamicTextViewModel"); dt != nil {
-				p.Title = firstNonEmpty(p.Title, stringValue(mapValue(dt, "text")["content"]))
-			}
-			p.ChannelName = firstNonEmpty(p.ChannelName, pageHeaderAvatarName(r))
-			for _, s := range pageHeaderMetadataParts(r) {
-				switch {
-				case strings.Contains(s, "video"):
-					if c := int(parseCountText(s)); c > 0 && p.VideoCount == 0 {
-						p.VideoCount = c
-					}
-				case strings.Contains(s, " view"):
-					p.ViewCountText = firstNonEmpty(p.ViewCountText, s)
-				case strings.Contains(s, "pdated"):
-					p.LastUpdatedText = firstNonEmpty(p.LastUpdatedText, s)
-				}
-			}
-		}
-	})
-	videos, edges := parsePlaylistVideos(data.InitialData, playlistID)
-	contToken := extractContinuationToken(data.InitialData)
-	if p.Title == "" && len(videos) == 0 {
-		return nil, nil, nil, "", fmt.Errorf("playlist metadata not found")
-	}
-	return p, edges, dedupeVideos(videos), contToken, nil
-}
-
-// ParseContinuationPlaylistVideos extracts playlist videos from a /browse continuation.
-func ParseContinuationPlaylistVideos(data map[string]any, playlistID string) ([]Video, []PlaylistVideo, string) {
-	videos, edges := parsePlaylistVideos(data, playlistID)
-	contToken := extractContinuationToken(data)
-	return dedupeVideos(videos), edges, contToken
-}
-
 // ParseSearchPage parses a search results HTML page.
 func ParseSearchPage(data *PageData, query string) ([]SearchResult, []Video, []Channel, []Playlist, string, error) {
 	var (
@@ -596,13 +536,14 @@ func ParseSearchPage(data *PageData, query string) ([]SearchResult, []Video, []C
 			}
 		}
 		if r, ok := m["playlistRenderer"].(map[string]any); ok {
-			p := Playlist{
-				PlaylistID:  stringValue(r["playlistId"]),
-				Title:       extractText(r["title"]),
-				ChannelName: extractText(r["longBylineText"]),
-				VideoCount:  int(parseCountText(extractText(r["videoCountText"]))),
-				URL:         joinURL(endpointURL(r["navigationEndpoint"])),
-				FetchedAt:   time.Now(),
+			p := newPlaylist(stringValue(r["playlistId"]), SurfaceInnerTube)
+			p.Title = extractText(r["title"])
+			p.ChannelTitle = extractText(r["longBylineText"])
+			p.ChannelID = ownerChannelID(r)
+			p.VideoCountText = extractText(r["videoCountText"])
+			p.VideoCount = parseCountText(p.VideoCountText)
+			if u := joinURL(endpointURL(r["navigationEndpoint"])); u != "" {
+				p.URL = u
 			}
 			if p.PlaylistID != "" {
 				playlists = append(playlists, p)
@@ -653,13 +594,14 @@ func ParseInnerTubeSearchResults(data map[string]any) ([]Video, []Channel, []Pla
 			}
 		}
 		if r, ok := m["playlistRenderer"].(map[string]any); ok {
-			p := Playlist{
-				PlaylistID:  stringValue(r["playlistId"]),
-				Title:       extractText(r["title"]),
-				ChannelName: extractText(r["longBylineText"]),
-				VideoCount:  int(parseCountText(extractText(r["videoCountText"]))),
-				URL:         joinURL(endpointURL(r["navigationEndpoint"])),
-				FetchedAt:   time.Now(),
+			p := newPlaylist(stringValue(r["playlistId"]), SurfaceInnerTube)
+			p.Title = extractText(r["title"])
+			p.ChannelTitle = extractText(r["longBylineText"])
+			p.ChannelID = ownerChannelID(r)
+			p.VideoCountText = extractText(r["videoCountText"])
+			p.VideoCount = parseCountText(p.VideoCountText)
+			if u := joinURL(endpointURL(r["navigationEndpoint"])); u != "" {
+				p.URL = u
 			}
 			if p.PlaylistID != "" {
 				playlists = append(playlists, p)
@@ -1190,6 +1132,12 @@ func parseShortsLockupViewModel(r map[string]any) Video {
 	v.Thumbnails = ParseThumbnails(mapValue(mapValue(mapValue(r, "thumbnailViewModel"), "thumbnailViewModel"), "image")["sources"])
 	v.ThumbnailURL = largestThumbnail(v.Thumbnails)
 	lockupMisses(&v)
+	// A shorts row names nobody. There is no byline, no avatar and no browse
+	// endpoint anywhere in the subtree, on the Shorts tab or in a search shelf, so
+	// the owner is only known when the surrounding page states it. That is a fact
+	// about the shape and it is said rather than left to look like a video with no
+	// uploader.
+	v.miss("a shorts row carries no owner: no byline, no avatar and no channel link anywhere on it")
 	return v
 }
 
@@ -1234,172 +1182,6 @@ func a11yViewCount(label string) (string, int64) {
 	return strings.TrimSpace(m[0]), int64(f * scale)
 }
 
-// parseLockupViewModel parses YouTube's newer lockupViewModel format.
-func parseLockupViewModel(r map[string]any) Video {
-	contentType := stringValue(r["contentType"])
-	if contentType != "" && contentType != "LOCKUP_CONTENT_TYPE_VIDEO" {
-		return Video{}
-	}
-	videoID := stringValue(r["contentId"])
-	if videoID == "" {
-		return Video{}
-	}
-	v := *NewVideo(videoID, SurfaceInnerTube)
-	if meta := mapValue(r, "metadata"); meta != nil {
-		if lm := mapValue(meta, "lockupMetadataViewModel"); lm != nil {
-			if title := mapValue(lm, "title"); title != nil {
-				v.Title = stringValue(title["content"])
-			}
-			if md := mapValue(lm, "metadata"); md != nil {
-				if cr := mapValue(md, "contentMetadataViewModel"); cr != nil {
-					if parts, ok := cr["metadataRows"].([]any); ok {
-						for _, row := range parts {
-							if rm, ok := row.(map[string]any); ok {
-								if mps, ok := rm["metadataParts"].([]any); ok {
-									for _, mp := range mps {
-										if mpm, ok := mp.(map[string]any); ok {
-											if txt := mapValue(mpm, "text"); txt != nil {
-												content := stringValue(txt["content"])
-												switch {
-												case strings.Contains(content, " view") || strings.Contains(content, " watching"):
-													// Full format: "101K views", "1.2K watching".
-													v.ViewCountText = content
-													v.ViewCount = parseCountText(content)
-													if strings.Contains(content, " watching") {
-														v.LiveState = "live"
-													}
-												case isRelativeTimeText(content):
-													v.PublishedText = content
-												case looksLikeCount(content):
-													// Compact continuation format: a bare "101K" with no "views" word.
-													if v.ViewCount == 0 {
-														v.ViewCountText = content
-														v.ViewCount = parseCountText(content)
-													}
-												case v.ChannelTitle == "":
-													v.ChannelTitle = content
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	v.ChannelID = lockupChannelID(r)
-	if img := mapValue(r, "contentImage"); img != nil {
-		if tm := mapValue(img, "thumbnailViewModel"); tm != nil {
-			if image := mapValue(tm, "image"); image != nil {
-				v.Thumbnails = ParseThumbnails(image["sources"])
-				v.ThumbnailURL = largestThumbnail(v.Thumbnails)
-			}
-			if overlays, ok := tm["overlays"].([]any); ok {
-				for _, o := range overlays {
-					if om, ok := o.(map[string]any); ok {
-						if bov := mapValue(om, "thumbnailBottomOverlayViewModel"); bov != nil {
-							if badges, ok := bov["badges"].([]any); ok {
-								for _, b := range badges {
-									if bm, ok := b.(map[string]any); ok {
-										if tbvm := mapValue(bm, "thumbnailBadgeViewModel"); tbvm != nil {
-											text := stringValue(tbvm["text"])
-											if text != "" && strings.Contains(text, ":") {
-												v.DurationText = text
-												v.DurationSeconds = parseDurationSeconds(text)
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	lockupMisses(&v)
-	return v
-}
-
-// lockupChannelID digs the uploader's channel id out of a lockupViewModel.
-//
-// It is not a field. The new view models put every link in a commandRuns entry
-// attached to the text it decorates, so the id is under the channel name's own tap
-// command, and the avatar stack carries a second copy. Both are checked because a
-// search lockup has the avatar and an uploads lockup has neither reliably.
-func lockupChannelID(r map[string]any) string {
-	var found string
-	walkJSON(r, func(m map[string]any) {
-		if found != "" {
-			return
-		}
-		if id := stringValue(mapValue(m, "browseEndpoint")["browseId"]); strings.HasPrefix(id, "UC") {
-			found = id
-		}
-	})
-	return found
-}
-
-// parseLockupPlaylist parses a lockupViewModel with LOCKUP_CONTENT_TYPE_PLAYLIST.
-func parseLockupPlaylist(r map[string]any) Playlist {
-	contentType := stringValue(r["contentType"])
-	if contentType != "LOCKUP_CONTENT_TYPE_PLAYLIST" {
-		return Playlist{}
-	}
-	p := Playlist{
-		PlaylistID: stringValue(r["contentId"]),
-		FetchedAt:  time.Now(),
-	}
-	if p.PlaylistID == "" {
-		return Playlist{}
-	}
-	p.URL = BaseURL + "/playlist?list=" + p.PlaylistID
-
-	if meta := mapValue(r, "metadata"); meta != nil {
-		if lm := mapValue(meta, "lockupMetadataViewModel"); lm != nil {
-			if title := mapValue(lm, "title"); title != nil {
-				p.Title = stringValue(title["content"])
-			}
-			if md := mapValue(lm, "metadata"); md != nil {
-				if cr := mapValue(md, "contentMetadataViewModel"); cr != nil {
-					if parts, ok := cr["metadataRows"].([]any); ok {
-						for _, row := range parts {
-							if rm, ok := row.(map[string]any); ok {
-								if mps, ok := rm["metadataParts"].([]any); ok {
-									for _, mp := range mps {
-										if mpm, ok := mp.(map[string]any); ok {
-											if txt := mapValue(mpm, "text"); txt != nil {
-												content := stringValue(txt["content"])
-												if strings.Contains(strings.ToLower(content), "updated") {
-													p.LastUpdatedText = content
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	if img := mapValue(r, "contentImage"); img != nil {
-		walkJSON(img, func(m map[string]any) {
-			if tbvm := mapValue(m, "thumbnailBadgeViewModel"); tbvm != nil {
-				text := stringValue(tbvm["text"])
-				if text != "" {
-					p.VideoCount = int(parseCountText(text))
-				}
-			}
-		})
-	}
-	return p
-}
-
 // parsePlaylistsFromTree walks a JSON tree and extracts Playlist items.
 func parsePlaylistsFromTree(root any) []Playlist {
 	var out []Playlist
@@ -1411,12 +1193,12 @@ func parsePlaylistsFromTree(root any) []Playlist {
 			}
 		}
 		if r, ok := m["gridPlaylistRenderer"].(map[string]any); ok {
-			p := Playlist{
-				PlaylistID: stringValue(r["playlistId"]),
-				Title:      extractText(r["title"]),
-				VideoCount: int(parseCountText(extractText(r["videoCountText"]))),
-				URL:        joinURL(endpointURL(r["navigationEndpoint"])),
-				FetchedAt:  time.Now(),
+			p := newPlaylist(stringValue(r["playlistId"]), SurfaceInnerTube)
+			p.Title = extractText(r["title"])
+			p.VideoCountText = extractText(r["videoCountText"])
+			p.VideoCount = parseCountText(p.VideoCountText)
+			if u := joinURL(endpointURL(r["navigationEndpoint"])); u != "" {
+				p.URL = u
 			}
 			if p.PlaylistID != "" {
 				out = append(out, p)
@@ -1431,58 +1213,6 @@ func ParseContinuationPlaylists(data map[string]any) ([]Playlist, string) {
 	playlists := parsePlaylistsFromTree(data)
 	contToken := extractContinuationToken(data)
 	return dedupePlaylists(playlists), contToken
-}
-
-func parsePlaylistVideos(root any, playlistID string) ([]Video, []PlaylistVideo) {
-	var (
-		videos []Video
-		edges  []PlaylistVideo
-		seen   = map[string]struct{}{}
-		pos    = 0
-	)
-	add := func(v Video) {
-		if v.VideoID == "" {
-			return
-		}
-		if _, ok := seen[v.VideoID]; ok {
-			return
-		}
-		seen[v.VideoID] = struct{}{}
-		pos++
-		videos = append(videos, v)
-		edges = append(edges, PlaylistVideo{PlaylistID: playlistID, VideoID: v.VideoID, Position: pos})
-	}
-	walkJSON(root, func(m map[string]any) {
-		if r, ok := m["playlistVideoRenderer"].(map[string]any); ok {
-			videoID := stringValue(r["videoId"])
-			if videoID == "" {
-				return
-			}
-			v := *NewVideo(videoID, SurfaceInnerTube)
-			v.Title = extractText(r["title"])
-			v.ChannelTitle = extractText(r["shortBylineText"])
-			v.ChannelID = ownerChannelID(r)
-			v.DurationText = extractText(r["lengthText"])
-			v.DurationSeconds = parseDurationSeconds(v.DurationText)
-			v.Thumbnails = ParseThumbnails(mapValue(r, "thumbnail")["thumbnails"])
-			v.ThumbnailURL = largestThumbnail(v.Thumbnails)
-			lockupMisses(&v)
-			add(v)
-		}
-		// Modern playlist pages render items as lockupViewModel rather than
-		// playlistVideoRenderer.
-		if r, ok := m["lockupViewModel"].(map[string]any); ok {
-			add(parseLockupViewModel(r))
-		}
-		// A shorts playlist renders none of the above. UUSHuAXFkgsw1L7xaCfnd5JJOw
-		// says 294 videos in its header and its page carries 98 shortsLockupViewModel
-		// and not one playlistVideoRenderer, so a reader that knows only the first
-		// two returns an empty playlist for a channel with 294 shorts in it.
-		if r, ok := m["shortsLockupViewModel"].(map[string]any); ok {
-			add(parseShortsLockupViewModel(r))
-		}
-	})
-	return videos, edges
 }
 
 func parseRelatedVideos(root any, videoID string) []RelatedVideo {

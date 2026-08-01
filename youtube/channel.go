@@ -142,7 +142,7 @@ func (c *Client) attachCounts(ctx context.Context, ch *Channel) {
 			ch.miss("playlist %s did not answer, so its count is 0 and the check below is not a check", pair.id)
 			continue
 		}
-		*pair.out = pl.VideoCount
+		*pair.out = int(pl.VideoCount)
 		ch.addSource(NormalizePlaylistURL(pair.id))
 	}
 	counts.Agrees = counts.Videos+counts.Shorts+counts.Streams == counts.Uploads
@@ -430,8 +430,8 @@ func (c *Client) StreamChannelPlaylists(ctx context.Context, idOrURL string, opt
 		if p.ChannelID == "" {
 			p.ChannelID = chID
 		}
-		if p.ChannelName == "" {
-			p.ChannelName = chTitle
+		if p.ChannelTitle == "" {
+			p.ChannelTitle = chTitle
 		}
 		if err := emit(p); err != nil {
 			return err

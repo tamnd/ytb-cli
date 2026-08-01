@@ -118,7 +118,7 @@ func newFakeGraph() *fakeGraph {
 			"UCb": {ChannelID: "UCb", Handle: "@beta", Title: "Beta"},
 		},
 		playlists: map[string]*Playlist{
-			"PLaaaaaaaaaa": {PlaylistID: "PLaaaaaaaaaa", Title: "Mix", ChannelID: "UCa", ChannelName: "Alpha"},
+			"PLaaaaaaaaaa": {PlaylistID: "PLaaaaaaaaaa", Title: "Mix", ChannelID: "UCa", ChannelTitle: "Alpha"},
 		},
 		uploads: map[string][]Video{
 			"UCa": {{VideoID: "vid1", Title: "First", ChannelID: "UCa"}, {VideoID: "vid3", Title: "Third", ChannelID: "UCa"}},

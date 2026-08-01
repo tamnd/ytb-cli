@@ -113,6 +113,13 @@ func TestParseLockupViewModelCompactCounts(t *testing.T) {
 
 // TestParseLockupViewModelFullCounts verifies the HTML-page lockup format, where
 // the view count and relative time carry their unit words.
+//
+// The owner part carries a commandRun through to the channel's browseEndpoint,
+// which is what identifies it as the owner. That is not a hopeful reading of the
+// shape: a census over 299 video lockups on five live responses, from a channel's
+// uploads, three playlists and a search, found the run on every single one. So the
+// channel name is read from its link and never from "the first fragment nothing
+// else matched".
 func TestParseLockupViewModelFullCounts(t *testing.T) {
 	r := map[string]any{
 		"contentType": "LOCKUP_CONTENT_TYPE_VIDEO",
@@ -123,11 +130,21 @@ func TestParseLockupViewModelFullCounts(t *testing.T) {
 					"contentMetadataViewModel": map[string]any{
 						"metadataRows": []any{
 							map[string]any{"metadataParts": []any{
-								map[string]any{"text": map[string]any{"content": "Some Channel"}},
+								map[string]any{"text": map[string]any{
+									"content": "Some Channel",
+									"commandRuns": []any{map[string]any{
+										"startIndex": 0.0,
+										"length":     12.0,
+										"onTap": map[string]any{"innertubeCommand": map[string]any{
+											"browseEndpoint": map[string]any{"browseId": "UCuAXFkgsw1L7xaCfnd5JJOw"},
+										}},
+									}},
+								}},
 							}},
 							map[string]any{"metadataParts": []any{
 								map[string]any{"text": map[string]any{"content": "1.2M views"}},
 								map[string]any{"text": map[string]any{"content": "3 months ago"}},
+								map[string]any{"text": map[string]any{"content": "Something YouTube has not shipped yet"}},
 							}},
 						},
 					},
@@ -144,6 +161,15 @@ func TestParseLockupViewModelFullCounts(t *testing.T) {
 	}
 	if v.ChannelTitle != "Some Channel" {
 		t.Errorf("ChannelTitle = %q, want %q", v.ChannelTitle, "Some Channel")
+	}
+	if v.ChannelID != "UCuAXFkgsw1L7xaCfnd5JJOw" {
+		t.Errorf("ChannelID = %q, want the id off the owner's own tap command", v.ChannelID)
+	}
+	// The point of the catch-all: a fragment this parser does not recognise is kept
+	// verbatim rather than dropped, so a shift in what YouTube renders shows up in
+	// the output as an unclassified string instead of silently going missing.
+	if len(v.MetadataParts) != 1 || v.MetadataParts[0] != "Something YouTube has not shipped yet" {
+		t.Errorf("MetadataParts = %q, want the unrecognised fragment kept", v.MetadataParts)
 	}
 }
 

@@ -320,8 +320,8 @@ func (s *Store) UpsertPlaylist(p Playlist) error {
 		video_count, view_count_text, last_updated_text, url, fetched_at
 	) VALUES (?,?,?,?,?,?,?,?,?,?)`,
 		p.PlaylistID, storeNullStr(p.Title), storeNullStr(p.Description),
-		storeNullStr(p.ChannelID), storeNullStr(p.ChannelName),
-		p.VideoCount, storeNullStr(p.ViewCountText), storeNullStr(p.LastUpdatedText),
+		storeNullStr(p.ChannelID), storeNullStr(p.ChannelTitle),
+		p.VideoCount, storeNullStr(p.ViewCountText), storeNullStr(p.UpdatedText),
 		storeNullStr(p.URL), storeTime(p.FetchedAt),
 	)
 	return err
@@ -845,9 +845,9 @@ func (s *Store) storeGetPlaylistsByChannel(channelID, channelName string) ([]Pla
 		var p Playlist
 		if err := rows.Scan(
 			&p.PlaylistID, &p.Title, &p.Description,
-			&p.ChannelID, &p.ChannelName,
+			&p.ChannelID, &p.ChannelTitle,
 			&p.VideoCount, &p.ViewCountText,
-			&p.LastUpdatedText, &p.URL,
+			&p.UpdatedText, &p.URL,
 		); err != nil {
 			return out, err
 		}

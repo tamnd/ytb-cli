@@ -2,6 +2,7 @@ package youtube
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -146,6 +147,29 @@ type Video struct {
 	// filled only by --microdata. It is a second opinion and never a replacement:
 	// the markup is generated for crawlers and rounds where the payload does not.
 	Microdata *Microdata `json:"microdata,omitempty" table:"-"`
+
+	// --- listing rows, doc 02 section 4.2 ---
+
+	// Badges are the thumbnail overlay badges a listing row carries, verbatim:
+	// LIVE, New, 4K, CC, a members-only marker. The duration badge is not in here,
+	// it is DurationText.
+	Badges []string `json:"badges,omitempty" table:"-"`
+	// MetadataParts is the catch-all. A lockup's metadata is a list of rendered
+	// fragments with no field names on them, and every fragment this read could not
+	// classify is kept here verbatim rather than dropped. A new fragment shows up in
+	// the output as an unclassified string instead of vanishing.
+	MetadataParts []string `json:"metadata_parts,omitempty" table:"-"`
+
+	// --- playlist membership, doc 03 section 4 ---
+
+	// Position is where this video sits in the playlist that was read, one based,
+	// and is only set by ytb items. The same video can appear twice in one playlist
+	// and position is the only thing telling the two apart.
+	Position int `json:"position,omitempty" table:"pos"`
+	// SetVideoID is the per-membership id YouTube needs to remove or reorder an
+	// entry. The old playlistVideoRenderer carried it and the lockupViewModel that
+	// replaced it does not, so at tier 0 it is now always empty and missed says so.
+	SetVideoID string `json:"set_video_id,omitempty" table:"-"`
 
 	Envelope
 }
@@ -444,18 +468,85 @@ type ByteRange struct {
 	End   int64 `json:"end"`
 }
 
-// Playlist is one playlist's header.
+// Playlist is one playlist's header. Doc 03 section 4.
+//
+// The header is not one block. YouTube serves a playlist page under one of two
+// shapes depending on how the playlist was made, and they share almost no key
+// names, so playlistparse.go reads each by name and this record is what both of
+// them fill in.
 type Playlist struct {
-	PlaylistID      string    `json:"playlist_id" kit:"id" table:"id"`
-	Title           string    `json:"title" table:"title,truncate"`
-	Description     string    `json:"description" kit:"body" table:"-"`
-	ChannelID       string    `json:"channel_id" kit:"link,kind=youtube/channel" table:"-"`
-	ChannelName     string    `json:"channel_name" table:"channel,truncate"`
-	VideoCount      int       `json:"video_count" table:"videos"`
-	ViewCountText   string    `json:"view_count_text" table:"-"`
-	LastUpdatedText string    `json:"last_updated_text" table:"-"`
-	URL             string    `json:"url" table:"url,url"`
-	FetchedAt       time.Time `json:"fetched_at" table:"-"`
+	// --- identity ---
+
+	// PlaylistID is the bare id with no VL prefix. The prefix is a browse
+	// addressing detail and is added on the wire, not stored.
+	PlaylistID string `json:"id" kit:"id" table:"id"`
+	URL        string `json:"url,omitempty" table:"url,url"`
+
+	// --- content ---
+
+	Title       string `json:"title,omitempty" table:"title,truncate"`
+	Description string `json:"description,omitempty" kit:"body" table:"-"`
+	// ChannelID and ChannelTitle are the owner. An auto-generated mix has neither,
+	// because nobody made it.
+	ChannelID    string `json:"channel_id,omitempty" kit:"link,kind=youtube/channel" table:"-"`
+	ChannelTitle string `json:"channel_title,omitempty" table:"channel,truncate"`
+
+	// --- counts ---
+
+	// VideoCount is the header's number and VideoCountText what it rendered. It is
+	// not the number of items ytb items yields: a playlist holding deleted or
+	// private videos states the full count here and serves fewer rows, and the
+	// difference is what missed explains.
+	VideoCount     int64  `json:"video_count,omitempty" table:"videos"`
+	VideoCountText string `json:"video_count_text,omitempty" table:"-"`
+	ViewCount      int64  `json:"view_count,omitempty" table:"-"`
+	ViewCountText  string `json:"view_count_text,omitempty" table:"-"`
+
+	// --- time ---
+
+	// UpdatedText is "Updated 4 days ago", rendered and relative. Only one of the
+	// two header shapes carries it, so its absence is a fact about the shape and
+	// not about the playlist.
+	UpdatedText string `json:"updated_text,omitempty" table:"-"`
+
+	// --- structure ---
+
+	// IsGenerated says YouTube built this playlist rather than a person. It is
+	// derived from the id prefix, which is the only thing that states it.
+	IsGenerated bool `json:"is_generated" table:"-"`
+	// Visibility is public or unlisted where the header says so, and empty where it
+	// does not, because guessing public is a claim this read cannot make.
+	Visibility string      `json:"visibility,omitempty" table:"-"`
+	Thumbnails []Thumbnail `json:"thumbnails,omitempty" table:"-"`
+	// MetadataParts is the same catch-all a Video carries: a rendered fragment this
+	// read did not recognise, kept verbatim rather than dropped.
+	MetadataParts []string `json:"metadata_parts,omitempty" table:"-"`
+
+	Envelope
+}
+
+// newPlaylist starts a playlist record. is_generated is set here because the id
+// is the only thing that answers it and every construction path has the id.
+func newPlaylist(id string, surfaces ...string) Playlist {
+	return Playlist{
+		PlaylistID:  id,
+		URL:         NormalizePlaylistURL(id),
+		IsGenerated: isGeneratedPlaylistID(id),
+		Envelope:    newEnvelope("playlist", surfaces...),
+	}
+}
+
+// isGeneratedPlaylistID reports whether YouTube built this playlist rather than a
+// person. UU and its UUSH and UULV variants are a channel's derived uploads, OL
+// is an album, RD is a mix or radio, and LL is the signed in user's likes. A PL
+// id is somebody's playlist.
+func isGeneratedPlaylistID(id string) bool {
+	for _, prefix := range []string{"UU", "OL", "RD", "LL", "FL"} {
+		if strings.HasPrefix(id, prefix) {
+			return true
+		}
+	}
+	return false
 }
 
 // PlaylistVideo is the playlist↔video membership join with position.
