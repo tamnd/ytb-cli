@@ -1,0 +1,1468 @@
+{
+ "metadata": {
+  "channelMetadataRenderer": {
+   "title": "Rick Astley",
+   "description": "New single ‘Raindrops’ out now. \nhttps://rickastley.lnk.to/Raindrops\n\nTickets for summer shows 2026 on sale now.\nhttps://rickastley.co.uk/\n",
+   "rssUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCuAXFkgsw1L7xaCfnd5JJOw",
+   "channelConversionUrl": "https://www.youtube.com/pagead/viewthroughconversion/962985656/?backend=innertube&cname=1&cver=2_20260731_00_00&data=backend%3Dinnertube%3Bcname%3D1%3Bcver%3D2_20260731_00_00%3Bptype%3Dcview%3Btype%3Dcview%3Butuid%3DuAXFkgsw1L7xaCfnd5JJOw&foc_id=uAXFkgsw1L7xaCfnd5JJOw&label=followon_cvisit&ptype=cview&utuid=uAXFkgsw1L7xaCfnd5JJOw",
+   "externalId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+   "keywords": "Official Rick Astley \"rick astley\" \"never gonna give you up\" \"the best of me\" \"best of me\" \"together forever\" \"cry for help\" \"beautiful life\" \"official video\" \"official audio\" rickroll rickrolled \"rick roll\" \"rick asltey\" \"give up\" meme",
+   "ownerUrls": [
+    "http://www.youtube.com/@RickAstleyYT"
+   ],
+   "avatar": {
+    "thumbnails": [
+     {
+      "url": "https://yt3.googleusercontent.com/MOWpaiGJdgN4aKMI-NGQLL4jMVP3aDORlQpOBWooi0GSE2TGt4_9ncyepk1pCh-yWQ795AhPbw=s900-c-k-c0x00ffffff-no-rj",
+      "width": 900,
+      "height": 900
+     }
+    ]
+   },
+   "channelUrl": "https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+   "isFamilySafe": true,
+   "availableCountryCodes": [
+    "FM",
+    "ST",
+    "GA",
+    "NI",
+    "MS",
+    "FR",
+    "GE",
+    "GT",
+    "GD",
+    "GH",
+    "SO",
+    "VE",
+    "BZ",
+    "VC",
+    "CX",
+    "PK",
+    "PW",
+    "SM",
+    "BD",
+    "CK",
+    "MQ",
+    "DO",
+    "UA",
+    "VI",
+    "GY",
+    "VG",
+    "GM",
+    "MD",
+    "NF",
+    "KH",
+    "ZA",
+    "PM",
+    "UG",
+    "IL",
+    "BN",
+    "AS",
+    "KI",
+    "LV",
+    "SL",
+    "BR",
+    "CH",
+    "PG",
+    "AT",
+    "AU",
+    "BH",
+    "CF",
+    "AO",
+    "KY",
+    "MW",
+    "MP",
+    "CM",
+    "FK",
+    "TV",
+    "NA",
+    "TF",
+    "SK",
+    "AE",
+    "PS",
+    "AM",
+    "BF",
+    "ME",
+    "SE",
+    "HM",
+    "DK",
+    "CV",
+    "YE",
+    "RO",
+    "ET",
+    "KN",
+    "IO",
+    "KZ",
+    "CN",
+    "TD",
+    "EH",
+    "BE",
+    "LK",
+    "TO",
+    "KR",
+    "AX",
+    "ML",
+    "EC",
+    "UM",
+    "NP",
+    "MH",
+    "CY",
+    "VA",
+    "HU",
+    "TT",
+    "TC",
+    "SJ",
+    "EG",
+    "PA",
+    "ZM",
+    "SV",
+    "IT",
+    "TH",
+    "VN",
+    "TL",
+    "ZW",
+    "IE",
+    "GL",
+    "AF",
+    "GU",
+    "BO",
+    "AW",
+    "MK",
+    "LC",
+    "GW",
+    "MF",
+    "ES",
+    "NE",
+    "OM",
+    "SN",
+    "PH",
+    "SR",
+    "SX",
+    "LA",
+    "LR",
+    "RU",
+    "BM",
+    "KM",
+    "JE",
+    "MT",
+    "RE",
+    "NC",
+    "BJ",
+    "ER",
+    "GQ",
+    "SZ",
+    "HT",
+    "VU",
+    "UY",
+    "NR",
+    "JP",
+    "YT",
+    "RW",
+    "KG",
+    "MV",
+    "PN",
+    "FO",
+    "SS",
+    "IR",
+    "MA",
+    "FI",
+    "WF",
+    "PF",
+    "QA",
+    "SC",
+    "GB",
+    "AG",
+    "KE",
+    "GP",
+    "CR",
+    "SD",
+    "SY",
+    "US",
+    "ID",
+    "DZ",
+    "HK",
+    "NZ",
+    "GF",
+    "PY",
+    "MZ",
+    "SG",
+    "UZ",
+    "AI",
+    "CA",
+    "CG",
+    "GI",
+    "MO",
+    "SB",
+    "DM",
+    "IN",
+    "GR",
+    "BA",
+    "DJ",
+    "CD",
+    "SH",
+    "FJ",
+    "TG",
+    "AQ",
+    "AZ",
+    "BG",
+    "BI",
+    "SI",
+    "LS",
+    "TJ",
+    "TW",
+    "IM",
+    "MX",
+    "CW",
+    "CZ",
+    "HN",
+    "BW",
+    "BV",
+    "IQ",
+    "BB",
+    "PT",
+    "LB",
+    "LY",
+    "LT",
+    "HR",
+    "MR",
+    "BS",
+    "EE",
+    "DE",
+    "BT",
+    "BL",
+    "KP",
+    "WS",
+    "KW",
+    "MN",
+    "CO",
+    "TR",
+    "NG",
+    "NU",
+    "GS",
+    "MU",
+    "LI",
+    "TN",
+    "PE",
+    "GG",
+    "IS",
+    "CU",
+    "CI",
+    "JM",
+    "BQ",
+    "MM",
+    "GN",
+    "JO",
+    "PL",
+    "MG",
+    "RS",
+    "SA",
+    "CC",
+    "CL",
+    "AR",
+    "NL",
+    "NO",
+    "TZ",
+    "BY",
+    "PR",
+    "MY",
+    "AD",
+    "AL",
+    "LU",
+    "TM",
+    "MC",
+    "TK"
+   ],
+   "androidDeepLink": "android-app://com.google.android.youtube/http/www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+   "androidAppindexingLink": "android-app://com.google.android.youtube/http/www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+   "iosAppindexingLink": "ios-app://544007664/vnd.youtube/www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+   "vanityChannelUrl": "http://www.youtube.com/@RickAstleyYT"
+  }
+ },
+ "microformat": {
+  "microformatDataRenderer": {
+   "urlCanonical": "https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+   "title": "Rick Astley",
+   "description": "New single ‘Raindrops’ out now. https://rickastley.lnk.to/Raindrops Tickets for summer shows 2026 on sale now. https://rickastley.co.uk/",
+   "thumbnail": {
+    "thumbnails": [
+     {
+      "url": "https://yt3.googleusercontent.com/MOWpaiGJdgN4aKMI-NGQLL4jMVP3aDORlQpOBWooi0GSE2TGt4_9ncyepk1pCh-yWQ795AhPbw=s200-c-k-c0x00ffffff-no-rj?days_since_epoch=20666",
+      "width": 200,
+      "height": 200
+     }
+    ]
+   },
+   "siteName": "YouTube",
+   "appName": "YouTube",
+   "androidPackage": "com.google.android.youtube",
+   "iosAppStoreId": "544007664",
+   "iosAppArguments": "https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+   "ogType": "yt-fb-app:channel",
+   "urlApplinksWeb": "https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw?feature=applinks",
+   "urlApplinksIos": "vnd.youtube://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw?feature=applinks",
+   "urlApplinksAndroid": "vnd.youtube://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw?feature=applinks",
+   "urlTwitterIos": "vnd.youtube://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw?feature=twitter-deep-link",
+   "urlTwitterAndroid": "vnd.youtube://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw?feature=twitter-deep-link",
+   "twitterCardType": "summary",
+   "twitterSiteHandle": "@YouTube",
+   "schemaDotOrgType": "http://schema.org/http://schema.org/YoutubeChannelV2",
+   "noindex": false,
+   "unlisted": false,
+   "familySafe": true,
+   "tags": [
+    "Official",
+    "Rick",
+    "Astley",
+    "rick astley",
+    "never gonna give you up",
+    "the best of me",
+    "best of me",
+    "together forever",
+    "cry for help",
+    "beautiful life",
+    "official video",
+    "official audio",
+    "rickroll",
+    "rickrolled",
+    "rick roll",
+    "rick asltey",
+    "give up",
+    "meme"
+   ],
+   "availableCountries": [
+    "FM",
+    "ST",
+    "GA",
+    "NI",
+    "MS",
+    "FR",
+    "GE",
+    "GT",
+    "GD",
+    "GH",
+    "SO",
+    "VE",
+    "BZ",
+    "VC",
+    "CX",
+    "PK",
+    "PW",
+    "SM",
+    "BD",
+    "CK",
+    "MQ",
+    "DO",
+    "UA",
+    "VI",
+    "GY",
+    "VG",
+    "GM",
+    "MD",
+    "NF",
+    "KH",
+    "ZA",
+    "PM",
+    "UG",
+    "IL",
+    "BN",
+    "AS",
+    "KI",
+    "LV",
+    "SL",
+    "BR",
+    "CH",
+    "PG",
+    "AT",
+    "AU",
+    "BH",
+    "CF",
+    "AO",
+    "KY",
+    "MW",
+    "MP",
+    "CM",
+    "FK",
+    "TV",
+    "NA",
+    "TF",
+    "SK",
+    "AE",
+    "PS",
+    "AM",
+    "BF",
+    "ME",
+    "SE",
+    "HM",
+    "DK",
+    "CV",
+    "YE",
+    "RO",
+    "ET",
+    "KN",
+    "IO",
+    "KZ",
+    "CN",
+    "TD",
+    "EH",
+    "BE",
+    "LK",
+    "TO",
+    "KR",
+    "AX",
+    "ML",
+    "EC",
+    "UM",
+    "NP",
+    "MH",
+    "CY",
+    "VA",
+    "HU",
+    "TT",
+    "TC",
+    "SJ",
+    "EG",
+    "PA",
+    "ZM",
+    "SV",
+    "IT",
+    "TH",
+    "VN",
+    "TL",
+    "ZW",
+    "IE",
+    "GL",
+    "AF",
+    "GU",
+    "BO",
+    "AW",
+    "MK",
+    "LC",
+    "GW",
+    "MF",
+    "ES",
+    "NE",
+    "OM",
+    "SN",
+    "PH",
+    "SR",
+    "SX",
+    "LA",
+    "LR",
+    "RU",
+    "BM",
+    "KM",
+    "JE",
+    "MT",
+    "RE",
+    "NC",
+    "BJ",
+    "ER",
+    "GQ",
+    "SZ",
+    "HT",
+    "VU",
+    "UY",
+    "NR",
+    "JP",
+    "YT",
+    "RW",
+    "KG",
+    "MV",
+    "PN",
+    "FO",
+    "SS",
+    "IR",
+    "MA",
+    "FI",
+    "WF",
+    "PF",
+    "QA",
+    "SC",
+    "GB",
+    "AG",
+    "KE",
+    "GP",
+    "CR",
+    "SD",
+    "SY",
+    "US",
+    "ID",
+    "DZ",
+    "HK",
+    "NZ",
+    "GF",
+    "PY",
+    "MZ",
+    "SG",
+    "UZ",
+    "AI",
+    "CA",
+    "CG",
+    "GI",
+    "MO",
+    "SB",
+    "DM",
+    "IN",
+    "GR",
+    "BA",
+    "DJ",
+    "CD",
+    "SH",
+    "FJ",
+    "TG",
+    "AQ",
+    "AZ",
+    "BG",
+    "BI",
+    "SI",
+    "LS",
+    "TJ",
+    "TW",
+    "IM",
+    "MX",
+    "CW",
+    "CZ",
+    "HN",
+    "BW",
+    "BV",
+    "IQ",
+    "BB",
+    "PT",
+    "LB",
+    "LY",
+    "LT",
+    "HR",
+    "MR",
+    "BS",
+    "EE",
+    "DE",
+    "BT",
+    "BL",
+    "KP",
+    "WS",
+    "KW",
+    "MN",
+    "CO",
+    "TR",
+    "NG",
+    "NU",
+    "GS",
+    "MU",
+    "LI",
+    "TN",
+    "PE",
+    "GG",
+    "IS",
+    "CU",
+    "CI",
+    "JM",
+    "BQ",
+    "MM",
+    "GN",
+    "JO",
+    "PL",
+    "MG",
+    "RS",
+    "SA",
+    "CC",
+    "CL",
+    "AR",
+    "NL",
+    "NO",
+    "TZ",
+    "BY",
+    "PR",
+    "MY",
+    "AD",
+    "AL",
+    "LU",
+    "TM",
+    "MC",
+    "TK"
+   ],
+   "linkAlternates": [
+    {
+     "hrefUrl": "https://m.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw"
+    },
+    {
+     "hrefUrl": "android-app://com.google.android.youtube/http/youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw"
+    },
+    {
+     "hrefUrl": "ios-app://544007664/http/youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw"
+    }
+   ],
+   "channelProfileMicroformatDetails": {
+    "profilePage": {
+     "context": "https://schema.org",
+     "type": "ProfilePage",
+     "url": "https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+     "name": "Rick Astley - YouTube",
+     "description": "New single ‘Raindrops’ out now. \nhttps://rickastley.lnk.to/Raindrops\n\nTickets for summer shows 2026 on sale now.\nhttps://rickastley.co.uk/\n",
+     "mainEntity": {
+      "type": "Person",
+      "name": "Rick Astley",
+      "url": "https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+      "alternateName": "@RickAstleyYT",
+      "image": "https://yt3.googleusercontent.com/MOWpaiGJdgN4aKMI-NGQLL4jMVP3aDORlQpOBWooi0GSE2TGt4_9ncyepk1pCh-yWQ795AhPbw=s88-c-k-c0x00ffffff-no-rj",
+      "description": "New single ‘Raindrops’ out now. \nhttps://rickastley.lnk.to/Raindrops\n\nTickets for summer shows 2026 on sale now.\nhttps://rickastley.co.uk/\n",
+      "sameAs": [
+       "https://rickastley.lnk.to/Raindrops",
+       "https://www.rickastley.co.uk/",
+       "https://linktr.ee/rickastleynever",
+       "https://www.instagram.com/officialrickastley/",
+       "https://www.tiktok.com/@rickastleyofficial",
+       "https://www.facebook.com/RickAstley/",
+       "https://open.spotify.com/user/rickastleyprofile/playlist/32O0SSXDNWDrMievPkV0Im?si=4kTEsf71RSWznX9X4CLxSw",
+       "https://itunes.apple.com/gb/artist/rick-astley/669771",
+       "https://music.youtube.com/channel/UCwZEU0wAwIyZb4x5G_KJp2w",
+       "https://www.deezer.com/pt/artist/6160"
+      ],
+      "interactionStatistic": [
+       {
+        "type": "InteractionCounter",
+        "interactionType": {
+         "type": "FollowAction"
+        },
+        "userInteractionCount": "4520000"
+       }
+      ]
+     }
+    }
+   }
+  }
+ },
+ "header": {
+  "pageHeaderRenderer": {
+   "pageTitle": "Rick Astley",
+   "content": {
+    "pageHeaderViewModel": {
+     "title": {
+      "dynamicTextViewModel": {
+       "text": {
+        "content": "Rick Astley",
+        "styleRuns": [
+         {
+          "startIndex": 11,
+          "styleRunExtensions": {
+           "styleRunColorMapExtension": {
+            "colorMap": [
+             {
+              "key": "USER_INTERFACE_THEME_DARK",
+              "value": 4294967295
+             },
+             {
+              "key": "USER_INTERFACE_THEME_LIGHT",
+              "value": 4279440147
+             }
+            ]
+           }
+          }
+         }
+        ],
+        "attachmentRuns": [
+         {
+          "startIndex": 11,
+          "length": 0,
+          "element": {
+           "type": {
+            "imageType": {
+             "image": {
+              "sources": [
+               {
+                "clientResource": {
+                 "imageName": "AUDIO_BADGE"
+                },
+                "width": 24,
+                "height": 24
+               }
+              ]
+             }
+            }
+           },
+           "properties": {
+            "layoutProperties": {
+             "height": {
+              "value": 24,
+              "unit": "DIMENSION_UNIT_POINT"
+             },
+             "width": {
+              "value": 24,
+              "unit": "DIMENSION_UNIT_POINT"
+             },
+             "margin": {
+              "left": {
+               "value": 8,
+               "unit": "DIMENSION_UNIT_POINT"
+              }
+             }
+            }
+           }
+          },
+          "alignment": "ALIGNMENT_VERTICAL_CENTER"
+         }
+        ]
+       },
+       "maxLines": 2,
+       "rendererContext": {
+        "loggingContext": {
+         "loggingDirectives": {
+          "trackingParams": "CCIQj-QKIhMI2MPckYz_lQMVzkoPAh1BVgLS",
+          "visibility": {
+           "types": "12"
+          }
+         }
+        },
+        "accessibilityContext": {
+         "label": "Rick Astley, Official Artist Channel"
+        }
+       }
+      }
+     },
+     "image": {
+      "decoratedAvatarViewModel": {
+       "avatar": {
+        "avatarViewModel": {
+         "image": {
+          "sources": [
+           {
+            "url": "https://yt3.googleusercontent.com/MOWpaiGJdgN4aKMI-NGQLL4jMVP3aDORlQpOBWooi0GSE2TGt4_9ncyepk1pCh-yWQ795AhPbw=s72-c-k-c0x00ffffff-no-rj",
+            "width": 72,
+            "height": 72
+           },
+           {
+            "url": "https://yt3.googleusercontent.com/MOWpaiGJdgN4aKMI-NGQLL4jMVP3aDORlQpOBWooi0GSE2TGt4_9ncyepk1pCh-yWQ795AhPbw=s120-c-k-c0x00ffffff-no-rj",
+            "width": 120,
+            "height": 120
+           },
+           {
+            "url": "https://yt3.googleusercontent.com/MOWpaiGJdgN4aKMI-NGQLL4jMVP3aDORlQpOBWooi0GSE2TGt4_9ncyepk1pCh-yWQ795AhPbw=s160-c-k-c0x00ffffff-no-rj",
+            "width": 160,
+            "height": 160
+           }
+          ],
+          "processor": {
+           "borderImageProcessor": {
+            "circular": true
+           }
+          }
+         },
+         "avatarImageSize": "AVATAR_SIZE_XL",
+         "loggingDirectives": {
+          "trackingParams": "CCEQ6OENIhMI2MPckYz_lQMVzkoPAh1BVgLS",
+          "visibility": {
+           "types": "12"
+          }
+         }
+        }
+       }
+      }
+     },
+     "metadata": {
+      "contentMetadataViewModel": {
+       "metadataRows": [
+        {
+         "metadataParts": [
+          {
+           "text": {
+            "content": "@RickAstleyYT",
+            "styleRuns": [
+             {
+              "weightLabel": "FONT_WEIGHT_MEDIUM",
+              "styleRunExtensions": {
+               "styleRunColorMapExtension": {
+                "colorMap": [
+                 {
+                  "key": "USER_INTERFACE_THEME_DARK",
+                  "value": 4294967295
+                 },
+                 {
+                  "key": "USER_INTERFACE_THEME_LIGHT",
+                  "value": 4279440147
+                 }
+                ]
+               }
+              }
+             }
+            ]
+           },
+           "enableTruncation": true
+          }
+         ]
+        },
+        {
+         "metadataParts": [
+          {
+           "text": {
+            "content": "4.52M subscribers"
+           },
+           "accessibilityLabel": "4.52 million subscribers"
+          },
+          {
+           "text": {
+            "content": "433 videos",
+            "styleRuns": [
+             {
+              "startIndex": 0,
+              "length": 10
+             }
+            ]
+           }
+          }
+         ]
+        }
+       ],
+       "delimiter": "•",
+       "rendererContext": {
+        "loggingContext": {
+         "loggingDirectives": {
+          "trackingParams": "CCAQ9eQKIhMI2MPckYz_lQMVzkoPAh1BVgLS",
+          "visibility": {
+           "types": "12"
+          }
+         }
+        }
+       }
+      }
+     },
+     "actions": {
+      "flexibleActionsViewModel": {
+       "actionsRows": [
+        {
+         "actions": [
+          {
+           "buttonViewModel": {
+            "title": "Subscribe",
+            "onTap": {
+             "innertubeCommand": {
+              "clickTrackingParams": "CBIQot8KIhMI2MPckYz_lQMVzkoPAh1BVgLSygEEyXGK_w==",
+              "commandMetadata": {
+               "webCommandMetadata": {
+                "ignoreNavigation": true
+               }
+              },
+              "modalEndpoint": {
+               "modal": {
+                "modalWithTitleAndButtonRenderer": {
+                 "title": {
+                  "simpleText": "Want to subscribe to this channel?"
+                 },
+                 "content": {
+                  "simpleText": "Sign in to subscribe to this channel."
+                 },
+                 "button": {
+                  "buttonRenderer": {
+                   "style": "STYLE_MONO_FILLED",
+                   "size": "SIZE_DEFAULT",
+                   "isDisabled": false,
+                   "text": {
+                    "simpleText": "Sign in"
+                   },
+                   "navigationEndpoint": {
+                    "clickTrackingParams": "CB8Q_YYEIhMI2MPckYz_lQMVzkoPAh1BVgLSMglzdWJzY3JpYmXKAQTJcYr_",
+                    "commandMetadata": {
+                     "webCommandMetadata": {
+                      "url": "https://accounts.google.com/ServiceLogin?service=youtube&uilel=3&passive=true&continue=https%3A%2F%2Fwww.youtube.com%2Fsignin%3Faction_handle_signin%3Dtrue%26app%3Ddesktop%26hl%3Den%26next%3D%252F%2540RickAstleyYT%26continue_action%3DQUM4Zm9rU0VnV3F4U2pRZFFodEJ2SUhMaHFDb3xBR3JiS2FtZFlwRXZhbjMxeFd4X3psYWNna0tFZFdjVEh5VS1YZ3c2bVN5SU5razV2dHNGUktTV2NWX2tqOEk2eG1WdnNTLXNZYnpkMTB3dmVNWkViNEtCN1p3NmJ2VTE4cm54NnA1ZWJzWU1nT3VOWXNHSEJuS0FITTdWeTJndmFDUEM4VC1yUkt6RU9zZmZkOGVoXzdVY0JhYWdHYUNpTlBQa0pKYjNoQU85cGE3SXJ5R3E5U08yMXow&hl=en&ec=66429",
+                      "webPageType": "WEB_PAGE_TYPE_UNKNOWN",
+                      "rootVe": 83769
+                     }
+                    },
+                    "signInEndpoint": {
+                     "nextEndpoint": {
+                      "clickTrackingParams": "CB8Q_YYEIhMI2MPckYz_lQMVzkoPAh1BVgLSygEEyXGK_w==",
+                      "commandMetadata": {
+                       "webCommandMetadata": {
+                        "url": "/@RickAstleyYT",
+                        "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                        "rootVe": 3611,
+                        "apiUrl": "/youtubei/v1/browse"
+                       }
+                      },
+                      "browseEndpoint": {
+                       "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+                       "params": "EgA%3D",
+                       "canonicalBaseUrl": "/@RickAstleyYT"
+                      }
+                     },
+                     "continueAction": "QUM4Zm9rU0VnV3F4U2pRZFFodEJ2SUhMaHFDb3xBR3JiS2FtZFlwRXZhbjMxeFd4X3psYWNna0tFZFdjVEh5VS1YZ3c2bVN5SU5razV2dHNGUktTV2NWX2tqOEk2eG1WdnNTLXNZYnpkMTB3dmVNWkViNEtCN1p3NmJ2VTE4cm54NnA1ZWJzWU1nT3VOWXNHSEJuS0FITTdWeTJndmFDUEM4VC1yUkt6RU9zZmZkOGVoXzdVY0JhYWdHYUNpTlBQa0pKYjNoQU85cGE3SXJ5R3E5U08yMXow",
+                     "idamTag": "66429"
+                    }
+                   },
+                   "trackingParams": "CB8Q_YYEIhMI2MPckYz_lQMVzkoPAh1BVgLS"
+                  }
+                 }
+                }
+               }
+              }
+             }
+            },
+            "accessibilityText": "Subscribe",
+            "style": "BUTTON_VIEW_MODEL_STYLE_MONO",
+            "trackingParams": "CBIQot8KIhMI2MPckYz_lQMVzkoPAh1BVgLS",
+            "isFullWidth": false,
+            "type": "BUTTON_VIEW_MODEL_TYPE_FILLED",
+            "buttonSize": "BUTTON_VIEW_MODEL_SIZE_DEFAULT",
+            "state": "BUTTON_VIEW_MODEL_STATE_ACTIVE"
+           }
+          }
+         ]
+        }
+       ],
+       "justifyContent": "FLEXIBLE_ACTIONS_JUSTIFY_CONTENT_START",
+       "minimumRowHeight": 44,
+       "rendererContext": {
+        "loggingContext": {
+         "loggingDirectives": {
+          "trackingParams": "CBIQot8KIhMI2MPckYz_lQMVzkoPAh1BVgLS",
+          "visibility": {
+           "types": "12"
+          },
+          "clientVeSpec": {
+           "uiType": 184974,
+           "veCounter": 137106966
+          }
+         }
+        }
+       }
+      }
+     },
+     "description": {
+      "descriptionPreviewViewModel": {
+       "description": {
+        "content": "New single ‘Raindrops’ out now. "
+       },
+       "maxLines": 2,
+       "truncationText": {
+        "content": "...more",
+        "styleRuns": [
+         {
+          "startIndex": 0,
+          "length": 7,
+          "weight": 500
+         }
+        ]
+       },
+       "alwaysShowTruncationText": true,
+       "rendererContext": {
+        "loggingContext": {
+         "loggingDirectives": {
+          "trackingParams": "CBoQr_4KIhMI2MPckYz_lQMVzkoPAh1BVgLS",
+          "visibility": {
+           "types": "12"
+          }
+         }
+        },
+        "accessibilityContext": {
+         "label": "Description. New single ‘Raindrops’ out now....tap for more."
+        },
+        "commandContext": {
+         "onTap": {
+          "innertubeCommand": {
+           "clickTrackingParams": "CBoQr_4KIhMI2MPckYz_lQMVzkoPAh1BVgLSygEEyXGK_w==",
+           "showEngagementPanelEndpoint": {
+            "engagementPanel": {
+             "engagementPanelSectionListRenderer": {
+              "header": {
+               "engagementPanelTitleHeaderRenderer": {
+                "title": {
+                 "simpleText": "Rick Astley"
+                },
+                "visibilityButton": {
+                 "buttonRenderer": {
+                  "style": "STYLE_DEFAULT",
+                  "size": "SIZE_DEFAULT",
+                  "isDisabled": false,
+                  "icon": {
+                   "iconType": "CLOSE"
+                  },
+                  "accessibility": {
+                   "label": "Close"
+                  },
+                  "trackingParams": "CB4Q8FsiEwjYw9yRjP-VAxXOSg8CHUFWAtI=",
+                  "accessibilityData": {
+                   "accessibilityData": {
+                    "label": "Close"
+                   }
+                  },
+                  "command": {
+                   "clickTrackingParams": "CB4Q8FsiEwjYw9yRjP-VAxXOSg8CHUFWAtLKAQTJcYr_",
+                   "changeEngagementPanelVisibilityAction": {
+                    "targetId": "6c26f5e1-0000-2641-9727-582429c3c9f0",
+                    "visibility": "ENGAGEMENT_PANEL_VISIBILITY_HIDDEN"
+                   }
+                  }
+                 }
+                },
+                "trackingParams": "CBsQ040EIhMI2MPckYz_lQMVzkoPAh1BVgLS"
+               }
+              },
+              "content": {
+               "sectionListRenderer": {
+                "contents": [
+                 {
+                  "itemSectionRenderer": {
+                   "contents": [
+                    {
+                     "continuationItemRenderer": {
+                      "trigger": "CONTINUATION_TRIGGER_ON_ITEM_SHOWN",
+                      "continuationEndpoint": {
+                       "clickTrackingParams": "CB0Quy8YACITCNjD3JGM_5UDFc5KDwIdQVYC0soBBMlxiv8=",
+                       "commandMetadata": {
+                        "webCommandMetadata": {
+                         "sendPost": true,
+                         "apiUrl": "/youtubei/v1/browse"
+                        }
+                       },
+                       "continuationCommand": {
+                        "token": "4qmFsgJgEhhVQ3VBWEZrZ3N3MUw3eGFDZm5kNUpKT3caRDhnWXJHaW1hQVNZS0pEWmpNalptTldVeUxUQXdNREF0TWpZME1TMDVOekkzTFRVNE1qUXlPV016WXpsbU1BJTNEJTNE",
+                        "request": "CONTINUATION_REQUEST_TYPE_BROWSE"
+                       }
+                      }
+                     }
+                    }
+                   ],
+                   "trackingParams": "CB0Quy8YACITCNjD3JGM_5UDFc5KDwIdQVYC0g==",
+                   "sectionIdentifier": "6c26f5e2-0000-2641-9727-582429c3c9f0",
+                   "targetId": "6c26f5e2-0000-2641-9727-582429c3c9f0"
+                  }
+                 }
+                ],
+                "trackingParams": "CBwQui8iEwjYw9yRjP-VAxXOSg8CHUFWAtI=",
+                "scrollPaneStyle": {
+                 "scrollable": true
+                }
+               }
+              },
+              "targetId": "6c26f5e1-0000-2641-9727-582429c3c9f0",
+              "identifier": {
+               "surface": "ENGAGEMENT_PANEL_SURFACE_BROWSE",
+               "tag": "6c26f5e1-0000-2641-9727-582429c3c9f0"
+              }
+             }
+            },
+            "identifier": {
+             "surface": "ENGAGEMENT_PANEL_SURFACE_BROWSE",
+             "tag": "6c26f5e1-0000-2641-9727-582429c3c9f0"
+            },
+            "engagementPanelPresentationConfigs": {
+             "engagementPanelPopupPresentationConfig": {
+              "popupType": "PANEL_POPUP_TYPE_DIALOG"
+             }
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     },
+     "attribution": {
+      "attributionViewModel": {
+       "text": {
+        "content": " rickastley.lnk.to/Raindrops",
+        "commandRuns": [
+         {
+          "startIndex": 0,
+          "length": 28,
+          "onTap": {
+           "innertubeCommand": {
+            "clickTrackingParams": "CBkQmokLGAIiEwjYw9yRjP-VAxXOSg8CHUFWAtLKAQTJcYr_",
+            "commandMetadata": {
+             "webCommandMetadata": {
+              "url": "https://www.youtube.com/redirect?event=channel_header&redir_token=QUM4Zm9rUWgwY1ZZZlAxa3Q0Qm5UeEYyNGgycnxBR3JiS2FuejUtYzlDamowV0JINHlBdGVBV3VzOTRnWHppRkZ4R1dGeTBReGFDQUJrTnZlWFNXREs1NHl1NVJyQWFTcE9HZVZ4d3Y1MjdJV3hWRnRJSVRhTkR5a1JCeDljWUNw&q=https%3A%2F%2Frickastley.lnk.to%2FRaindrops",
+              "webPageType": "WEB_PAGE_TYPE_UNKNOWN",
+              "rootVe": 83769
+             }
+            },
+            "urlEndpoint": {
+             "url": "https://www.youtube.com/redirect?event=channel_header&redir_token=QUM4Zm9rUWgwY1ZZZlAxa3Q0Qm5UeEYyNGgycnxBR3JiS2FuejUtYzlDamowV0JINHlBdGVBV3VzOTRnWHppRkZ4R1dGeTBReGFDQUJrTnZlWFNXREs1NHl1NVJyQWFTcE9HZVZ4d3Y1MjdJV3hWRnRJSVRhTkR5a1JCeDljWUNw&q=https%3A%2F%2Frickastley.lnk.to%2FRaindrops",
+             "target": "TARGET_NEW_WINDOW"
+            }
+           }
+          },
+          "loggingDirectives": {
+           "trackingParams": "CBkQmokLGAIiEwjYw9yRjP-VAxXOSg8CHUFWAtI=",
+           "visibility": {
+            "types": "12"
+           }
+          }
+         }
+        ],
+        "styleRuns": [
+         {
+          "weightLabel": "FONT_WEIGHT_NORMAL",
+          "styleRunExtensions": {
+           "styleRunColorMapExtension": {
+            "colorMap": [
+             {
+              "key": "USER_INTERFACE_THEME_DARK",
+              "value": 4282296063
+             },
+             {
+              "key": "USER_INTERFACE_THEME_LIGHT",
+              "value": 4278607828
+             }
+            ]
+           }
+          }
+         }
+        ],
+        "attachmentRuns": [
+         {
+          "startIndex": 0,
+          "length": 0,
+          "element": {
+           "type": {
+            "imageType": {
+             "image": {
+              "sources": [
+               {
+                "customImageSource": {
+                 "youtubeIconSource": {
+                  "clientResource": {
+                   "icon": "YTICON_OUTLINE_LINK_S24"
+                  }
+                 }
+                }
+               }
+              ]
+             }
+            }
+           },
+           "properties": {
+            "layoutProperties": {
+             "height": {
+              "value": 14,
+              "unit": "DIMENSION_UNIT_POINT"
+             },
+             "width": {
+              "value": 14,
+              "unit": "DIMENSION_UNIT_POINT"
+             }
+            }
+           }
+          },
+          "alignment": "ALIGNMENT_VERTICAL_CENTER"
+         }
+        ]
+       },
+       "suffix": {
+        "content": "and 9 more links",
+        "commandRuns": [
+         {
+          "startIndex": 0,
+          "length": 16,
+          "onTap": {
+           "innertubeCommand": {
+            "clickTrackingParams": "CBQQmIkLGAAiEwjYw9yRjP-VAxXOSg8CHUFWAtLKAQTJcYr_",
+            "showEngagementPanelEndpoint": {
+             "engagementPanel": {
+              "engagementPanelSectionListRenderer": {
+               "header": {
+                "engagementPanelTitleHeaderRenderer": {
+                 "title": {
+                  "simpleText": "Rick Astley"
+                 },
+                 "visibilityButton": {
+                  "buttonRenderer": {
+                   "style": "STYLE_DEFAULT",
+                   "size": "SIZE_DEFAULT",
+                   "isDisabled": false,
+                   "icon": {
+                    "iconType": "CLOSE"
+                   },
+                   "accessibility": {
+                    "label": "Close"
+                   },
+                   "trackingParams": "CBgQ8FsiEwjYw9yRjP-VAxXOSg8CHUFWAtI=",
+                   "accessibilityData": {
+                    "accessibilityData": {
+                     "label": "Close"
+                    }
+                   },
+                   "command": {
+                    "clickTrackingParams": "CBgQ8FsiEwjYw9yRjP-VAxXOSg8CHUFWAtLKAQTJcYr_",
+                    "changeEngagementPanelVisibilityAction": {
+                     "targetId": "6c26f5e3-0000-2641-9727-582429c3c9f0",
+                     "visibility": "ENGAGEMENT_PANEL_VISIBILITY_HIDDEN"
+                    }
+                   }
+                  }
+                 },
+                 "trackingParams": "CBUQ040EIhMI2MPckYz_lQMVzkoPAh1BVgLS"
+                }
+               },
+               "content": {
+                "sectionListRenderer": {
+                 "contents": [
+                  {
+                   "itemSectionRenderer": {
+                    "contents": [
+                     {
+                      "continuationItemRenderer": {
+                       "trigger": "CONTINUATION_TRIGGER_ON_ITEM_SHOWN",
+                       "continuationEndpoint": {
+                        "clickTrackingParams": "CBcQuy8YACITCNjD3JGM_5UDFc5KDwIdQVYC0soBBMlxiv8=",
+                        "commandMetadata": {
+                         "webCommandMetadata": {
+                          "sendPost": true,
+                          "apiUrl": "/youtubei/v1/browse"
+                         }
+                        },
+                        "continuationCommand": {
+                         "token": "4qmFsgJgEhhVQ3VBWEZrZ3N3MUw3eGFDZm5kNUpKT3caRDhnWXJHaW1hQVNZS0pEWmpNalptTldVMExUQXdNREF0TWpZME1TMDVOekkzTFRVNE1qUXlPV016WXpsbU1BJTNEJTNE",
+                         "request": "CONTINUATION_REQUEST_TYPE_BROWSE"
+                        }
+                       }
+                      }
+                     }
+                    ],
+                    "trackingParams": "CBcQuy8YACITCNjD3JGM_5UDFc5KDwIdQVYC0g==",
+                    "sectionIdentifier": "6c26f5e4-0000-2641-9727-582429c3c9f0",
+                    "targetId": "6c26f5e4-0000-2641-9727-582429c3c9f0"
+                   }
+                  }
+                 ],
+                 "trackingParams": "CBYQui8iEwjYw9yRjP-VAxXOSg8CHUFWAtI=",
+                 "scrollPaneStyle": {
+                  "scrollable": true
+                 }
+                }
+               },
+               "targetId": "6c26f5e3-0000-2641-9727-582429c3c9f0",
+               "identifier": {
+                "surface": "ENGAGEMENT_PANEL_SURFACE_BROWSE",
+                "tag": "6c26f5e3-0000-2641-9727-582429c3c9f0"
+               }
+              }
+             },
+             "identifier": {
+              "surface": "ENGAGEMENT_PANEL_SURFACE_BROWSE",
+              "tag": "6c26f5e3-0000-2641-9727-582429c3c9f0"
+             },
+             "engagementPanelPresentationConfigs": {
+              "engagementPanelPopupPresentationConfig": {
+               "popupType": "PANEL_POPUP_TYPE_DIALOG"
+              }
+             }
+            }
+           }
+          },
+          "loggingDirectives": {
+           "trackingParams": "CBQQmIkLGAAiEwjYw9yRjP-VAxXOSg8CHUFWAtI=",
+           "visibility": {
+            "types": "12"
+           }
+          }
+         }
+        ],
+        "styleRuns": [
+         {
+          "fontName": "",
+          "fontSize": 0,
+          "weightLabel": "FONT_WEIGHT_MEDIUM"
+         }
+        ]
+       },
+       "rendererContext": {
+        "loggingContext": {
+         "loggingDirectives": {
+          "trackingParams": "CBMQjaULIhMI2MPckYz_lQMVzkoPAh1BVgLS",
+          "visibility": {
+           "types": "12"
+          }
+         }
+        }
+       }
+      }
+     },
+     "rendererContext": {
+      "loggingContext": {
+       "loggingDirectives": {
+        "trackingParams": "CBIQot8KIhMI2MPckYz_lQMVzkoPAh1BVgLS",
+        "visibility": {
+         "types": "12"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "contents": {
+  "twoColumnBrowseResultsRenderer": {
+   "tabs": [
+    {
+     "tabRenderer": {
+      "title": "Home",
+      "endpoint": {
+       "clickTrackingParams": "CCkQ8JMBGAYiEwjYw9yRjP-VAxXOSg8CHUFWAtLKAQTJcYr_",
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@RickAstleyYT/featured",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+        "params": "EghmZWF0dXJlZPIGBAoCMgA%3D",
+        "canonicalBaseUrl": "/@RickAstleyYT"
+       }
+      },
+      "selected": true
+     }
+    },
+    {
+     "tabRenderer": {
+      "title": "Videos",
+      "endpoint": {
+       "clickTrackingParams": "CCgQ8JMBGAciEwjYw9yRjP-VAxXOSg8CHUFWAtLKAQTJcYr_",
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@RickAstleyYT/videos",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+        "params": "EgZ2aWRlb3PyBgQKAjoA",
+        "canonicalBaseUrl": "/@RickAstleyYT"
+       }
+      }
+     }
+    },
+    {
+     "tabRenderer": {
+      "title": "Shorts",
+      "endpoint": {
+       "clickTrackingParams": "CCcQ8JMBGAgiEwjYw9yRjP-VAxXOSg8CHUFWAtLKAQTJcYr_",
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@RickAstleyYT/shorts",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+        "params": "EgZzaG9ydHPyBgUKA5oBAA%3D%3D",
+        "canonicalBaseUrl": "/@RickAstleyYT"
+       }
+      }
+     }
+    },
+    {
+     "tabRenderer": {
+      "title": "Live",
+      "endpoint": {
+       "clickTrackingParams": "CCYQ8JMBGAkiEwjYw9yRjP-VAxXOSg8CHUFWAtLKAQTJcYr_",
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@RickAstleyYT/streams",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+        "params": "EgdzdHJlYW1z8gYECgJ6AA%3D%3D",
+        "canonicalBaseUrl": "/@RickAstleyYT"
+       }
+      }
+     }
+    },
+    {
+     "tabRenderer": {
+      "title": "Releases",
+      "endpoint": {
+       "clickTrackingParams": "CCUQ8JMBGAoiEwjYw9yRjP-VAxXOSg8CHUFWAtLKAQTJcYr_",
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@RickAstleyYT/releases",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+        "params": "EghyZWxlYXNlc_IGBQoDsgEA",
+        "canonicalBaseUrl": "/@RickAstleyYT"
+       }
+      }
+     }
+    },
+    {
+     "tabRenderer": {
+      "title": "Playlists",
+      "endpoint": {
+       "clickTrackingParams": "CCQQ8JMBGAsiEwjYw9yRjP-VAxXOSg8CHUFWAtLKAQTJcYr_",
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@RickAstleyYT/playlists",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+        "params": "EglwbGF5bGlzdHPyBgQKAkIA",
+        "canonicalBaseUrl": "/@RickAstleyYT"
+       }
+      }
+     }
+    },
+    {
+     "tabRenderer": {
+      "title": "Posts",
+      "endpoint": {
+       "clickTrackingParams": "CCMQ8JMBGAwiEwjYw9yRjP-VAxXOSg8CHUFWAtLKAQTJcYr_",
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@RickAstleyYT/posts",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+        "params": "EgVwb3N0c_IGBAoCSgA%3D",
+        "canonicalBaseUrl": "/@RickAstleyYT"
+       }
+      }
+     }
+    },
+    {
+     "expandableTabRenderer": {
+      "title": "Search",
+      "endpoint": {
+       "clickTrackingParams": "CAAQhGciEwjYw9yRjP-VAxXOSg8CHUFWAtLKAQTJcYr_",
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@RickAstleyYT/search",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+        "params": "EgZzZWFyY2jyBgQKAloA",
+        "canonicalBaseUrl": "/@RickAstleyYT"
+       }
+      },
+      "selected": false
+     }
+    }
+   ]
+  }
+ }
+}

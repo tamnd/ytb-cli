@@ -66,6 +66,16 @@ func (s Surfaces) String() string {
 	return strings.Join(s, ", ")
 }
 
+// Has reports whether the given surface answered.
+func (s Surfaces) Has(id string) bool {
+	for _, got := range s {
+		if got == id {
+			return true
+		}
+	}
+	return false
+}
+
 // Envelope is embedded in a record rather than nested under a key, so its fields
 // flatten into the record's own JSON the way encoding/json flattens an anonymous
 // struct, and into the table's columns the same way.

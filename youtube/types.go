@@ -1,6 +1,9 @@
 package youtube
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 // Video is one YouTube video: the fullest record in the model and the one whose
 // shape varies most by which surface answered. Doc 03 section 2.
@@ -160,28 +163,152 @@ type Playability struct {
 	PlayableInEmbed *bool  `json:"playable_in_embed,omitempty"`
 }
 
-// Channel is one YouTube channel.
+// Channel is one YouTube channel. Doc 03 section 3.
+//
+// Three blocks of the channel page answer, and they answer different questions.
+// channelMetadataRenderer is the machine record: the id, the keywords, the rss
+// url, the country codes the channel is available in. microformatDataRenderer is
+// what the page tells crawlers, and it carries the ProfilePage that lists every
+// external link. pageHeaderViewModel is what a person sees: the handle, the two
+// rounded counts and the badge next to the title. The about panel is a fourth
+// read, one continuation, and it is the only source of the join date, the
+// lifetime view count and the country in words.
+//
+// Like Video, every optional field is omitempty or omitzero, because absent and
+// zero are different claims. A channel with no banner has no banner key on its
+// header, measured on @RickAstleyYT, and printing "banner_url": "" for it would
+// be this record inventing an answer.
 type Channel struct {
-	ChannelID         string    `json:"channel_id" kit:"id" table:"id"`
-	Handle            string    `json:"handle" table:"handle"`
-	Title             string    `json:"title" table:"title,truncate"`
-	Description       string    `json:"description" kit:"body" table:"-"`
-	AvatarURL         string    `json:"avatar_url" table:"-"`
-	BannerURL         string    `json:"banner_url" table:"-"`
-	SubscribersText   string    `json:"subscribers_text" table:"subscribers"`
-	VideosText        string    `json:"videos_text" table:"videos"`
-	ViewsText         string    `json:"views_text" table:"-"`
-	Country           string    `json:"country" table:"-"`
-	JoinedDateText    string    `json:"joined_date_text" table:"-"`
-	UploadsPlaylistID string    `json:"uploads_playlist_id" table:"-"`
-	URL               string    `json:"url" table:"url,url"`
-	SubscriberCount   int64     `json:"subscriber_count" table:"-"`
-	VideoCount        int64     `json:"video_count" table:"-"`
-	ViewCount         int64     `json:"view_count" table:"-"`
-	Keywords          []string  `json:"keywords" table:"-"`
-	TrailerVideoID    string    `json:"trailer_video_id" table:"-"`
-	IsVerified        bool      `json:"is_verified" table:"-"`
-	FetchedAt         time.Time `json:"fetched_at" table:"-"`
+	// --- identity ---
+
+	ChannelID string `json:"id" kit:"id" table:"id"`
+	// Handle is the @name, and HandleURL the address it is reached at. YouTube
+	// spells vanityChannelUrl with an http scheme, which is normalised here.
+	Handle    string `json:"handle,omitempty" table:"handle"`
+	HandleURL string `json:"handle_url,omitempty" table:"-"`
+	// URL is the address that was read and CanonicalURL the /channel/UC form
+	// YouTube itself states, which is not always the one a caller typed.
+	URL          string `json:"url,omitempty" table:"url,url"`
+	CanonicalURL string `json:"canonical_url,omitempty" table:"-"`
+
+	// --- content ---
+
+	Title string `json:"title,omitempty" table:"title,truncate"`
+	// Description is the channel's own words.
+	Description string `json:"description,omitempty" kit:"body" table:"-"`
+	// ArtistBio is a third party biography that only a music channel has. It is not
+	// the description and is never merged into it.
+	ArtistBio string `json:"artist_bio,omitempty" table:"-"`
+	// Keywords is the owner's keyword list, which the page carries as one
+	// space separated string with quoted phrases in it.
+	Keywords []string `json:"keywords,omitempty" table:"-"`
+	// Links are the channel's external links. The about panel gives all of them
+	// with their titles; without it the ld+json still gives every destination.
+	Links []ChannelLink `json:"links,omitempty" table:"-"`
+
+	// --- counts, doc 02 section 6 ---
+
+	// SubscriberCount is rounded to three significant figures by YouTube itself,
+	// which is what SubscriberCountIsApproximate says. It is written even though it
+	// is always true, because a consumer reading 4520000 has no other way to know
+	// it is not a count.
+	SubscriberCount              int64  `json:"subscriber_count,omitempty" table:"subscribers"`
+	SubscriberCountText          string `json:"subscriber_count_text,omitempty" table:"-"`
+	SubscriberCountIsApproximate bool   `json:"subscriber_count_is_approximate" table:"-"`
+	// VideoCount and VideoCountText are the header's, and the two sources disagree:
+	// the header said 433 videos on a channel whose uploads playlist holds 435. Via
+	// says which one answered.
+	VideoCount     int64  `json:"video_count,omitempty" table:"videos"`
+	VideoCountText string `json:"video_count_text,omitempty" table:"-"`
+	// ViewCount is the channel's lifetime views, exact, and only the about panel
+	// carries it.
+	ViewCount int64 `json:"view_count,omitempty" table:"-"`
+
+	// --- time ---
+
+	// JoinedAt is the join date parsed, JoinedText the panel's own sentence. The
+	// panel says "Joined 12 Aug 2009" with no time in it, so JoinedAt is a date at
+	// midnight UTC and not a moment.
+	JoinedAt   time.Time `json:"joined_at,omitzero" table:"-"`
+	JoinedText string    `json:"joined_text,omitempty" table:"-"`
+
+	// --- images ---
+
+	// Avatar and Banner are the rendition lists YouTube supplied, not one URL
+	// picked here, because which size a consumer wants is not this tool's call.
+	Avatar []Thumbnail `json:"avatar,omitempty" table:"-"`
+	Banner []Thumbnail `json:"banner,omitempty" table:"-"`
+
+	// --- structure ---
+
+	// Tabs is the tab strip, so the tab list is data rather than a table compiled
+	// into this tool. It is what lets a read of a missing tab exit 3 naming the
+	// tabs the channel really has. Doc 01 section 2.1.
+	Tabs []Tab `json:"tabs,omitempty" table:"-"`
+	// UploadsPlaylistID is derived from the id, and Counts is the four derived
+	// playlists actually read, which only --counts asks for.
+	UploadsPlaylistID string         `json:"uploads_playlist_id,omitempty" table:"-"`
+	Counts            *ChannelCounts `json:"counts,omitempty" table:"counts"`
+	// RSSURL is the Atom feed, named by the site rather than built here.
+	RSSURL string `json:"rss_url,omitempty" table:"-"`
+
+	// --- flags ---
+
+	// IsFamilySafe is a pointer for the same reason Video's flags are: false is
+	// YouTube's answer and absent is nobody having asked.
+	IsFamilySafe *bool `json:"is_family_safe,omitempty" table:"-"`
+	// AvailableCountryCodes is where the channel can be watched, 249 entries on a
+	// channel with no restriction at all.
+	AvailableCountryCodes []string `json:"available_country_codes,omitempty" table:"-"`
+	// IsVerified and IsArtist come off the badge beside the title: a verified
+	// channel carries CHECK_CIRCLE_FILLED and an official artist channel carries
+	// AUDIO_BADGE. They are plain bools because the header always answers.
+	IsVerified bool `json:"is_verified" table:"-"`
+	IsArtist   bool `json:"is_artist" table:"-"`
+
+	// Country is where the channel says it is, in words, from the about panel.
+	Country string `json:"country,omitempty" table:"-"`
+	// FacebookProfileID is the channel's Facebook page name, which
+	// channelMetadataRenderer states on some channels and not others: @BBCNews has
+	// "bbcnews" and @RickAstleyYT has no such key. It is kept as the id and not
+	// turned into a facebook.com url, because the page said an id and a url would
+	// be this record constructing one.
+	FacebookProfileID string `json:"facebook_profile_id,omitempty" table:"-"`
+
+	Envelope
+}
+
+// ChannelCounts is the four derived playlists read for real, which --counts asks
+// for at a cost of four requests. Doc 01 section 2.5.
+//
+// The three kinds partition the uploads playlist, so the sum is a check on the
+// whole derivation: measured on @RickAstleyYT, 139 videos + 294 shorts + 2
+// streams = 435 uploads. When that stops agreeing something about the derived ids
+// changed, which is worth finding out from a printed line rather than from a
+// dataset that quietly lost a third of a channel.
+type ChannelCounts struct {
+	Uploads int `json:"uploads"`
+	Videos  int `json:"videos"`
+	Shorts  int `json:"shorts"`
+	Streams int `json:"streams"`
+	// The playlist ids read, so the numbers can be checked by hand.
+	UploadsID string `json:"uploads_id"`
+	VideosID  string `json:"videos_id"`
+	ShortsID  string `json:"shorts_id"`
+	StreamsID string `json:"streams_id"`
+	// Agrees is whether videos + shorts + streams came to uploads.
+	Agrees bool `json:"agrees"`
+}
+
+// String is the one line the table cell shows, and it states the arithmetic
+// rather than the verdict alone, because "agrees" with no numbers behind it is
+// not something a reader can check.
+func (c ChannelCounts) String() string {
+	verdict := "does not agree"
+	if c.Agrees {
+		verdict = "agrees"
+	}
+	return fmt.Sprintf("%d + %d + %d = %d uploads, %s", c.Videos, c.Shorts, c.Streams, c.Uploads, verdict)
 }
 
 // Comment is one comment or reply. Replies carry the parent comment id in ParentID.
