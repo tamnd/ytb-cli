@@ -484,44 +484,13 @@ func pageHeaderAvatarName(ph map[string]any) string {
 	return ""
 }
 
-// ParseChannelPage parses ytInitialData from a channel HTML page.
+// ParseChannelPage parses a channel HTML page into the channel and whatever
+// listing was on it. The record itself is built by ParseChannelRecord; this adds
+// the videos and the continuation token, which is what a tab read needs.
 func ParseChannelPage(data *PageData, pageURL string) (*Channel, []Video, string, error) {
-	ch := &Channel{URL: pageURL, FetchedAt: time.Now()}
-	walkJSON(data.InitialData, func(m map[string]any) {
-		if r, ok := m["channelMetadataRenderer"].(map[string]any); ok {
-			ch.ChannelID = firstNonEmpty(ch.ChannelID, stringValue(r["externalId"]))
-			ch.Title = firstNonEmpty(ch.Title, stringValue(r["title"]))
-			ch.Description = firstNonEmpty(ch.Description, stringValue(r["description"]))
-			ch.Handle = firstNonEmpty(ch.Handle, strings.TrimPrefix(stringValue(r["vanityChannelUrl"]), BaseURL+"/"))
-			if ch.URL == "" {
-				ch.URL = stringValue(r["channelUrl"])
-			}
-			if thumbs := mapValue(r, "avatar"); thumbs != nil {
-				ch.AvatarURL = bestThumbnail(thumbs["thumbnails"])
-			}
-		}
-		if r, ok := m["pageHeaderViewModel"].(map[string]any); ok {
-			if banner := mapValue(r, "banner"); banner != nil {
-				ch.BannerURL = bestThumbnail(mapValue(banner, "image")["sources"])
-			}
-			for _, s := range pageHeaderMetadataParts(r) {
-				switch {
-				case ch.SubscribersText == "" && strings.Contains(s, "subscriber"):
-					ch.SubscribersText = s
-				case ch.VideosText == "" && strings.Contains(s, "video"):
-					ch.VideosText = s
-				}
-			}
-		}
-		if r, ok := m["videoCountText"].(map[string]any); ok && ch.VideosText == "" {
-			ch.VideosText = extractText(r)
-		}
-		if r, ok := m["subscriberCountText"].(map[string]any); ok && ch.SubscribersText == "" {
-			ch.SubscribersText = extractText(r)
-		}
-	})
-	if ch.ChannelID != "" && strings.HasPrefix(ch.ChannelID, "UC") {
-		ch.UploadsPlaylistID = "UU" + ch.ChannelID[2:]
+	ch := ParseChannelRecord(data, pageURL)
+	if ch == nil {
+		return nil, nil, "", fmt.Errorf("channel metadata not found")
 	}
 	videos := parseVideosFromTree(data.InitialData)
 	for i := range videos {
@@ -533,9 +502,6 @@ func ParseChannelPage(data *PageData, pageURL string) (*Channel, []Video, string
 		}
 	}
 	contToken := extractContinuationToken(data.InitialData)
-	if ch.ChannelID == "" && ch.Title == "" {
-		return nil, nil, "", fmt.Errorf("channel metadata not found")
-	}
 	return ch, dedupeVideos(videos), contToken, nil
 }
 
@@ -623,14 +589,7 @@ func ParseSearchPage(data *PageData, query string) ([]SearchResult, []Video, []C
 			}
 		}
 		if r, ok := m["channelRenderer"].(map[string]any); ok {
-			c := Channel{
-				ChannelID:       stringValue(r["channelId"]),
-				Title:           extractText(r["title"]),
-				Description:     extractText(r["descriptionSnippet"]),
-				SubscribersText: extractText(r["subscriberCountText"]),
-				URL:             joinURL(endpointURL(r["navigationEndpoint"])),
-				FetchedAt:       time.Now(),
-			}
+			c := parseChannelRenderer(r)
 			if c.ChannelID != "" {
 				channels = append(channels, c)
 				results = append(results, SearchResult{EntityType: EntityChannel, ID: c.ChannelID, Title: c.Title, URL: c.URL})
@@ -688,14 +647,7 @@ func ParseInnerTubeSearchResults(data map[string]any) ([]Video, []Channel, []Pla
 			}
 		}
 		if r, ok := m["channelRenderer"].(map[string]any); ok {
-			c := Channel{
-				ChannelID:       stringValue(r["channelId"]),
-				Title:           extractText(r["title"]),
-				Description:     extractText(r["descriptionSnippet"]),
-				SubscribersText: extractText(r["subscriberCountText"]),
-				URL:             joinURL(endpointURL(r["navigationEndpoint"])),
-				FetchedAt:       time.Now(),
-			}
+			c := parseChannelRenderer(r)
 			if c.ChannelID != "" {
 				channels = append(channels, c)
 			}
@@ -854,60 +806,6 @@ func urlExpiry(raw string) time.Time {
 		return time.Time{}
 	}
 	return time.Unix(sec, 0)
-}
-
-// ParseChannelNumericCounts enriches a Channel with numeric counts from InnerTube data.
-func ParseChannelNumericCounts(data map[string]any, ch *Channel) {
-	if ch == nil {
-		return
-	}
-	walkJSON(data, func(m map[string]any) {
-		if ch.SubscriberCount == 0 {
-			if subs, ok := m["subscriberCountText"].(map[string]any); ok {
-				txt := extractText(subs)
-				if txt != "" {
-					ch.SubscriberCount = parseCountText(txt)
-				}
-			}
-		}
-		if ch.VideoCount == 0 {
-			if vids, ok := m["videosCountText"].(map[string]any); ok {
-				txt := extractText(vids)
-				if txt != "" {
-					ch.VideoCount = parseCountText(txt)
-				}
-			}
-		}
-		if ch.ViewCount == 0 {
-			if views, ok := m["viewCountText"].(map[string]any); ok {
-				txt := extractText(views)
-				if txt != "" {
-					ch.ViewCount = parseCountText(txt)
-				}
-			}
-		}
-		if kw, ok := m["keywords"].(string); ok && kw != "" && len(ch.Keywords) == 0 {
-			ch.Keywords = strings.Fields(kw)
-		}
-		if tv, ok := m["channelTrailerVideo"].(map[string]any); ok && ch.TrailerVideoID == "" {
-			if vd := mapValue(tv, "videoRenderer"); vd != nil {
-				ch.TrailerVideoID = stringValue(vd["videoId"])
-			}
-		}
-		if !ch.IsVerified {
-			if badges, ok := m["badges"].([]any); ok {
-				for _, b := range badges {
-					if bm, ok := b.(map[string]any); ok {
-						if mbr := mapValue(bm, "metadataBadgeRenderer"); mbr != nil {
-							if stringValue(mbr["style"]) == "BADGE_STYLE_TYPE_VERIFIED" {
-								ch.IsVerified = true
-							}
-						}
-					}
-				}
-			}
-		}
-	})
 }
 
 // ParseCommentRenderer parses a single commentRenderer or replyRenderer map.
@@ -1244,22 +1142,34 @@ func parseVideosFromTree(root any) []Video {
 	return out
 }
 
-// parseShortsLockupViewModel parses the shortsLockupViewModel used on the Shorts
-// tab. The video id rides in the entityId ("shorts-shelf-item-<id>") and the
-// title and view count sit in overlayMetadata.
+// parseShortsLockupViewModel parses the shortsLockupViewModel, which is how a
+// short is rendered on the Shorts tab and in the UUSH shorts playlist.
+//
+// The same view model on those two pages is not the same object, and every
+// difference is a trap.
+//
+// entityId is "shorts-shelf-item-GdbjNGtWPe4" on the Shorts tab and the opaque
+// hash "A4C99DA633F4D7CD" in the playlist. So the id is read out of the
+// reelWatchEndpoint, which both pages carry and which states it outright, and the
+// entityId is only trusted when the prefix was really there.
+//
+// overlayMetadata.secondaryText is "22K views" on the Shorts tab and absent in
+// the playlist. What the playlist does carry is accessibilityText, which ends
+// "..., 22 thousand views - play Short", and that is where the count comes from
+// when the lockup itself does not state one.
 func parseShortsLockupViewModel(r map[string]any) Video {
-	videoID := strings.TrimPrefix(stringValue(r["entityId"]), "shorts-shelf-item-")
+	videoID := reelVideoID(r)
 	if videoID == "" {
-		meta := mapValue(mapValue(mapValue(r, "onTap"), "innertubeCommand"), "commandMetadata")
-		u := stringValue(mapValue(meta, "webCommandMetadata")["url"])
-		videoID = strings.TrimPrefix(u, "/shorts/")
+		if id, ok := strings.CutPrefix(stringValue(r["entityId"]), "shorts-shelf-item-"); ok {
+			videoID = id
+		}
 	}
 	if videoID == "" {
 		return Video{}
 	}
 	v := *NewVideo(videoID, SurfaceInnerTube)
-	// A shorts lockup is the one surface that states the thing is a short by
-	// existing: it only ever appears on the Shorts tab.
+	// A shorts lockup is the one listing surface that states the thing is a short
+	// by existing: nothing but a short is ever rendered as one.
 	v.URL = BaseURL + "/shorts/" + videoID
 	v.IsShort = boolPtr(true)
 	if om := mapValue(r, "overlayMetadata"); om != nil {
@@ -1270,10 +1180,58 @@ func parseShortsLockupViewModel(r map[string]any) Video {
 			v.setVia("view_count", "s2 overlayMetadata.secondaryText, rounded")
 		}
 	}
-	v.Thumbnails = ParseThumbnails(mapValue(r, "thumbnail")["sources"])
+	if v.ViewCount == 0 {
+		if txt, n := a11yViewCount(stringValue(r["accessibilityText"])); n > 0 {
+			v.ViewCountText = txt
+			v.ViewCount = n
+			v.setVia("view_count", "s2 accessibilityText, rounded and spelled out")
+		}
+	}
+	v.Thumbnails = ParseThumbnails(mapValue(mapValue(mapValue(r, "thumbnailViewModel"), "thumbnailViewModel"), "image")["sources"])
 	v.ThumbnailURL = largestThumbnail(v.Thumbnails)
 	lockupMisses(&v)
 	return v
+}
+
+// reelVideoID reads the id a shorts lockup navigates to. The endpoint states it
+// twice, as a field and as the last segment of the url, and the field is
+// preferred because it needs no string surgery.
+func reelVideoID(r map[string]any) string {
+	cmd := mapValue(mapValue(r, "onTap"), "innertubeCommand")
+	if id := stringValue(mapValue(cmd, "reelWatchEndpoint")["videoId"]); id != "" {
+		return id
+	}
+	u := stringValue(mapValue(mapValue(cmd, "commandMetadata"), "webCommandMetadata")["url"])
+	if id, ok := strings.CutPrefix(u, "/shorts/"); ok {
+		return id
+	}
+	return ""
+}
+
+// a11yViewCountRe pulls the count out of a shorts lockup's accessibility label,
+// which reads "<title>, 22 thousand views - play Short". The scale is a word
+// rather than the K/M suffix the visible text uses.
+var a11yViewCountRe = regexp.MustCompile(`([\d,.]+)\s*(thousand|million|billion)?\s+views`)
+
+// a11yViewCount returns the phrase it matched and the number behind it, so a
+// caller can record both what was said and what it read.
+func a11yViewCount(label string) (string, int64) {
+	m := a11yViewCountRe.FindStringSubmatch(label)
+	if m == nil {
+		return "", 0
+	}
+	scale := map[string]float64{"thousand": 1_000, "million": 1_000_000, "billion": 1_000_000_000}[m[2]]
+	if scale == 0 {
+		return strings.TrimSpace(m[0]), parseCountText(m[1])
+	}
+	// The number in front of the scale word can be fractional, "1.4 million", so
+	// it is parsed as one rather than run through the integer count reader that
+	// would drop the .4 and lose four hundred thousand views.
+	f, err := strconv.ParseFloat(strings.ReplaceAll(m[1], ",", ""), 64)
+	if err != nil {
+		return "", 0
+	}
+	return strings.TrimSpace(m[0]), int64(f * scale)
 }
 
 // parseLockupViewModel parses YouTube's newer lockupViewModel format.
@@ -1515,6 +1473,13 @@ func parsePlaylistVideos(root any, playlistID string) ([]Video, []PlaylistVideo)
 		// playlistVideoRenderer.
 		if r, ok := m["lockupViewModel"].(map[string]any); ok {
 			add(parseLockupViewModel(r))
+		}
+		// A shorts playlist renders none of the above. UUSHuAXFkgsw1L7xaCfnd5JJOw
+		// says 294 videos in its header and its page carries 98 shortsLockupViewModel
+		// and not one playlistVideoRenderer, so a reader that knows only the first
+		// two returns an empty playlist for a channel with 294 shorts in it.
+		if r, ok := m["shortsLockupViewModel"].(map[string]any); ok {
+			add(parseShortsLockupViewModel(r))
 		}
 	})
 	return videos, edges

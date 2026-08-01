@@ -42,6 +42,20 @@ func NormalizePlaylistURL(input string) string {
 	return BaseURL + "/playlist?list=" + input
 }
 
+// ChannelHomeURL is the channel's own page, the one with the header, the tab
+// strip and the microformat on it. NormalizeChannelURL adds /videos because most
+// callers want the listing; a channel read wants the page itself.
+func ChannelHomeURL(input string) string {
+	return strings.TrimSuffix(NormalizeChannelURL(input), "/videos")
+}
+
+// ChannelFeedURL is the channel's Atom feed, surface s6. The site names the same
+// address in channelMetadataRenderer.rssUrl, and this builds it for the reads
+// that have an id and no page.
+func ChannelFeedURL(channelID string) string {
+	return BaseURL + "/feeds/videos.xml?channel_id=" + channelID
+}
+
 // NormalizeChannelURL converts a channel ID, @handle, vanity name, or URL to
 // a canonical https://www.youtube.com/... form that ends with /videos.
 func NormalizeChannelURL(input string) string {

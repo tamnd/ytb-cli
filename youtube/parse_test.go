@@ -146,3 +146,86 @@ func TestParseLockupViewModelFullCounts(t *testing.T) {
 		t.Errorf("ChannelTitle = %q, want %q", v.ChannelTitle, "Some Channel")
 	}
 }
+
+// A shorts lockup is the same view model on two pages and it is not the same
+// object. On the Shorts tab the entityId is shorts-shelf-item-<id> and the
+// overlay states "22K views"; in the UUSH shorts playlist the entityId is the
+// opaque hash A4C99DA633F4D7CD and the overlay has no view count at all. Both
+// forms are measured below, because a reader that only knows the first returns
+// an empty playlist for a channel with 294 shorts in it.
+func TestParseShortsLockupViewModelBothPages(t *testing.T) {
+	onTap := map[string]any{
+		"innertubeCommand": map[string]any{
+			"commandMetadata":   map[string]any{"webCommandMetadata": map[string]any{"url": "/shorts/GdbjNGtWPe4"}},
+			"reelWatchEndpoint": map[string]any{"videoId": "GdbjNGtWPe4"},
+		},
+	}
+	thumb := map[string]any{"thumbnailViewModel": map[string]any{
+		"image": map[string]any{"sources": []any{
+			map[string]any{"url": "https://i.ytimg.com/vi/GdbjNGtWPe4/oar2.jpg", "width": float64(405), "height": float64(720)},
+		}},
+	}}
+	a11y := "39 years of Never Gonna Give You Up, 22 thousand views - play Short"
+
+	tab := parseShortsLockupViewModel(map[string]any{
+		"entityId":           "shorts-shelf-item-GdbjNGtWPe4",
+		"onTap":              onTap,
+		"accessibilityText":  a11y,
+		"thumbnailViewModel": thumb,
+		"overlayMetadata": map[string]any{
+			"primaryText":   map[string]any{"content": "39 years of Never Gonna Give You Up"},
+			"secondaryText": map[string]any{"content": "22K views"},
+		},
+	})
+	playlist := parseShortsLockupViewModel(map[string]any{
+		"entityId":           "A4C99DA633F4D7CD",
+		"onTap":              onTap,
+		"accessibilityText":  a11y,
+		"thumbnailViewModel": thumb,
+		"overlayMetadata": map[string]any{
+			"primaryText": map[string]any{"content": "39 years of Never Gonna Give You Up"},
+		},
+	})
+
+	for label, v := range map[string]Video{"shorts tab": tab, "shorts playlist": playlist} {
+		if v.VideoID != "GdbjNGtWPe4" {
+			t.Errorf("%s: VideoID = %q, want GdbjNGtWPe4", label, v.VideoID)
+		}
+		if v.IsShort == nil || !*v.IsShort {
+			t.Errorf("%s: nothing but a short is rendered as a shorts lockup", label)
+		}
+		if v.ViewCount != 22000 {
+			t.Errorf("%s: ViewCount = %d, want 22000", label, v.ViewCount)
+		}
+		if len(v.Thumbnails) == 0 {
+			t.Errorf("%s: no thumbnails, the sources live under thumbnailViewModel", label)
+		}
+		if v.Via["view_count"] == "" {
+			t.Errorf("%s: via should name where the count came from", label)
+		}
+	}
+	// The two pages state the count differently and via has to say which was read.
+	if tab.Via["view_count"] == playlist.Via["view_count"] {
+		t.Errorf("both pages claim the same source: %q", tab.Via["view_count"])
+	}
+}
+
+// The accessibility label spells the scale as a word where the visible text uses
+// the K/M suffix.
+func TestA11yViewCount(t *testing.T) {
+	cases := map[string]int64{
+		"Title, 22 thousand views - play Short": 22_000,
+		"Title, 1.4 million views - play Short": 1_400_000,
+		"Title, 2 billion views - play Short":   2_000_000_000,
+		"Title, 934 views - play Short":         934,
+		"Title, 1,234 views - play Short":       1_234,
+	}
+	for label, want := range cases {
+		if _, got := a11yViewCount(label); got != want {
+			t.Errorf("a11yViewCount(%q) = %d, want %d", label, got, want)
+		}
+	}
+	if _, got := a11yViewCount("no numbers here"); got != 0 {
+		t.Errorf("a label with no count should give 0, got %d", got)
+	}
+}

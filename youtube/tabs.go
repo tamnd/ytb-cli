@@ -31,13 +31,13 @@ import (
 type Tab struct {
 	// Slug is the language independent tab name: featured, videos, shorts,
 	// streams, releases, playlists, posts, search.
-	Slug string
+	Slug string `json:"slug"`
 	// Title is what a person sees. It is translated, so it is for display only.
-	Title string
+	Title string `json:"title,omitempty"`
 	// BrowseID and Params are what a browse call needs.
-	BrowseID string
-	Params   string
-	Selected bool
+	BrowseID string `json:"browse_id,omitempty"`
+	Params   string `json:"params,omitempty"`
+	Selected bool   `json:"selected,omitempty"`
 }
 
 // tabRendererKeys are the renderers a tab arrives as. The search tab is an
