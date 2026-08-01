@@ -45,8 +45,13 @@ transcript fallback when YouTube gates the caption endpoints.
 | Command | Reads |
 | --- | --- |
 | `ytb video <id\|url>...` | one or more videos; full metadata |
-| `ytb channel <handle\|url>` | channel metadata; `--videos`, `--shorts`, `--streams`, `--playlists` |
-| `ytb playlist <id\|url>` | a playlist's header and items |
+| `ytb channel <handle\|url>` | a channel's record; `--counts`, `--no-about` |
+| `ytb about <handle\|url>` | a channel's about panel: links, country, join date |
+| `ytb uploads <handle\|url>` | a channel's uploads; `--kind`, `--via`, `--exact` |
+| `ytb feed <handle\|url>` | the newest fifteen, with exact timestamps |
+| `ytb playlists <handle\|url>` | a channel's playlists |
+| `ytb playlist <id\|url>` | a playlist's header |
+| `ytb items <id\|url>` | a playlist's videos |
 | `ytb search <query>` | search with type, duration, features, and sort filters |
 | `ytb trending` | what is hot right now; `--category` |
 | `ytb comments <id\|url>` | a video's comments and replies; `--sort` |
@@ -80,13 +85,14 @@ Full reference and guides live at [ytb-cli.tamnd.com](https://ytb-cli.tamnd.com)
 ## Usage
 
 ```bash
-ytb video dQw4w9WgXcQ                         # full video metadata
-ytb channel @MrBeast --videos -n 20            # a channel's uploads
-ytb search 'lofi hip hop' -n 50               # search
+ytb video dQw4w9WgXcQ                        # full video metadata
+ytb channel @MrBeast                         # a channel's record
+ytb uploads @MrBeast -n 20                   # a channel's uploads
+ytb search 'lofi hip hop' -n 50              # search
 ytb comments dQw4w9WgXcQ --sort new -n 100   # newest 100 comments
-ytb transcript dQw4w9WgXcQ                    # transcript as text
-ytb trending --category music                 # what is hot right now
-ytb music search 'rick astley'                # YouTube Music search
+ytb transcript dQw4w9WgXcQ                   # transcript as text
+ytb trending --category music                # what is hot right now
+ytb music search 'rick astley'               # YouTube Music search
 ```
 
 Records come out as a table (the default on a terminal), list, markdown, JSON,
@@ -98,20 +104,20 @@ ytb search 'lofi hip hop' --fields id,title,channel,views -o table
 ytb video dQw4w9WgXcQ -o json
 ytb search 'go' -n 50 -o jsonl | jq 'select(.views > 100000)'
 ytb search 'go' -o url
-ytb channel @MrBeast --videos -o jsonl > mrbeast.jsonl
-ytb playlist PLFgquLnL59alCl_2TQvOiD5Vgm1hCaGSI -o url | ytb video -
+ytb uploads @MrBeast -o jsonl > mrbeast.jsonl
+ytb items PLFgquLnL59alCl_2TQvOiD5Vgm1hCaGSI -o url | ytb video -
 ```
 
 Chain commands through stdin with `-` for batch lookups:
 
 ```bash
-ytb search 'go programming' -o id | ytb video -
+ytb search 'go programming' -o url | ytb video -
 ```
 
 ### Global flags
 
 ```
--o, --output       list|table|markdown|json|jsonl|csv|tsv|url|id|raw   (auto: table on a TTY, jsonl when piped)
+-o, --output       list|table|markdown|json|jsonl|csv|tsv|url|raw      (auto: table on a TTY, jsonl when piped)
     --fields       comma-separated columns to keep, in order
     --no-header    omit the header row
     --template     Go text/template applied per record
@@ -138,7 +144,7 @@ relationships between them. That turns the same commands into a crawler and give
 you SQL over what you have collected.
 
 ```bash
-ytb channel @MrBeast --videos --db yt.db     # stream and persist in one pass
+ytb uploads @MrBeast --db yt.db               # stream and persist in one pass
 ytb db stats --db yt.db                       # row counts per table
 ytb db query "select title, views from videos order by views desc limit 10" --db yt.db
 ytb db search videos "lofi" --db yt.db        # full-text search
@@ -149,7 +155,7 @@ For larger collection runs, the `seed`/`crawl`/`queue`/`jobs` commands turn the
 store into a work queue:
 
 ```bash
-ytb search 'podcast' -o id --enqueue --db yt.db  # seed from a search
+ytb search 'podcast' --enqueue --db yt.db         # seed from a search
 ytb crawl --db yt.db -j 8                         # drain with 8 workers
 ytb queue --db yt.db                              # see what is pending
 ```

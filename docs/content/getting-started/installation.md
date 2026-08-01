@@ -31,7 +31,7 @@ Mount a volume and point `--db` at it to keep a SQLite store across runs:
 
 ```bash
 docker run --rm -v "$PWD/data:/data" ghcr.io/tamnd/ytb \
-  channel @MrBeast --videos --db /data/yt.db
+  uploads @MrBeast --db /data/yt.db
 ```
 
 ## From source

@@ -46,7 +46,7 @@ Pass `-` to read ids or URLs from stdin, one per line. This is how the other
 commands chain into `video`:
 
 ```sh
-ytb search "go programming" -o id | ytb video -
+ytb search "go programming" -o url | ytb video -
 ```
 
 `-j`/`--workers` sets how many detail fetches run at once when you pass many ids.

@@ -14,7 +14,7 @@ ytb search "lofi hip hop"
 ```
 
 Output is automatic: an aligned table on a terminal, JSONL when piped. Override
-it with `-o` (`table`, `json`, `jsonl`, `csv`, `tsv`, `url`, `id`, `raw`).
+it with `-o` (`list`, `table`, `markdown`, `json`, `jsonl`, `csv`, `tsv`, `url`, `raw`).
 
 ## Filters
 
@@ -68,11 +68,11 @@ ytb search "lofi hip hop" --max-pages 3  # fetch at most 3 pages
 
 ## Piping ids into other commands
 
-Use `-o id` to emit just the video id per line, then feed it to `video -`,
+Use `-o url` to emit just the video URL per line, then feed it to `video -`,
 which reads ids from stdin and resolves each to full metadata:
 
 ```sh
-ytb search "go programming" -o id | ytb video -
+ytb search "go programming" -o url | ytb video -
 ```
 
 The same works for `--fields` to keep the columns you care about:
@@ -89,7 +89,7 @@ workers can then drain the queue later. See [The store](/guides/the-store/) for
 the full crawl workflow.
 
 ```sh
-ytb search "podcast" -o id --enqueue --db yt.db
+ytb search "podcast" --enqueue --db yt.db
 ```
 
 ## Related discovery commands

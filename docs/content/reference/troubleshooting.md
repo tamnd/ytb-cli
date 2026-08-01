@@ -61,7 +61,7 @@ with backoff up to `--retries` times (default `3`).
 If you still see repeated `429`s, raise the delay:
 
 ```sh
-ytb channel @MrBeast --videos --rate 3s
+ytb uploads @MrBeast --rate 3s
 ytb search "podcast" -n 500 --rate 4s --retries 5
 ```
 

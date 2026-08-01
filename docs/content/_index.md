@@ -13,11 +13,11 @@ the browser. ytb talks to the same public InnerTube endpoints the site
 itself uses, so there is nothing to sign up for and no quota to budget.
 
 ```bash
-ytb video dQw4w9WgXcQ                 # full metadata for a video
-ytb channel @MrBeast --videos          # stream a channel's uploads
-ytb search "lofi hip hop" -n 50        # search with continuation paging
-ytb transcript dQw4w9WgXcQ             # the video's transcript as text
-ytb download dQw4w9WgXcQ               # download it with the built-in engine
+ytb video dQw4w9WgXcQ             # full metadata for a video
+ytb uploads @MrBeast              # stream a channel's uploads
+ytb search "lofi hip hop" -n 50   # search with continuation paging
+ytb transcript dQw4w9WgXcQ        # the video's transcript as text
+ytb download dQw4w9WgXcQ          # download it with the built-in engine
 ```
 
 It speaks to the public endpoints behind `youtube.com/youtubei/v1/*` over plain

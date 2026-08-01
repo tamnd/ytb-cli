@@ -42,7 +42,7 @@ pull out clean records, the same approach the site's own UI takes.
 
 Long lists do not arrive all at once. Each response carries an opaque
 **continuation token** that asks for the next chunk. ytb follows those tokens
-for you, so `ytb channel @someone --videos` streams the entire upload history
+for you, so `ytb uploads @someone` streams the entire upload history
 without you ever seeing a page boundary. The `-n`/`--limit` and `--max-pages`
 flags bound how far it goes.
 

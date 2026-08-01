@@ -11,7 +11,7 @@ formats, and the relationships between them). The same commands you already run
 become a crawler, and you get SQL over what you have collected.
 
 ```sh
-ytb channel @MrBeast --videos --db yt.db   # stream and persist in one pass
+ytb uploads @MrBeast --db yt.db              # stream and persist in one pass
 ytb video dQw4w9WgXcQ --db yt.db            # one video, with its relations
 ```
 
@@ -54,7 +54,7 @@ ytb seed "lofi" --entity search --priority 10 --db yt.db
 `search` can enqueue its own results directly with `--enqueue`:
 
 ```sh
-ytb search "podcast" -o id --enqueue --db yt.db   # seed the queue from a search
+ytb search "podcast" --enqueue --db yt.db          # seed the queue from a search
 ```
 
 `crawl` drains the queue with `-j` workers, persisting each result as it goes.

@@ -32,7 +32,7 @@ Results carry the browse id or video id you need to open the entity with the
 other subcommands, so the two compose:
 
 ```sh
-ytb music search "daft punk" --type artist -o id    # just the browse ids
+ytb music search "daft punk" --type artist -o url   # just the Music URLs
 ```
 
 ## Opening an artist

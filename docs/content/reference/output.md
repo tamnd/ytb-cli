@@ -25,7 +25,6 @@ ytb search example -o jsonl    # one JSON object per line, for piping
 ytb search example -o csv      # comma-separated, spreadsheet friendly
 ytb search example -o tsv      # tab-separated
 ytb search example -o url      # just the canonical URL, one per line
-ytb search example -o id       # just the id, one per line
 ytb search example -o raw      # the raw underlying value
 ```
 
@@ -42,7 +41,7 @@ the table draws a dim rounded border with an accented bold header, and JSON keys
 strings, numbers, and literals are highlighted. Color is suppressed the moment
 output is not a terminal, so a pipe always gets plain, parseable bytes and
 `ytb ... | jq` is never affected. Force the choice with `--color always|never`
-(or set `NO_COLOR`). `markdown`, `csv`, `tsv`, `url`, `id`, and `raw` are never
+(or set `NO_COLOR`). `markdown`, `csv`, `tsv`, `url`, and `raw` are never
 colored, so they stay safe to redirect into a file. A too-wide `table` shrinks to
 fit the terminal instead of wrapping at the edge.
 
@@ -74,16 +73,14 @@ ytb video dQw4w9WgXcQ --template '{{.ID}} {{.Title}} {{.Channel}}'
 A template wins over `--fields` and `-o`, since you are describing the exact line
 to print.
 
-## Piping ids and urls
+## Piping urls
 
-`-o id` and `-o url` exist for chaining. Any command that takes an id or URL also
-accepts `-` to read a list from stdin, so the output of one command feeds the
-next:
+`-o url` exists for chaining.
+Any command that takes an id or URL also accepts `-` to read a list from stdin, so the output of one command feeds the next:
 
 ```sh
-ytb search "go programming" -o id | ytb video -
-ytb playlist PLFgquLnL59alCl_2TQvOiD5Vgm1hCaGSI -o id | ytb video -
+ytb search "go programming" -o url | ytb video -
+ytb items PLFgquLnL59alCl_2TQvOiD5Vgm1hCaGSI -o url | ytb video -
 ```
 
-The first command emits one id per line, and `ytb video -` resolves each to
-full metadata.
+The first command emits one URL per line, and `ytb video -` resolves each to full metadata.

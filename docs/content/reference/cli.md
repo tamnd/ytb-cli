@@ -16,7 +16,7 @@ Persistent flags accepted by every command.
 
 | Flag | Meaning |
 | --- | --- |
-| `-o, --output` | Output format: `table`, `json`, `jsonl`, `csv`, `tsv`, `url`, `id`, `raw` (auto) |
+| `-o, --output` | Output format: `list`, `table`, `markdown`, `json`, `jsonl`, `csv`, `tsv`, `url`, `raw` (auto) |
 | `--fields` | Comma-separated columns to show |
 | `-n, --limit` | Max rows emitted (`0` = unlimited) |
 | `--max-pages` | Max continuation pages fetched (`0` = unlimited) |
@@ -43,8 +43,13 @@ Persistent flags accepted by every command.
 | Command | What it does |
 | --- | --- |
 | `video` | Resolve one or more videos to full metadata |
-| `channel` | Channel metadata and its content |
-| `playlist` | Playlist header and its items |
+| `channel` | A channel's record: header, about panel and external links |
+| `about` | A channel's about panel on its own |
+| `uploads` | Stream a channel's uploads |
+| `feed` | A channel's Atom feed: the newest fifteen, with exact times |
+| `playlists` | List a channel's playlists |
+| `playlist` | Playlist header |
+| `items` | Stream a playlist's videos |
 | `search` | Search with the full filter grid |
 | `trending` | What's hot right now |
 | `comments` | Comments and replies |
@@ -90,24 +95,84 @@ The watch page carries a stream list for free and a plain read still leaves it o
 
 ## channel
 
-`ytb channel <id|@handle|url> [--flags]`. Without a tab flag, prints the channel record.
+`ytb channel <id|@handle|url> [--flags]`. Prints the channel record.
 
 | Flag | Meaning |
 | --- | --- |
-| `--videos` | Stream the uploads tab |
-| `--shorts` | Stream the Shorts tab |
-| `--streams` | Stream the past live streams tab |
-| `--playlists` | List the channel's playlists |
+| `--no-about` | Skip the about panel: one request fewer, and no join date, lifetime views or link titles |
+| `--counts` | Read the four derived playlists and check that videos + shorts + streams = uploads (four extra requests) |
+
+A channel page publishes its facts in four blocks that barely overlap, and the record is all four merged.
+`channelMetadataRenderer` has the id, the keywords, the RSS url and the 249 country codes it will serve in.
+`microformatDataRenderer` has the crawler's view plus a schema.org ProfilePage, and `mainEntity.sameAs` in that ProfilePage is the whole external link list with no continuation behind it, which is the cheapest place on the site to get a channel's links.
+`pageHeaderViewModel` has the handle, the badge and the banner.
+The about panel is a continuation and is the only source of the join date, the lifetime view count, the country in words and the link titles, which is what `--no-about` trades away.
+
+Subscriber counts always carry `subscriber_count_is_approximate: true`.
+The site rounds every one of them to three significant figures, including the number in the ProfilePage's `interactionStatistic`, so 1490000 means somewhere in the 1.49 millions and never means exactly that.
+
+The header and the about panel can disagree with each other about the video count, and both can disagree with the uploads playlist.
+The panel beats the header, `--counts` beats both, and `via` names the number that lost:
+
+```
+$ ytb channel @RickAstleyYT --counts --fields handle,videos,counts
+╭───────────────┬────────┬─────────────────────────────────────╮
+│ HANDLE        │ VIDEOS │ COUNTS                              │
+├───────────────┼────────┼─────────────────────────────────────┤
+│ @RickAstleyYT │ 435    │ 139 + 294 + 2 = 435 uploads, agrees │
+╰───────────────┴────────┴─────────────────────────────────────╯
+```
+
+Those are the four playlists derived from the channel id: `UU` is every upload, `UULF` long form, `UUSH` shorts, `UULV` past live streams.
+The three partition the first, so a mismatch means the site is mid-write or a video is in a state none of the three tabs claims.
+The table shows the whole check as one `counts` cell; `-o json` carries the four ids, the four numbers and `agrees` separately.
+
+## about
+
+`ytb about <id|@handle|url>`. The about panel on its own: description, join date, lifetime views, country, and the external links with their titles.
+No flags beyond the globals.
+
+## uploads
+
+`ytb uploads <id|@handle|url> [--flags]`. Streams a channel's uploads.
+
+| Flag | Meaning |
+| --- | --- |
+| `--kind` | Which uploads: `all`, `videos`, `shorts`, `streams`, `popular` (default `all`) |
+| `--via` | Read them from the derived `playlist` or from the channel `tab` (default `playlist`) |
+| `--exact` | Cross-read the Atom feed so the newest fifteen get exact timestamps (one extra request) |
 | `--enrich` | Call `/player` per video for full metadata |
-| `--all` | Remove the default page cap |
+| `--max-pages` | Max continuation pages (0 = unlimited) |
+
+The playlist route is the default because it is the only one that answers `--kind all`.
+No tab lists a channel's uploads: the Videos tab is long form only and returns exactly what `UULF` returns, so `--kind all --via tab` and `--kind popular --via tab` are usage errors rather than something that quietly returns less.
+
+A shorts row comes back from the two routes with the same id and the same view count and a different `via`, because the two pages render the same view model differently.
+The Shorts tab writes a readable `shorts-shelf-item-<id>` and a "22K views" overlay; the `UUSH` playlist writes an opaque hash and no overlay at all, and the only view count on the row is the one spelled out in its accessibility label, "22 thousand views".
+Both are read, and `via` says which.
+
+`--exact` fetches the Atom feed once and merges it into the newest fifteen rows.
+Those get a timestamp to the second and an exact view count; everything after row fifteen keeps the rounded text and says so in `missed`, because the feed serves fifteen entries and has no continuation.
+
+## feed
+
+`ytb feed <id|@handle|url>`. The channel's Atom feed: fifteen entries, newest first, each with a publication time to the second and an exact view count.
+No flags beyond the globals.
+
+This is the only surface outside the player that says whether a video is a short, which it does by linking to `/shorts/<id>` instead of `/watch?v=`.
+`media:starRating count` on an entry is a rating count and not a like count, so it is never written into `like_count`.
+
+## playlists
+
+`ytb playlists <id|@handle|url> [--flags]`. Lists the playlists a channel has published, from its Playlists tab.
 
 ## playlist
 
-`ytb playlist <id|url> [--flags]`. Prints the playlist header.
+`ytb playlist <id|url>`. Prints the playlist header.
 
-| Flag | Meaning |
-| --- | --- |
-| `--videos` | Stream the playlist items |
+## items
+
+`ytb items <playlist-id|url> [--flags]`. Streams a playlist's videos, each with its position.
 
 ## search
 

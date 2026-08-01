@@ -37,11 +37,10 @@ Point at a channel by handle, id, or URL and stream its uploads. ytb follows
 the continuation tokens for you, so this keeps going until your limit is hit:
 
 ```bash
-ytb channel @RickAstleyYT --videos -n 20
+ytb uploads @RickAstleyYT -n 20
 ```
 
-Swap `--videos` for `--shorts`, `--streams`, or `--playlists` to walk the other
-tabs.
+Add `--kind shorts` or `--kind streams` for those, `ytb playlists` for the channel's playlists, and `ytb channel` on its own for the channel record.
 
 ## 3. Search with filters
 
@@ -53,10 +52,10 @@ ytb search "drone footage" --4k --duration long --sort date
 ytb search "podcast" --type channel
 ```
 
-Render just the ids and pipe them straight into another command:
+Render just the URLs and pipe them straight into another command:
 
 ```bash
-ytb search "go programming" -o id -n 10 | ytb video -
+ytb search "go programming" -o url -n 10 | ytb video -
 ```
 
 The trailing `-` tells `video` to read its arguments from stdin, one per line.
@@ -104,7 +103,7 @@ Add `--db` to any command and ytb also writes everything into a local SQLite
 database, turning the same commands into an incremental crawler:
 
 ```bash
-ytb channel @RickAstleyYT --videos --db yt.db
+ytb uploads @RickAstleyYT --db yt.db
 ytb db stats --db yt.db
 ytb db query "select title, view_count from videos order by view_count desc limit 5" --db yt.db
 ```
