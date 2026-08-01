@@ -257,15 +257,59 @@ func (s *Store) UpsertChannel(c Channel) error {
 		fetched_at
 	) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
 		c.ChannelID, storeNullStr(c.Handle), storeNullStr(c.Title),
-		storeNullStr(c.Description), storeNullStr(c.AvatarURL), storeNullStr(c.BannerURL),
-		storeNullStr(c.SubscribersText), storeNullStr(c.VideosText), storeNullStr(c.ViewsText),
-		storeNullStr(c.Country), storeNullStr(c.JoinedDateText),
+		storeNullStr(c.Description), storeNullStr(largestThumbnail(c.Avatar)), storeNullStr(largestThumbnail(c.Banner)),
+		storeNullStr(c.SubscriberCountText), storeNullStr(c.VideoCountText), storeNullStr(""),
+		storeNullStr(c.Country), storeNullStr(c.JoinedText),
 		storeNullStr(c.UploadsPlaylistID), storeNullStr(c.URL),
 		storeNullInt64(c.SubscriberCount), storeNullInt64(c.VideoCount), storeNullInt64(c.ViewCount),
-		jsonString(c.Keywords), storeNullStr(c.TrailerVideoID), storeBool(c.IsVerified),
+		jsonString(c.Keywords), storeNullStr(""), storeBool(c.IsVerified),
 		storeTime(c.FetchedAt),
 	)
 	return err
+}
+
+// storedChannel bridges the channels table to the Channel record.
+//
+// The table predates the record. It keeps one avatar_url and one banner_url
+// where the record keeps the whole rendition list, and it keeps a views_text
+// column the record has no field for at all. Milestone 12 rewrites the schema;
+// until then this reads what is there and puts it back where it belongs, rather
+// than leaving Avatar empty on every channel read out of the store.
+type storedChannel struct {
+	avatarURL string
+	bannerURL string
+	viewsText string
+}
+
+// dest is the scan destination list, in the column order both channel queries
+// select. Keeping it in one place is what stops the two from drifting apart.
+func (r *storedChannel) dest(c *Channel) []any {
+	return []any{
+		&c.ChannelID, &c.Handle, &c.Title,
+		&c.Description, &r.avatarURL, &r.bannerURL,
+		&c.SubscriberCountText, &c.VideoCountText,
+		&r.viewsText, &c.Country,
+		&c.JoinedText, &c.UploadsPlaylistID,
+		&c.URL,
+	}
+}
+
+// apply folds the columns with no field of their own back onto the record. The
+// counts are read back off their text because the query does not select the
+// numeric columns, and a record with "4.52M subscribers" on it and a zero
+// subscriber_count would read as a channel that lost its audience.
+func (r storedChannel) apply(c *Channel) {
+	if r.avatarURL != "" {
+		c.Avatar = []Thumbnail{{URL: r.avatarURL, Source: ThumbnailFromPayload}}
+	}
+	if r.bannerURL != "" {
+		c.Banner = []Thumbnail{{URL: r.bannerURL, Source: ThumbnailFromPayload}}
+	}
+	c.SubscriberCount = parseCountText(c.SubscriberCountText)
+	c.SubscriberCountIsApproximate = true
+	c.VideoCount = parseCountText(c.VideoCountText)
+	c.ViewCount = parseCountText(r.viewsText)
+	c.JoinedAt = parseJoinedDate(c.JoinedText)
 }
 
 // --- Playlist ---
@@ -621,7 +665,7 @@ func (s *Store) SearchChannels(q string, limit int) ([]Channel, error) {
 	for rows.Next() {
 		var c Channel
 		if err := rows.Scan(
-			&c.ChannelID, &c.Handle, &c.Title, &c.Description, &c.SubscribersText, &c.URL,
+			&c.ChannelID, &c.Handle, &c.Title, &c.Description, &c.SubscriberCountText, &c.URL,
 		); err != nil {
 			return out, err
 		}
@@ -687,7 +731,7 @@ func (s *Store) Close() error { return s.db.Close() }
 
 func (s *Store) storeGetChannel(idOrHandle string) (*Channel, error) {
 	h := strings.TrimPrefix(idOrHandle, "@")
-	row := s.db.QueryRow(`
+	r := s.db.QueryRow(`
 		SELECT channel_id, COALESCE(handle,''), COALESCE(title,''),
 		       COALESCE(description,''), COALESCE(avatar_url,''), COALESCE(banner_url,''),
 		       COALESCE(subscribers_text,''), COALESCE(videos_text,''),
@@ -701,16 +745,11 @@ func (s *Store) storeGetChannel(idOrHandle string) (*Channel, error) {
 		LIMIT 1`,
 		idOrHandle, h, "@"+h, h, h, h)
 	var c Channel
-	if err := row.Scan(
-		&c.ChannelID, &c.Handle, &c.Title,
-		&c.Description, &c.AvatarURL, &c.BannerURL,
-		&c.SubscribersText, &c.VideosText,
-		&c.ViewsText, &c.Country,
-		&c.JoinedDateText, &c.UploadsPlaylistID,
-		&c.URL,
-	); err != nil {
+	var row storedChannel
+	if err := r.Scan(row.dest(&c)...); err != nil {
 		return nil, err
 	}
+	row.apply(&c)
 	return &c, nil
 }
 
@@ -730,16 +769,11 @@ func (s *Store) storeGetAllChannels() ([]Channel, error) {
 	var out []Channel
 	for rows.Next() {
 		var c Channel
-		if err := rows.Scan(
-			&c.ChannelID, &c.Handle, &c.Title,
-			&c.Description, &c.AvatarURL, &c.BannerURL,
-			&c.SubscribersText, &c.VideosText,
-			&c.ViewsText, &c.Country,
-			&c.JoinedDateText, &c.UploadsPlaylistID,
-			&c.URL,
-		); err != nil {
+		var row storedChannel
+		if err := rows.Scan(row.dest(&c)...); err != nil {
 			return out, err
 		}
+		row.apply(&c)
 		out = append(out, c)
 	}
 	return out, rows.Err()

@@ -29,7 +29,7 @@ func (g *fakeGraph) FetchVideo(_ context.Context, ref string, _ VideoOptions) (*
 	return nil, errors.New("video not found: " + ref)
 }
 
-func (g *fakeGraph) FetchChannel(_ context.Context, ref string) (*Channel, error) {
+func (g *fakeGraph) FetchChannel(_ context.Context, ref string, _ ChannelOptions) (*Channel, error) {
 	if c, ok := g.channels[ref]; ok {
 		return c, nil
 	}

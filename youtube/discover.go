@@ -321,7 +321,7 @@ type WalkOptions struct {
 // test supplies a fake. Every method matches *Client exactly.
 type grapher interface {
 	FetchVideo(ctx context.Context, ref string, opt VideoOptions) (*VideoResult, error)
-	FetchChannel(ctx context.Context, ref string) (*Channel, error)
+	FetchChannel(ctx context.Context, ref string, opt ChannelOptions) (*Channel, error)
 	FetchPlaylist(ctx context.Context, ref string) (*Playlist, error)
 	StreamChannelTab(ctx context.Context, ref, tab string, opt PageOptions, emit func(Video) error) error
 	StreamChannelPlaylists(ctx context.Context, ref string, opt PageOptions, emit func(Playlist) error) error
@@ -496,7 +496,7 @@ func (w *Walker) hydrate(ctx context.Context, f frontier, expand bool, edges Edg
 		return n, nil, nil
 	case KindChannel:
 		if f.channel == nil {
-			ch, err := w.g.FetchChannel(ctx, f.ref)
+			ch, err := w.g.FetchChannel(ctx, f.ref, ChannelOptions{})
 			if err != nil {
 				return nil, nil, err
 			}

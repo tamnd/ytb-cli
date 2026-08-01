@@ -163,7 +163,7 @@ func crawlVideo(ctx context.Context, c *Client, store *Store, url string, opt Cr
 }
 
 func crawlChannel(ctx context.Context, c *Client, store *Store, url string, opt CrawlOptions) error {
-	ch, err := c.FetchChannel(ctx, url)
+	ch, err := c.FetchChannel(ctx, url, ChannelOptions{})
 	if err != nil {
 		return err
 	}

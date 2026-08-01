@@ -85,7 +85,7 @@ func channelRow(c youtube.Channel) Row {
 	return Row{
 		Cols: []string{"id", "handle", "title", "subscribers", "videos", "url"},
 		Vals: []string{
-			c.ChannelID, c.Handle, c.Title, c.SubscribersText, c.VideosText, c.URL,
+			c.ChannelID, c.Handle, c.Title, c.SubscriberCountText, c.VideoCountText, c.URL,
 		},
 		Value: c,
 	}

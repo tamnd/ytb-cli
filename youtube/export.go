@@ -227,8 +227,8 @@ func exportWriteChannelIndex(ch Channel, videos, shorts []Video, playlists []Pla
 	_, _ = fmt.Fprintf(f, "title: %s\nurl: %s\n-->\n\n", ch.Title, ch.URL)
 
 	_, _ = fmt.Fprintf(f, "# %s\n\n", ch.Title)
-	if ch.AvatarURL != "" {
-		_, _ = fmt.Fprintf(f, "<img src=\"%s\" alt=\"%s\" width=\"120\">\n\n", ch.AvatarURL, exportEscText(ch.Title))
+	if avatar := largestThumbnail(ch.Avatar); avatar != "" {
+		_, _ = fmt.Fprintf(f, "<img src=\"%s\" alt=\"%s\" width=\"120\">\n\n", avatar, exportEscText(ch.Title))
 	}
 	if ch.Description != "" {
 		_, _ = fmt.Fprintf(f, "> %s\n\n", strings.ReplaceAll(strings.TrimSpace(ch.Description), "\n", "\n> "))
@@ -236,7 +236,7 @@ func exportWriteChannelIndex(ch Channel, videos, shorts []Video, playlists []Pla
 
 	_, _ = fmt.Fprintf(f, "## Channel at a Glance\n\n")
 	_, _ = fmt.Fprintf(f, "| | |\n|---|---|\n")
-	exportStatRow(f, "Subscribers", ch.SubscribersText)
+	exportStatRow(f, "Subscribers", ch.SubscriberCountText)
 	exportStatRow(f, "Videos", fmt.Sprintf("%d", len(videos)))
 	if len(shorts) > 0 {
 		exportStatRow(f, "Shorts", fmt.Sprintf("[%d](shorts/README.md)", len(shorts)))
@@ -258,7 +258,7 @@ func exportWriteChannelIndex(ch Channel, videos, shorts []Video, playlists []Pla
 		exportStatRow(f, "Content Span", fmt.Sprintf("%s to %s (%d years)", earliest[:4], latest[:4], len(yearCounts)))
 	}
 	exportStatRow(f, "Country", ch.Country)
-	exportStatRow(f, "Joined", ch.JoinedDateText)
+	exportStatRow(f, "Joined", ch.JoinedText)
 	_, _ = fmt.Fprintf(f, "| **YouTube** | [%s](%s) |\n\n", ch.URL, ch.URL)
 
 	if len(byViews) > 0 {

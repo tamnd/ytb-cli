@@ -59,7 +59,7 @@ func (Domain) Register(app *kit.App) {
 		URIType: "video", Resolver: true,
 		Args: []kit.Arg{{Name: "ref", Help: "video id or URL (or - for stdin)", Variadic: true}}}, getVideo)
 	kit.Handle(app, kit.OpMeta{Name: "channel", Group: "read", Single: true,
-		Summary: "Resolve a channel to its header metadata",
+		Summary: "Read a channel: header, about panel and external links",
 		URIType: "channel", Resolver: true,
 		Args: []kit.Arg{{Name: "ref", Help: "channel id, @handle, or URL"}}}, getChannel)
 	kit.Handle(app, kit.OpMeta{Name: "about", Group: "read", Single: true,
@@ -79,9 +79,13 @@ func (Domain) Register(app *kit.App) {
 	// List ops: members of a parent resource, the home of `ant ls`. They emit
 	// records that are themselves addressable, so a host can keep following.
 	kit.Handle(app, kit.OpMeta{Name: "uploads", Group: "read", List: true,
-		Summary: "Stream a channel's uploads (--tab videos|shorts|streams)",
+		Summary: "Stream a channel's uploads (--kind all|videos|shorts|streams|popular)",
 		URIType: "channel",
 		Args:    []kit.Arg{{Name: "ref", Help: "channel id, @handle, or URL"}}}, listUploads)
+	kit.Handle(app, kit.OpMeta{Name: "feed", Group: "read", List: true,
+		Summary: "Read a channel's Atom feed: the newest fifteen, with exact times",
+		URIType: "channel",
+		Args:    []kit.Arg{{Name: "ref", Help: "channel id, @handle, or URL"}}}, listFeed)
 	kit.Handle(app, kit.OpMeta{Name: "playlists", Group: "read", List: true,
 		Summary: "List a channel's playlists",
 		URIType: "channel",
@@ -205,17 +209,41 @@ type channelRef struct {
 	Client *Client `kit:"inject"`
 }
 
+// channelReadRef is the channel record read. The two flags are the two extra
+// requests it can make: the about panel is one continuation and is on by default
+// because the join date, the lifetime views and the link titles live nowhere
+// else, and --counts is four playlist reads and is off because most callers do
+// not want to pay for them.
+type channelReadRef struct {
+	Ref     string  `kit:"arg" help:"channel id, @handle, or URL"`
+	NoAbout bool    `kit:"flag,name=no-about" help:"skip the about panel (saves one request, loses join date, lifetime views and link titles)"`
+	Counts  bool    `kit:"flag" help:"read the four derived playlists and check videos + shorts + streams = uploads (four requests)"`
+	Client  *Client `kit:"inject"`
+}
+
 type playlistRef struct {
 	Ref    string  `kit:"arg" help:"playlist id or URL"`
 	Client *Client `kit:"inject"`
 }
 
+// uploadsRef is a channel's uploads. Kind says which uploads and Via says which
+// road to them, because the derived playlist and the tab are two different reads
+// of the same channel and they do not always agree.
 type uploadsRef struct {
 	Ref      string  `kit:"arg" help:"channel id, @handle, or URL"`
-	Tab      string  `kit:"flag" help:"which tab: videos|shorts|streams" default:"videos" enum:"videos,shorts,streams"`
+	Kind     string  `kit:"flag" help:"which uploads: all|videos|shorts|streams|popular" default:"all" enum:"all,videos,shorts,streams,popular"`
+	Via      string  `kit:"flag" help:"read them from the derived playlist or from the channel tab" default:"playlist" enum:"playlist,tab"`
+	Exact    bool    `kit:"flag" help:"cross read the Atom feed so the newest fifteen get exact timestamps (one extra request)"`
 	Enrich   bool    `kit:"flag" help:"call /player per video for full metadata"`
 	MaxPages int     `kit:"flag,name=max-pages" help:"max continuation pages (0 = unlimited)"`
 	Client   *Client `kit:"inject"`
+}
+
+// feedRef is the channel's Atom feed on its own, surface s6: fifteen entries,
+// exact times, no paging.
+type feedRef struct {
+	Ref    string  `kit:"arg" help:"channel id, @handle, or URL"`
+	Client *Client `kit:"inject"`
 }
 
 type pagedRef struct {
@@ -308,8 +336,8 @@ func getVideo(ctx context.Context, in videoRef, emit func(*Video) error) error {
 	return nil
 }
 
-func getChannel(ctx context.Context, in channelRef, emit func(*Channel) error) error {
-	ch, err := in.Client.FetchChannel(ctx, in.Ref)
+func getChannel(ctx context.Context, in channelReadRef, emit func(*Channel) error) error {
+	ch, err := in.Client.FetchChannel(ctx, in.Ref, ChannelOptions{NoAbout: in.NoAbout, Counts: in.Counts})
 	if err != nil {
 		return mapErr(err)
 	}
@@ -342,11 +370,25 @@ func getPlaylist(ctx context.Context, in playlistRef, emit func(*Playlist) error
 }
 
 func listUploads(ctx context.Context, in uploadsRef, emit func(Video) error) error {
-	tab := in.Tab
-	if tab == "" {
-		tab = "videos"
+	return mapErr(in.Client.StreamUploads(ctx, in.Ref, UploadsOptions{
+		Kind:  in.Kind,
+		Via:   in.Via,
+		Exact: in.Exact,
+		Page:  pageOpts(in.MaxPages, in.Enrich),
+	}, emit))
+}
+
+func listFeed(ctx context.Context, in feedRef, emit func(Video) error) error {
+	videos, err := in.Client.FetchChannelFeed(ctx, in.Ref)
+	if err != nil {
+		return mapErr(err)
 	}
-	return mapErr(in.Client.StreamChannelTab(ctx, in.Ref, tab, pageOpts(in.MaxPages, in.Enrich), emit))
+	for _, v := range videos {
+		if err := emit(v); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func listChannelPlaylists(ctx context.Context, in pagedRef, emit func(Playlist) error) error {
