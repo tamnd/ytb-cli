@@ -353,18 +353,36 @@ func parseJoinedDate(s string) time.Time {
 // count, and that is all it carries. The envelope says so: the surface is the
 // search response and missed names what a real read would add, so a consumer that
 // stored one of these knows it is holding a row rather than a record.
+//
+// The two count fields are read by what they say and not by what they are called.
+// YouTube shifted them by one: on every channel row a live search returns,
+// subscriberCountText holds the handle and videoCountText holds the subscriber
+// count. A channel with no handle, such as a Topic channel, has no
+// subscriberCountText at all and its videoCountText really is a video count. So
+// each string is classified on its own text and the key names are ignored.
 func parseChannelRenderer(r map[string]any) Channel {
-	text := extractText(r["subscriberCountText"])
 	c := Channel{
-		ChannelID:                    stringValue(r["channelId"]),
-		Title:                        extractText(r["title"]),
-		Description:                  extractText(r["descriptionSnippet"]),
-		SubscriberCountText:          text,
-		SubscriberCount:              parseCountText(text),
-		SubscriberCountIsApproximate: true,
-		URL:                          joinURL(endpointURL(r["navigationEndpoint"])),
-		Avatar:                       ParseThumbnails(mapValue(r, "thumbnail")["thumbnails"]),
-		Envelope:                     newEnvelope("channel", SurfaceInnerTube),
+		ChannelID:   stringValue(r["channelId"]),
+		Title:       extractText(r["title"]),
+		Description: extractText(r["descriptionSnippet"]),
+		URL:         joinURL(endpointURL(r["navigationEndpoint"])),
+		Avatar:      ParseThumbnails(mapValue(r, "thumbnail")["thumbnails"]),
+		Envelope:    newEnvelope("channel", SurfaceInnerTube),
+	}
+	for _, key := range []string{"subscriberCountText", "videoCountText"} {
+		text := extractText(r[key])
+		switch {
+		case text == "":
+		case strings.HasPrefix(text, "@"):
+			c.Handle = text
+		case strings.Contains(text, "subscriber"):
+			c.SubscriberCountText = text
+			c.SubscriberCount = parseCountText(text)
+			c.SubscriberCountIsApproximate = true
+		case strings.Contains(text, "video"):
+			c.VideoCountText = text
+			c.VideoCount = parseCountText(text)
+		}
 	}
 	if h := stringValue(mapValue(mapValue(mapValue(r, "navigationEndpoint"), "commandMetadata"), "webCommandMetadata")["url"]); strings.HasPrefix(h, "/@") {
 		c.Handle = strings.TrimPrefix(h, "/")

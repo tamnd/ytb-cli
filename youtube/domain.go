@@ -274,7 +274,7 @@ type trendingRef struct {
 
 type searchRef struct {
 	Query      []string `kit:"arg,variadic" help:"search terms"`
-	Type       string   `kit:"flag" help:"video|channel|playlist"`
+	Type       string   `kit:"flag" help:"video|channel|playlist|movie"`
 	Sort       string   `kit:"flag" help:"relevance|date|views|rating"`
 	Duration   string   `kit:"flag" help:"short|medium|long"`
 	UploadDate string   `kit:"flag,name=upload-date" help:"hour|today|week|month|year"`
@@ -282,6 +282,7 @@ type searchRef struct {
 	CC         bool     `kit:"flag,name=cc" help:"closed captions / subtitles"`
 	Creative   bool     `kit:"flag,name=creative-commons" help:"Creative Commons license"`
 	Live       bool     `kit:"flag" help:"live only"`
+	Purchased  bool     `kit:"flag" help:"purchased titles only"`
 	FourK      bool     `kit:"flag,name=4k" help:"4K only"`
 	ThreeSixty bool     `kit:"flag,name=360" help:"360-degree video"`
 	HDR        bool     `kit:"flag,name=hdr" help:"HDR only"`
@@ -453,6 +454,7 @@ func search(ctx context.Context, in searchRef, emit func(any) error) error {
 		CC:             in.CC,
 		CreativeCommon: in.Creative,
 		Live:           in.Live,
+		Purchased:      in.Purchased,
 		FourK:          in.FourK,
 		ThreeSixty:     in.ThreeSixty,
 		HDR:            in.HDR,
@@ -599,7 +601,7 @@ func mapErr(err error) error {
 	switch {
 	case err == nil, errors.Is(err, ErrStop):
 		return nil
-	case errors.Is(err, ErrChannelNotFound):
+	case errors.Is(err, ErrChannelNotFound), errors.Is(err, ErrPlaylistNotFound):
 		// Exit 6 per doc 05 section 9. A vanity URL that nobody claimed is a missing
 		// thing, not a failed read, and the difference matters to a script walking a
 		// list of addresses.

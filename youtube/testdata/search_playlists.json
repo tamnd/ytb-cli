@@ -1,0 +1,813 @@
+{
+ "contents": {
+  "twoColumnSearchResultsRenderer": {
+   "primaryContents": {
+    "sectionListRenderer": {
+     "contents": [
+      {
+       "itemSectionRenderer": {
+        "contents": [
+         {
+          "channelRenderer": {
+           "channelId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+           "title": {
+            "simpleText": "Rick Astley"
+           },
+           "navigationEndpoint": {
+            "commandMetadata": {
+             "webCommandMetadata": {
+              "url": "/@RickAstleyYT",
+              "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+              "rootVe": 3611,
+              "apiUrl": "/youtubei/v1/browse"
+             }
+            },
+            "browseEndpoint": {
+             "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+             "canonicalBaseUrl": "/@RickAstleyYT"
+            }
+           },
+           "thumbnail": {
+            "thumbnails": [
+             {
+              "url": "https://yt3.googleusercontent.com/MOWpaiGJdgN4aKMI-NGQLL4jMVP3aDORlQpOBWooi0GSE2TGt4_9ncyepk1pCh-yWQ795AhPbw=s88-c-k-c0x00ffffff-no-rj-mo",
+              "width": 88,
+              "height": 88
+             },
+             {
+              "url": "https://yt3.googleusercontent.com/MOWpaiGJdgN4aKMI-NGQLL4jMVP3aDORlQpOBWooi0GSE2TGt4_9ncyepk1pCh-yWQ795AhPbw=s176-c-k-c0x00ffffff-no-rj-mo",
+              "width": 176,
+              "height": 176
+             }
+            ]
+           },
+           "descriptionSnippet": {
+            "runs": [
+             {
+              "text": "New single 'Raindrops' out now. https://"
+             },
+             {
+              "text": "rickastley",
+              "bold": true
+             },
+             {
+              "text": ".lnk.to/Raindrops Tickets for summer shows 2026 on sale now."
+             }
+            ]
+           },
+           "shortBylineText": {
+            "runs": [
+             {
+              "text": "Rick Astley",
+              "navigationEndpoint": {
+               "commandMetadata": {
+                "webCommandMetadata": {
+                 "url": "/@RickAstleyYT",
+                 "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                 "rootVe": 3611,
+                 "apiUrl": "/youtubei/v1/browse"
+                }
+               },
+               "browseEndpoint": {
+                "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+                "canonicalBaseUrl": "/@RickAstleyYT"
+               }
+              }
+             }
+            ]
+           },
+           "videoCountText": {
+            "accessibility": {
+             "accessibilityData": {
+              "label": "4.52 million subscribers"
+             }
+            },
+            "simpleText": "4.52M subscribers"
+           },
+           "subscriptionButton": {
+            "subscribed": false
+           },
+           "subscriberCountText": {
+            "simpleText": "@RickAstleyYT"
+           },
+           "subscribeButton": {
+            "buttonRenderer": {
+             "style": "STYLE_DESTRUCTIVE",
+             "size": "SIZE_DEFAULT",
+             "isDisabled": false,
+             "text": {
+              "runs": [
+               {
+                "text": "Subscribe"
+               }
+              ]
+             },
+             "navigationEndpoint": {
+              "commandMetadata": {
+               "webCommandMetadata": {
+                "url": "https://accounts.google.com/ServiceLogin?service=youtube&uilel=3&passive=true&continue=https%3A%2F%2Fwww.youtube.com%2Fsignin%3Faction_handle_signin%3Dtrue%26app%3Ddesktop%26hl%3Den%26next%3D%252Fresults%253Fsearch_query%253Drick%252Bastley%2526sp%253DEgIQAw%2525253D%2525253D%26continue_action%3DQUM4Zm9rUjMxTkNnaTlBRTBRWnZYVkpTUWhnc3xBR3JiS2FrVWw1Q2UxTjlUYjE3M2FieXZMRGhabkw1VkFEeUh1ZXFidEhaeUt3azB5dHdPdnBiS2VGVk9SZDlFb2hkd2lxQm14Z1NxRUE3ckdzM1RybzEzaFc3cmpvTERTTko4a1FYdGlIVl9PRE1UbVk3ckZLbGRKNC0zUm5ubWtxTDFzbHYycGI0UUhrVVdtRk80OXQzd3JlVWN6VU9vNVZuN1dvc2I0ZWwyWERoT21VejZVTlU2MUUw&hl=en",
+                "webPageType": "WEB_PAGE_TYPE_UNKNOWN",
+                "rootVe": 83769
+               }
+              },
+              "signInEndpoint": {
+               "nextEndpoint": {
+                "commandMetadata": {
+                 "webCommandMetadata": {
+                  "url": "/results?search_query=rick+astley&sp=EgIQAw%253D%253D",
+                  "webPageType": "WEB_PAGE_TYPE_SEARCH",
+                  "rootVe": 4724
+                 }
+                },
+                "searchEndpoint": {
+                 "query": "rick astley",
+                 "params": "EgIQAw%3D%3D"
+                }
+               },
+               "continueAction": "QUM4Zm9rUjMxTkNnaTlBRTBRWnZYVkpTUWhnc3xBR3JiS2FrVWw1Q2UxTjlUYjE3M2FieXZMRGhabkw1VkFEeUh1ZXFidEhaeUt3azB5dHdPdnBiS2VGVk9SZDlFb2hkd2lxQm14Z1NxRUE3ckdzM1RybzEzaFc3cmpvTERTTko4a1FYdGlIVl9PRE1UbVk3ckZLbGRKNC0zUm5ubWtxTDFzbHYycGI0UUhrVVdtRk80OXQzd3JlVWN6VU9vNVZuN1dvc2I0ZWwyWERoT21VejZVTlU2MUUw"
+              }
+             }
+            }
+           },
+           "longBylineText": {
+            "runs": [
+             {
+              "text": "Rick Astley",
+              "navigationEndpoint": {
+               "commandMetadata": {
+                "webCommandMetadata": {
+                 "url": "/@RickAstleyYT",
+                 "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                 "rootVe": 3611,
+                 "apiUrl": "/youtubei/v1/browse"
+                }
+               },
+               "browseEndpoint": {
+                "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+                "canonicalBaseUrl": "/@RickAstleyYT"
+               }
+              }
+             }
+            ]
+           }
+          }
+         },
+         {
+          "lockupViewModel": {
+           "contentImage": {
+            "collectionThumbnailViewModel": {
+             "primaryThumbnail": {
+              "thumbnailViewModel": {
+               "image": {
+                "sources": [
+                 {
+                  "url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hq720.jpg?sqp=-oaymwEXCOgCEMoBSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLAmcb8rtMhEjuYeigpkSaXOltKOwg",
+                  "width": 360,
+                  "height": 202
+                 },
+                 {
+                  "url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hq720.jpg?sqp=-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLDX3LgTmArIBIk6uvvz4y5p95MOcg",
+                  "width": 720,
+                  "height": 404
+                 }
+                ]
+               },
+               "overlays": [
+                {
+                 "thumbnailOverlayBadgeViewModel": {
+                  "thumbnailBadges": [
+                   {
+                    "thumbnailBadgeViewModel": {
+                     "icon": {
+                      "sources": [
+                       {
+                        "clientResource": {
+                         "imageName": "PLAYLISTS"
+                        }
+                       }
+                      ]
+                     },
+                     "text": "10 videos",
+                     "badgeStyle": "THUMBNAIL_OVERLAY_BADGE_STYLE_DEFAULT"
+                    }
+                   }
+                  ],
+                  "position": "THUMBNAIL_OVERLAY_BADGE_POSITION_BOTTOM_END"
+                 }
+                },
+                {
+                 "thumbnailHoverOverlayViewModel": {
+                  "icon": {
+                   "sources": [
+                    {
+                     "clientResource": {
+                      "imageName": "PLAY_ALL"
+                     }
+                    }
+                   ]
+                  },
+                  "text": {
+                   "content": "Play all"
+                  },
+                  "style": "THUMBNAIL_HOVER_OVERLAY_STYLE_COVER"
+                 }
+                }
+               ]
+              }
+             },
+             "stackColor": {
+              "lightTheme": 7043993,
+              "darkTheme": 7766163
+             }
+            }
+           },
+           "metadata": {
+            "lockupMetadataViewModel": {
+             "title": {
+              "content": "RickAstley - Greatest Hits"
+             },
+             "metadata": {
+              "contentMetadataViewModel": {
+               "metadataRows": [
+                {
+                 "metadataParts": [
+                  {
+                   "text": {
+                    "content": "RickAstleyVEVO",
+                    "commandRuns": [
+                     {
+                      "startIndex": 0,
+                      "length": 14,
+                      "onTap": {
+                       "innertubeCommand": {
+                        "commandMetadata": {
+                         "webCommandMetadata": {
+                          "url": "/@RickAstleyVEVO",
+                          "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                          "rootVe": 3611,
+                          "apiUrl": "/youtubei/v1/browse"
+                         }
+                        },
+                        "browseEndpoint": {
+                         "browseId": "UC38IQsAvIsxxjztdMZQtwHA",
+                         "canonicalBaseUrl": "/@RickAstleyVEVO"
+                        }
+                       }
+                      }
+                     }
+                    ],
+                    "attachmentRuns": [
+                     {
+                      "startIndex": 14,
+                      "length": 0,
+                      "element": {
+                       "type": {
+                        "imageType": {
+                         "image": {
+                          "sources": [
+                           {
+                            "clientResource": {
+                             "imageName": "CHECK_CIRCLE_FILLED"
+                            },
+                            "width": 14,
+                            "height": 14
+                           }
+                          ]
+                         }
+                        }
+                       },
+                       "properties": {
+                        "layoutProperties": {
+                         "height": {
+                          "value": 14,
+                          "unit": "DIMENSION_UNIT_POINT"
+                         },
+                         "width": {
+                          "value": 14,
+                          "unit": "DIMENSION_UNIT_POINT"
+                         },
+                         "margin": {
+                          "left": {
+                           "value": 4,
+                           "unit": "DIMENSION_UNIT_POINT"
+                          }
+                         }
+                        }
+                       }
+                      },
+                      "alignment": "ALIGNMENT_VERTICAL_CENTER"
+                     }
+                    ]
+                   }
+                  },
+                  {
+                   "text": {
+                    "content": "Playlist",
+                    "commandRuns": [
+                     {
+                      "startIndex": 0,
+                      "length": 8,
+                      "onTap": {
+                       "innertubeCommand": {
+                        "commandMetadata": {
+                         "webCommandMetadata": {
+                          "url": "/@RickAstleyVEVO",
+                          "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                          "rootVe": 3611,
+                          "apiUrl": "/youtubei/v1/browse"
+                         }
+                        },
+                        "browseEndpoint": {
+                         "browseId": "UC38IQsAvIsxxjztdMZQtwHA",
+                         "canonicalBaseUrl": "/@RickAstleyVEVO"
+                        }
+                       }
+                      }
+                     }
+                    ]
+                   }
+                  }
+                 ]
+                },
+                {
+                 "isSpacerRow": true
+                },
+                {
+                 "metadataParts": [
+                  {
+                   "text": {
+                    "content": "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster) \u00b7 3:34",
+                    "commandRuns": [
+                     {
+                      "startIndex": 0,
+                      "length": 76,
+                      "onTap": {
+                       "innertubeCommand": {
+                        "commandMetadata": {
+                         "webCommandMetadata": {
+                          "url": "/watch?v=dQw4w9WgXcQ&list=PL2MI040U_GXobmpXtTwBF7oHBGT5BETSD",
+                          "webPageType": "WEB_PAGE_TYPE_WATCH",
+                          "rootVe": 3832
+                         }
+                        },
+                        "watchEndpoint": {
+                         "videoId": "dQw4w9WgXcQ",
+                         "playlistId": "PL2MI040U_GXobmpXtTwBF7oHBGT5BETSD",
+                         "watchEndpointSupportedOnesieConfig": {
+                          "html5PlaybackOnesieConfig": {
+                           "commonConfig": {
+                            "url": "https://rr11---sn-8qj-i5ozd.googlevideo.com/initplayback?source=youtube&oeis=1&c=WEB&oad=3200&ovd=3200&oaad=11000&oavd=11000&ocs=700&oewis=1&oputc=1&olis=1&ofpcc=1&msp=1&odepv=1&id=750c38c3d5a05dc4&ip=14.177.111.100&vip=216.239.38.119&initcwndbps=2298750&mt=1785576797&oweuc=&pxtags=Cg4KAnR4Egg1MTkyOTU2Ng&rxtags=Cg4KAnR4Egg1MTkyOTU2Ng%2CCg4KAnR4Egg1MTkyOTU2Nw%2CCg4KAnR4Egg1MTkyOTU2OA"
+                           }
+                          }
+                         }
+                        }
+                       }
+                      }
+                     }
+                    ]
+                   }
+                  }
+                 ]
+                },
+                {
+                 "metadataParts": [
+                  {
+                   "text": {
+                    "content": "Rick Astley - Together Forever (Official Video) [4K Remaster] \u00b7 3:24",
+                    "commandRuns": [
+                     {
+                      "startIndex": 0,
+                      "length": 69,
+                      "onTap": {
+                       "innertubeCommand": {
+                        "commandMetadata": {
+                         "webCommandMetadata": {
+                          "url": "/watch?v=yPYZpwSpKmA&list=PL2MI040U_GXobmpXtTwBF7oHBGT5BETSD",
+                          "webPageType": "WEB_PAGE_TYPE_WATCH",
+                          "rootVe": 3832
+                         }
+                        },
+                        "watchEndpoint": {
+                         "videoId": "yPYZpwSpKmA",
+                         "playlistId": "PL2MI040U_GXobmpXtTwBF7oHBGT5BETSD",
+                         "watchEndpointSupportedOnesieConfig": {
+                          "html5PlaybackOnesieConfig": {
+                           "commonConfig": {
+                            "url": "https://rr1---sn-8qj-i5okl.googlevideo.com/initplayback?source=youtube&oeis=1&c=WEB&oad=3200&ovd=3200&oaad=11000&oavd=11000&ocs=700&oewis=1&oputc=1&olis=1&ofpcc=1&msp=1&odepv=1&id=c8f619a704a92a60&ip=14.177.111.100&vip=216.239.38.119&initcwndbps=3026250&mt=1785576797&oweuc=&pxtags=Cg4KAnR4Egg1MTkyOTU2Ng&rxtags=Cg4KAnR4Egg1MTkyOTU2Ng%2CCg4KAnR4Egg1MTkyOTU2Nw%2CCg4KAnR4Egg1MTkyOTU2OA"
+                           }
+                          }
+                         }
+                        }
+                       }
+                      }
+                     }
+                    ]
+                   }
+                  }
+                 ]
+                },
+                {
+                 "isSpacerRow": true
+                },
+                {
+                 "metadataParts": [
+                  {
+                   "text": {
+                    "content": "View full playlist",
+                    "commandRuns": [
+                     {
+                      "startIndex": 0,
+                      "length": 18,
+                      "onTap": {
+                       "innertubeCommand": {
+                        "commandMetadata": {
+                         "webCommandMetadata": {
+                          "url": "/playlist?list=PL2MI040U_GXobmpXtTwBF7oHBGT5BETSD",
+                          "webPageType": "WEB_PAGE_TYPE_PLAYLIST",
+                          "rootVe": 5754,
+                          "apiUrl": "/youtubei/v1/browse"
+                         }
+                        },
+                        "browseEndpoint": {
+                         "browseId": "VLPL2MI040U_GXobmpXtTwBF7oHBGT5BETSD"
+                        }
+                       }
+                      }
+                     }
+                    ]
+                   }
+                  }
+                 ]
+                }
+               ],
+               "delimiter": " \u2022 "
+              }
+             }
+            }
+           },
+           "contentId": "PL2MI040U_GXobmpXtTwBF7oHBGT5BETSD",
+           "contentType": "LOCKUP_CONTENT_TYPE_PLAYLIST",
+           "itemPlayback": {},
+           "rendererContext": {
+            "commandContext": {
+             "onTap": {
+              "innertubeCommand": {
+               "commandMetadata": {
+                "webCommandMetadata": {
+                 "url": "/watch?v=dQw4w9WgXcQ&list=PL2MI040U_GXobmpXtTwBF7oHBGT5BETSD",
+                 "webPageType": "WEB_PAGE_TYPE_WATCH",
+                 "rootVe": 3832
+                }
+               },
+               "watchEndpoint": {
+                "videoId": "dQw4w9WgXcQ",
+                "playlistId": "PL2MI040U_GXobmpXtTwBF7oHBGT5BETSD",
+                "params": "OAI%3D",
+                "watchEndpointSupportedOnesieConfig": {
+                 "html5PlaybackOnesieConfig": {
+                  "commonConfig": {
+                   "url": "https://rr11---sn-8qj-i5ozd.googlevideo.com/initplayback?source=youtube&oeis=1&c=WEB&oad=3200&ovd=3200&oaad=11000&oavd=11000&ocs=700&oewis=1&oputc=1&olis=1&ofpcc=1&msp=1&odepv=1&id=750c38c3d5a05dc4&ip=14.177.111.100&vip=216.239.38.119&initcwndbps=2298750&mt=1785576797&oweuc=&pxtags=Cg4KAnR4Egg1MTkyOTU2Ng&rxtags=Cg4KAnR4Egg1MTkyOTU2Ng%2CCg4KAnR4Egg1MTkyOTU2Nw%2CCg4KAnR4Egg1MTkyOTU2OA"
+                  }
+                 }
+                }
+               }
+              }
+             }
+            }
+           }
+          }
+         },
+         {
+          "lockupViewModel": {
+           "contentImage": {
+            "collectionThumbnailViewModel": {
+             "primaryThumbnail": {
+              "thumbnailViewModel": {
+               "image": {
+                "sources": [
+                 {
+                  "url": "https://i.ytimg.com/vi/fZlUZSMJKgs/hq720.jpg?sqp=-oaymwEXCOgCEMoBSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLATtGhdaGnKx6nSxmxp5528FabypQ",
+                  "width": 360,
+                  "height": 202
+                 },
+                 {
+                  "url": "https://i.ytimg.com/vi/fZlUZSMJKgs/hq720.jpg?sqp=-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLAyyuwWaQ8tX1Gy4FKE3lbXe12YdA",
+                  "width": 720,
+                  "height": 404
+                 }
+                ]
+               },
+               "overlays": [
+                {
+                 "thumbnailOverlayBadgeViewModel": {
+                  "thumbnailBadges": [
+                   {
+                    "thumbnailBadgeViewModel": {
+                     "icon": {
+                      "sources": [
+                       {
+                        "clientResource": {
+                         "imageName": "PLAYLISTS"
+                        }
+                       }
+                      ]
+                     },
+                     "text": "151 videos",
+                     "badgeStyle": "THUMBNAIL_OVERLAY_BADGE_STYLE_DEFAULT"
+                    }
+                   }
+                  ],
+                  "position": "THUMBNAIL_OVERLAY_BADGE_POSITION_BOTTOM_END"
+                 }
+                },
+                {
+                 "thumbnailHoverOverlayViewModel": {
+                  "icon": {
+                   "sources": [
+                    {
+                     "clientResource": {
+                      "imageName": "PLAY_ALL"
+                     }
+                    }
+                   ]
+                  },
+                  "text": {
+                   "content": "Play all"
+                  },
+                  "style": "THUMBNAIL_HOVER_OVERLAY_STYLE_COVER"
+                 }
+                }
+               ]
+              }
+             },
+             "stackColor": {
+              "lightTheme": 8952171,
+              "darkTheme": 8555632
+             }
+            }
+           },
+           "metadata": {
+            "lockupMetadataViewModel": {
+             "title": {
+              "content": "Rick Astley Videos"
+             },
+             "metadata": {
+              "contentMetadataViewModel": {
+               "metadataRows": [
+                {
+                 "metadataParts": [
+                  {
+                   "text": {
+                    "content": "Just A Happy Troll",
+                    "commandRuns": [
+                     {
+                      "startIndex": 0,
+                      "length": 18,
+                      "onTap": {
+                       "innertubeCommand": {
+                        "commandMetadata": {
+                         "webCommandMetadata": {
+                          "url": "/@justahappytroll",
+                          "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                          "rootVe": 3611,
+                          "apiUrl": "/youtubei/v1/browse"
+                         }
+                        },
+                        "browseEndpoint": {
+                         "browseId": "UC1sGq_H-cSLNT9PANH8b0fg",
+                         "canonicalBaseUrl": "/@justahappytroll"
+                        }
+                       }
+                      }
+                     }
+                    ],
+                    "attachmentRuns": [
+                     {
+                      "startIndex": 18,
+                      "length": 0,
+                      "element": {
+                       "type": {
+                        "imageType": {
+                         "image": {
+                          "sources": [
+                           {
+                            "clientResource": {
+                             "imageName": "CHECK_CIRCLE_FILLED"
+                            },
+                            "width": 14,
+                            "height": 14
+                           }
+                          ]
+                         }
+                        }
+                       },
+                       "properties": {
+                        "layoutProperties": {
+                         "height": {
+                          "value": 14,
+                          "unit": "DIMENSION_UNIT_POINT"
+                         },
+                         "width": {
+                          "value": 14,
+                          "unit": "DIMENSION_UNIT_POINT"
+                         },
+                         "margin": {
+                          "left": {
+                           "value": 4,
+                           "unit": "DIMENSION_UNIT_POINT"
+                          }
+                         }
+                        }
+                       }
+                      },
+                      "alignment": "ALIGNMENT_VERTICAL_CENTER"
+                     }
+                    ]
+                   }
+                  },
+                  {
+                   "text": {
+                    "content": "Playlist",
+                    "commandRuns": [
+                     {
+                      "startIndex": 0,
+                      "length": 8,
+                      "onTap": {
+                       "innertubeCommand": {
+                        "commandMetadata": {
+                         "webCommandMetadata": {
+                          "url": "/@justahappytroll",
+                          "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                          "rootVe": 3611,
+                          "apiUrl": "/youtubei/v1/browse"
+                         }
+                        },
+                        "browseEndpoint": {
+                         "browseId": "UC1sGq_H-cSLNT9PANH8b0fg",
+                         "canonicalBaseUrl": "/@justahappytroll"
+                        }
+                       }
+                      }
+                     }
+                    ]
+                   }
+                  }
+                 ]
+                },
+                {
+                 "isSpacerRow": true
+                },
+                {
+                 "metadataParts": [
+                  {
+                   "text": {
+                    "content": "Rick Astley Loves Cherry \u00b7 1:59",
+                    "commandRuns": [
+                     {
+                      "startIndex": 0,
+                      "length": 32,
+                      "onTap": {
+                       "innertubeCommand": {
+                        "commandMetadata": {
+                         "webCommandMetadata": {
+                          "url": "/watch?v=fZlUZSMJKgs&list=PLtgfAG7SN7m_89NLQQ40pwQnQdIO9Ev7C",
+                          "webPageType": "WEB_PAGE_TYPE_WATCH",
+                          "rootVe": 3832
+                         }
+                        },
+                        "watchEndpoint": {
+                         "videoId": "fZlUZSMJKgs",
+                         "playlistId": "PLtgfAG7SN7m_89NLQQ40pwQnQdIO9Ev7C",
+                         "watchEndpointSupportedOnesieConfig": {
+                          "html5PlaybackOnesieConfig": {
+                           "commonConfig": {
+                            "url": "https://rr2---sn-8qj-i5orz.googlevideo.com/initplayback?source=youtube&oeis=1&c=WEB&oad=3200&ovd=3200&oaad=11000&oavd=11000&ocs=700&oewis=1&oputc=1&olis=1&ofpcc=1&msp=1&odepv=1&id=7d99546523092a0b&ip=14.177.111.100&vip=216.239.38.119&initcwndbps=2970000&mt=1785576797&oweuc=&pxtags=Cg4KAnR4Egg1MTkyOTU2Ng&rxtags=Cg4KAnR4Egg1MTkyOTU2Ng%2CCg4KAnR4Egg1MTkyOTU2Nw%2CCg4KAnR4Egg1MTkyOTU2OA"
+                           }
+                          }
+                         }
+                        }
+                       }
+                      }
+                     }
+                    ]
+                   }
+                  }
+                 ]
+                },
+                {
+                 "metadataParts": [
+                  {
+                   "text": {
+                    "content": "Rick Astley Sings the Alphabet ABC! \u00b7 0:32",
+                    "commandRuns": [
+                     {
+                      "startIndex": 0,
+                      "length": 43,
+                      "onTap": {
+                       "innertubeCommand": {
+                        "commandMetadata": {
+                         "webCommandMetadata": {
+                          "url": "/watch?v=4QWDZuZ1YT4&list=PLtgfAG7SN7m_89NLQQ40pwQnQdIO9Ev7C",
+                          "webPageType": "WEB_PAGE_TYPE_WATCH",
+                          "rootVe": 3832
+                         }
+                        },
+                        "watchEndpoint": {
+                         "videoId": "4QWDZuZ1YT4",
+                         "playlistId": "PLtgfAG7SN7m_89NLQQ40pwQnQdIO9Ev7C",
+                         "watchEndpointSupportedOnesieConfig": {
+                          "html5PlaybackOnesieConfig": {
+                           "commonConfig": {
+                            "url": "https://rr5---sn-8qj-i5ozd.googlevideo.com/initplayback?source=youtube&oeis=1&c=WEB&oad=3200&ovd=3200&oaad=11000&oavd=11000&ocs=700&oewis=1&oputc=1&olis=1&ofpcc=1&msp=1&odepv=1&id=e1058366e675613e&ip=14.177.111.100&vip=216.239.38.119&initcwndbps=2298750&mt=1785576797&oweuc=&pxtags=Cg4KAnR4Egg1MTkyOTU2Ng&rxtags=Cg4KAnR4Egg1MTkyOTU2Ng%2CCg4KAnR4Egg1MTkyOTU2Nw%2CCg4KAnR4Egg1MTkyOTU2OA"
+                           }
+                          }
+                         }
+                        }
+                       }
+                      }
+                     }
+                    ]
+                   }
+                  }
+                 ]
+                },
+                {
+                 "isSpacerRow": true
+                },
+                {
+                 "metadataParts": [
+                  {
+                   "text": {
+                    "content": "View full playlist",
+                    "commandRuns": [
+                     {
+                      "startIndex": 0,
+                      "length": 18,
+                      "onTap": {
+                       "innertubeCommand": {
+                        "commandMetadata": {
+                         "webCommandMetadata": {
+                          "url": "/playlist?list=PLtgfAG7SN7m_89NLQQ40pwQnQdIO9Ev7C",
+                          "webPageType": "WEB_PAGE_TYPE_PLAYLIST",
+                          "rootVe": 5754,
+                          "apiUrl": "/youtubei/v1/browse"
+                         }
+                        },
+                        "browseEndpoint": {
+                         "browseId": "VLPLtgfAG7SN7m_89NLQQ40pwQnQdIO9Ev7C"
+                        }
+                       }
+                      }
+                     }
+                    ]
+                   }
+                  }
+                 ]
+                }
+               ],
+               "delimiter": " \u2022 "
+              }
+             }
+            }
+           },
+           "contentId": "PLtgfAG7SN7m_89NLQQ40pwQnQdIO9Ev7C",
+           "contentType": "LOCKUP_CONTENT_TYPE_PLAYLIST",
+           "itemPlayback": {},
+           "rendererContext": {
+            "commandContext": {
+             "onTap": {
+              "innertubeCommand": {
+               "commandMetadata": {
+                "webCommandMetadata": {
+                 "url": "/watch?v=fZlUZSMJKgs&list=PLtgfAG7SN7m_89NLQQ40pwQnQdIO9Ev7C",
+                 "webPageType": "WEB_PAGE_TYPE_WATCH",
+                 "rootVe": 3832
+                }
+               },
+               "watchEndpoint": {
+                "videoId": "fZlUZSMJKgs",
+                "playlistId": "PLtgfAG7SN7m_89NLQQ40pwQnQdIO9Ev7C",
+                "params": "OAI%3D",
+                "watchEndpointSupportedOnesieConfig": {
+                 "html5PlaybackOnesieConfig": {
+                  "commonConfig": {
+                   "url": "https://rr2---sn-8qj-i5orz.googlevideo.com/initplayback?source=youtube&oeis=1&c=WEB&oad=3200&ovd=3200&oaad=11000&oavd=11000&ocs=700&oewis=1&oputc=1&olis=1&ofpcc=1&msp=1&odepv=1&id=7d99546523092a0b&ip=14.177.111.100&vip=216.239.38.119&initcwndbps=2970000&mt=1785576797&oweuc=&pxtags=Cg4KAnR4Egg1MTkyOTU2Ng&rxtags=Cg4KAnR4Egg1MTkyOTU2Ng%2CCg4KAnR4Egg1MTkyOTU2Nw%2CCg4KAnR4Egg1MTkyOTU2OA"
+                  }
+                 }
+                }
+               }
+              }
+             }
+            }
+           }
+          }
+         }
+        ]
+       }
+      }
+     ]
+    }
+   }
+  }
+ }
+}

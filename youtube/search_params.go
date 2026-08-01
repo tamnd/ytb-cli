@@ -8,24 +8,28 @@ import (
 // SearchFilters controls YouTube search filtering via the sp= parameter.
 type SearchFilters struct {
 	Sort           string // relevance, date, views, rating
-	Type           string // video, channel, playlist
+	Type           string // video, channel, playlist, movie
 	Duration       string // short (<4m), medium (4-20m), long (>20m)
 	UploadDate     string // hour, today, week, month, year
 	HD             bool
 	CC             bool // closed captions / subtitles
 	CreativeCommon bool
 	Live           bool
-	FourK          bool
-	ThreeSixty     bool
-	HDR            bool
-	VR180          bool
+	// Purchased is the site's "Purchased" feature filter, inner field 9. It is a
+	// filter over the whole catalogue and not over an account, so it is a tier 0
+	// filter like the rest and signed out it narrows to paid titles.
+	Purchased  bool
+	FourK      bool
+	ThreeSixty bool
+	HDR        bool
+	VR180      bool
 }
 
 // IsEmpty reports whether no filter is set.
 func (f SearchFilters) IsEmpty() bool {
 	return f.Sort == "" && f.Type == "" && f.Duration == "" && f.UploadDate == "" &&
-		!f.HD && !f.CC && !f.CreativeCommon && !f.Live && !f.FourK &&
-		!f.ThreeSixty && !f.HDR && !f.VR180
+		!f.HD && !f.CC && !f.CreativeCommon && !f.Live && !f.Purchased &&
+		!f.FourK && !f.ThreeSixty && !f.HDR && !f.VR180
 }
 
 // Encode returns the base64url-encoded protobuf sp parameter, or "" if empty.
@@ -65,6 +69,10 @@ func (f SearchFilters) Encode() string {
 	}
 	if f.Live {
 		inner = appendVarint(inner, makeTag(8, 0))
+		inner = appendVarint(inner, 1)
+	}
+	if f.Purchased {
+		inner = appendVarint(inner, makeTag(9, 0))
 		inner = appendVarint(inner, 1)
 	}
 	if f.FourK {
@@ -131,6 +139,8 @@ func typeValue(s string) int {
 		return 2
 	case "playlist":
 		return 3
+	case "movie", "film":
+		return 4
 	default:
 		return 0
 	}
