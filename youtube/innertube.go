@@ -302,6 +302,7 @@ func (it *InnerTubeClient) MusicNext(ctx context.Context, body map[string]any, s
 func (it *InnerTubeClient) Suggest(ctx context.Context, input string) ([]string, error) {
 	url := "https://suggestqueries-clients6.youtube.com/complete/search?client=youtube&ds=yt&hl=" +
 		it.hl + "&gl=" + it.gl + "&q=" + strings.ReplaceAll(input, " ", "+")
+	it.c.noteRequest(http.MethodGet, url)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err

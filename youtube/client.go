@@ -29,8 +29,31 @@ type Client struct {
 	mu      sync.Mutex
 	lastReq time.Time
 
-	cfgCache *ytcfgCache
-	cache    *Cache
+	cfgCache  *ytcfgCache
+	cache     *Cache
+	onRequest func(method, url string)
+}
+
+// SetOnRequest installs a hook called once for every request that actually goes
+// out. Doc 04 section 3.3: a budget is in requests, and it is counted rather
+// than estimated.
+//
+// A cache hit never reaches the hook, so it is not a request and does not count,
+// which is why a second walk over the same seeds gets further on the same
+// budget. A retry does reach it, because a retry is a request the site had to
+// answer.
+//
+// The hook is called from whatever goroutine made the request, so it must be
+// safe to call concurrently, and it should be installed before the first read.
+func (c *Client) SetOnRequest(fn func(method, url string)) { c.onRequest = fn }
+
+// noteRequest tells the hook a request is going out. It is called at the point
+// the request is built, which is after the cache was consulted and after the
+// rate limiter let it through.
+func (c *Client) noteRequest(method, url string) {
+	if c.onRequest != nil {
+		c.onRequest(method, url)
+	}
 }
 
 // SetCache attaches a disk cache. Every read goes through it keyed by URL plus
@@ -114,6 +137,7 @@ func (c *Client) Fetch(ctx context.Context, url string) ([]byte, int, error) {
 			}
 		}
 		c.rateLimit()
+		c.noteRequest(http.MethodGet, c.localise(url))
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.localise(url), nil)
 		if err != nil {
 			return nil, 0, err
@@ -368,6 +392,7 @@ func (c *Client) postJSONWithHeaders(ctx context.Context, url string, body map[s
 			}
 		}
 		c.rateLimit()
+		c.noteRequest(http.MethodPost, url)
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(raw))
 		if err != nil {
 			return nil, err

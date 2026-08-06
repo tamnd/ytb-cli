@@ -337,6 +337,7 @@ var errStreamURLStale = errors.New("the CDN refused this stream URL")
 // how many bytes that was. It appends rather than returning a slice so a chunk
 // that arrives in pieces is assembled without copying it again per piece.
 func (d *download) fetchRange(ctx context.Context, rawURL string, from, to int64, buf *[]byte) (int, error) {
+	d.client.noteRequest(http.MethodGet, rawURL)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
 	if err != nil {
 		return 0, err

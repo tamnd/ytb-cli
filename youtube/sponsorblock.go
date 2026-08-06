@@ -41,6 +41,7 @@ func (c *Client) SponsorSegments(ctx context.Context, videoID string, categories
 	q.Set("categories", string(cats))
 	reqURL := sponsorBlockAPI + "?" + q.Encode()
 
+	c.noteRequest(http.MethodGet, reqURL)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, reqURL, nil)
 	if err != nil {
 		return nil, err

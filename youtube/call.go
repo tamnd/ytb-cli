@@ -106,6 +106,7 @@ func (c *Client) doInnerTube(ctx context.Context, spec ClientSpec, url string, b
 			}
 		}
 		c.rateLimit()
+		c.noteRequest(http.MethodPost, url)
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
 		if err != nil {
 			return nil, err

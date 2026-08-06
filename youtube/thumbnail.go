@@ -162,6 +162,7 @@ func (c *Client) ConfirmThumbnails(ctx context.Context, thumbs []Thumbnail) []Th
 
 // headThumbnail reports whether the CDN has a URL, and how big it is.
 func (c *Client) headThumbnail(ctx context.Context, url string) (int64, bool) {
+	c.noteRequest(http.MethodHead, url)
 	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, nil)
 	if err != nil {
 		return 0, false
@@ -181,6 +182,7 @@ func (c *Client) headThumbnail(ctx context.Context, url string) (int64, bool) {
 // trying renditions largest first and skipping any that 404.
 func (c *Client) DownloadThumbnail(ctx context.Context, videoID, dst string) (Thumbnail, error) {
 	for _, t := range Thumbnails(videoID) {
+		c.noteRequest(http.MethodGet, t.URL)
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, t.URL, nil)
 		if err != nil {
 			return Thumbnail{}, err
