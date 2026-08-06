@@ -18,7 +18,7 @@ func TestCaptionsFromAndroidPlayer(t *testing.T) {
 	if got := playabilityStatus(resp); got != "OK" {
 		t.Fatalf("playabilityStatus = %q, want OK", got)
 	}
-	tracks := captionsFromPlayer(resp, "dQw4w9WgXcQ")
+	tracks := ParseCaptionTracks(resp, "dQw4w9WgXcQ")
 	if len(tracks) != 6 {
 		t.Fatalf("got %d tracks, want the 6 the video carries: %s", len(tracks), trackSummary(tracks))
 	}
@@ -71,7 +71,7 @@ func TestCaptionsFromAndroidPlayer(t *testing.T) {
 }
 
 func TestPickCaptionTrack(t *testing.T) {
-	tracks := captionsFromPlayer(loadFixture(t, "video_captions_android.json"), "dQw4w9WgXcQ")
+	tracks := ParseCaptionTracks(loadFixture(t, "video_captions_android.json"), "dQw4w9WgXcQ")
 
 	cases := []struct {
 		label string
@@ -108,7 +108,7 @@ func TestPickCaptionTrack(t *testing.T) {
 // asking for a language the video does not have. Listing what it does have is
 // the whole point of the error.
 func TestTrackSummaryNamesWhatIsThere(t *testing.T) {
-	tracks := captionsFromPlayer(loadFixture(t, "video_captions_android.json"), "dQw4w9WgXcQ")
+	tracks := ParseCaptionTracks(loadFixture(t, "video_captions_android.json"), "dQw4w9WgXcQ")
 	got := trackSummary(tracks)
 	for _, want := range []string{"en", "en (auto)", "ja", "es-419"} {
 		if !strings.Contains(got, want) {

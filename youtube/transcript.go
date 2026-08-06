@@ -69,7 +69,7 @@ func (c *Client) Captions(ctx context.Context, idOrURL string) ([]CaptionTrack, 
 		}
 		return nil, newRefusal("captions for "+videoID, "player as ANDROID", msg)
 	}
-	return captionsFromPlayer(resp, videoID), nil
+	return ParseCaptionTracks(resp, videoID), nil
 }
 
 // playabilityStatus reports what the player said about the video, which is the
@@ -78,7 +78,9 @@ func playabilityStatus(resp map[string]any) string {
 	return stringValue(mapValue(resp, "playabilityStatus")["status"])
 }
 
-func captionsFromPlayer(playerResp map[string]any, videoID string) []CaptionTrack {
+// ParseCaptionTracks reads the caption track list off a player response. The
+// text is a separate read; this is the index.
+func ParseCaptionTracks(playerResp map[string]any, videoID string) []CaptionTrack {
 	renderer := mapValue(mapValue(playerResp, "captions"), "playerCaptionsTracklistRenderer")
 	if renderer == nil {
 		return nil
