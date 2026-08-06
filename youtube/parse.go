@@ -734,7 +734,8 @@ func microTime(micro int64) time.Time {
 }
 
 // urlExpiry reads the expire parameter off a stream URL, which is the deadline the
-// CDN actually enforces.
+// CDN actually enforces. It is a unix timestamp sitting in plain sight, so a long
+// download knows when it will be cut off before it starts rather than at the 403.
 func urlExpiry(raw string) time.Time {
 	if raw == "" {
 		return time.Time{}
@@ -743,7 +744,22 @@ func urlExpiry(raw string) time.Time {
 	if err != nil {
 		return time.Time{}
 	}
-	sec, err := strconv.ParseInt(u.Query().Get("expire"), 10, 64)
+	if sec, err := strconv.ParseInt(u.Query().Get("expire"), 10, 64); err == nil && sec > 0 {
+		return time.Unix(sec, 0)
+	}
+	// Some googlevideo URLs carry it as a path segment instead: /expire/1786013780/.
+	// Same number, same meaning, and missing it would mean the downloader never
+	// refreshes on those hosts.
+	const marker = "/expire/"
+	i := strings.Index(u.Path, marker)
+	if i < 0 {
+		return time.Time{}
+	}
+	rest := u.Path[i+len(marker):]
+	if end := strings.Index(rest, "/"); end >= 0 {
+		rest = rest[:end]
+	}
+	sec, err := strconv.ParseInt(rest, 10, 64)
 	if err != nil || sec <= 0 {
 		return time.Time{}
 	}

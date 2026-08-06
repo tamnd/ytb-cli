@@ -95,6 +95,69 @@ func TestNoAPIKeyLiteral(t *testing.T) {
 	}
 }
 
+// TestEveryStreamRequestSetsRange is the source-level half of the media rule.
+// download_test.go proves the requests that actually go out carry a Range
+// header; this one proves there is no function that could send one without it,
+// including a path no test happens to walk.
+//
+// Doc 01 section 8: the same URL fetched un-ranged is throttled to 32 KiB/s and
+// never finishes, so this is not a performance note, it is whether the tool
+// works. The failure it guards against is a well-meant "fall back to a plain GET
+// when contentLength is missing", which reads like robustness and is the bug.
+func TestEveryStreamRequestSetsRange(t *testing.T) {
+	const path = "download.go"
+	fset := token.NewFileSet()
+	f, err := parser.ParseFile(fset, path, nil, 0)
+	if err != nil {
+		t.Fatalf("parse %s: %v", path, err)
+	}
+
+	requestBuilders := 0
+	for _, decl := range f.Decls {
+		fn, ok := decl.(*ast.FuncDecl)
+		if !ok || fn.Body == nil {
+			continue
+		}
+		var builds, ranges int
+		ast.Inspect(fn.Body, func(n ast.Node) bool {
+			call, ok := n.(*ast.CallExpr)
+			if !ok {
+				return true
+			}
+			if sel, ok := call.Fun.(*ast.SelectorExpr); ok {
+				switch sel.Sel.Name {
+				case "NewRequest", "NewRequestWithContext", "Get", "Head", "Post":
+					if pkg, ok := sel.X.(*ast.Ident); ok && pkg.Name == "http" {
+						builds++
+					}
+				case "Set", "Add":
+					if len(call.Args) > 0 {
+						if lit, ok := call.Args[0].(*ast.BasicLit); ok {
+							if s, err := strconv.Unquote(lit.Value); err == nil && s == "Range" {
+								ranges++
+							}
+						}
+					}
+				}
+			}
+			return true
+		})
+		if builds == 0 {
+			continue
+		}
+		requestBuilders++
+		if ranges == 0 {
+			t.Errorf("%s builds an HTTP request and never sets a Range header, which is the 32 KiB/s path",
+				fset.Position(fn.Pos()))
+		}
+	}
+	// One place builds requests here, on purpose. Two would mean the rule has to
+	// hold in two places, and the second one is where it stops holding.
+	if requestBuilders != 1 {
+		t.Errorf("%s has %d functions building HTTP requests, want exactly 1", path, requestBuilders)
+	}
+}
+
 // TestNoJavaScriptRuntime asserts the JS interpreter stays gone. A watch page's
 // adaptive formats carry no signatureCipher, so there is nothing to run, and a
 // dependency on a JS runtime is a large attack surface for a feature we do not
