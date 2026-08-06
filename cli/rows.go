@@ -155,7 +155,7 @@ func captionRow(t youtube.CaptionTrack) Row {
 func artistRow(a youtube.Artist) Row {
 	return Row{
 		Cols:  []string{"id", "name", "subscribers", "url"},
-		Vals:  []string{a.ArtistID, a.Name, a.SubscribersText, a.URL},
+		Vals:  []string{a.ArtistID, a.Name, a.SubscriberCountText, a.URL},
 		Value: a,
 	}
 }
@@ -164,23 +164,141 @@ func albumRow(a youtube.Album) Row {
 	return Row{
 		Cols: []string{"id", "title", "artist", "year", "tracks", "url"},
 		Vals: []string{
-			a.AlbumID, a.Title, a.ArtistName, a.Year, itoa(a.TrackCount), a.URL,
+			a.AlbumID, a.Title, credits(a.ArtistNames), a.Year, itoa(a.TrackCount), a.URL,
 		},
 		Value: a,
 	}
 }
 
-func songRow(s youtube.Song) Row {
+func trackRow(t youtube.Track) Row {
 	return Row{
 		Cols: []string{"id", "title", "artist", "album", "duration", "url"},
 		Vals: []string{
-			s.VideoID, s.Title, s.ArtistName, s.AlbumName, s.DurationText, s.URL,
+			t.VideoID, t.Title, credits(t.ArtistNames), t.AlbumTitle, t.DurationText, t.URL,
 		},
-		Value: s,
+		Value: t,
 	}
 }
 
-// anyRow renders a polymorphic search emission (Video/Channel/Playlist/Artist/Album/Song).
+// musicItemRow renders one lockup off an artist page.
+func musicItemRow(m youtube.MusicItem) Row {
+	kind := m.Kind
+	if m.AlbumType != "" {
+		kind = strings.ToLower(m.AlbumType)
+	}
+	return Row{
+		Cols:  []string{"kind", "id", "title", "shelf", "year", "url"},
+		Vals:  []string{kind, m.ID, m.Title, m.Shelf, m.Year, m.URL},
+		Value: m,
+	}
+}
+
+// musicResultRow renders one row of a music search, whatever kind it is.
+//
+// A music search comes back interleaved: a song, then a playlist, then an
+// album. The table renderer takes its header from the first record it sees and
+// lays every later one out under it, so four row shapes in one stream print
+// four values under the wrong four headings. One shape for the whole stream is
+// what fixes that. The detail column is whatever that kind's own line said, a
+// duration for a track and a year for an album, and -o json still carries the
+// full record with all of its fields.
+func musicResultRow(v any) Row {
+	f, ok := musicFields(v)
+	if !ok {
+		return anyRow(v)
+	}
+	return Row{
+		Cols:  []string{"kind", "id", "title", "artist", "detail", "url"},
+		Vals:  []string{f.kind, f.id, f.title, f.artist, f.detail, f.url},
+		Value: v,
+	}
+}
+
+// musicShelfRow is musicResultRow with the shelf the row came off, which is
+// what an artist page adds and a search does not have.
+func musicShelfRow(v any, shelf string) Row {
+	f, ok := musicFields(v)
+	if !ok {
+		return anyRow(v)
+	}
+	if f.shelf == "" {
+		f.shelf = shelf
+	}
+	return Row{
+		Cols:  []string{"kind", "id", "title", "artist", "detail", "shelf", "url"},
+		Vals:  []string{f.kind, f.id, f.title, f.artist, f.detail, f.shelf, f.url},
+		Value: v,
+	}
+}
+
+// musicFace is what every music record has in common once it is a table row.
+type musicFace struct{ kind, id, title, artist, detail, shelf, url string }
+
+func musicFields(v any) (musicFace, bool) {
+	var f musicFace
+	switch x := v.(type) {
+	case youtube.Track:
+		// ATV is an art track, which is a song. Anything else is a video of one,
+		// and the music app types it rather than saying so in words. Both are the
+		// same record, so this column is the only place the difference shows.
+		f.kind = "track"
+		if x.MusicVideoType != "" && x.MusicVideoType != "ATV" {
+			f.kind = "video"
+		}
+		f.id, f.title = x.VideoID, x.Title
+		f.artist, f.detail, f.url = credits(x.ArtistNames), x.DurationText, x.URL
+		if f.detail == "" {
+			f.detail = x.PlaysText
+		}
+		if f.detail == "" && len(x.MetadataParts) > 0 {
+			f.detail = x.MetadataParts[0]
+		}
+	case youtube.Album:
+		f.kind, f.id, f.title = "album", x.AlbumID, x.Title
+		f.artist, f.detail, f.url = credits(x.ArtistNames), x.Year, x.URL
+		if x.AlbumType != "" {
+			f.kind = strings.ToLower(x.AlbumType)
+		}
+	case youtube.Artist:
+		f.kind, f.id, f.title = "artist", x.ArtistID, x.Name
+		f.detail, f.url = x.SubscriberCountText, x.URL
+		if f.detail == "" && len(x.MetadataParts) > 0 {
+			f.detail = x.MetadataParts[0]
+		}
+	case youtube.Playlist:
+		f.kind, f.id, f.title = "playlist", x.PlaylistID, x.Title
+		f.artist, f.url = x.ChannelTitle, x.URL
+		f.detail = x.VideoCountText
+		if f.detail == "" && len(x.MetadataParts) > 0 {
+			f.detail = x.MetadataParts[0]
+		}
+	case youtube.MusicItem:
+		f.kind, f.id, f.title = x.Kind, x.ID, x.Title
+		if x.MusicVideoType != "" && x.MusicVideoType != "ATV" {
+			f.kind = "video"
+		}
+		f.artist, f.shelf, f.url = credits(x.ArtistNames), x.Shelf, x.URL
+		f.detail = x.Year
+		if f.detail == "" {
+			f.detail = x.CountText
+		}
+		if x.AlbumType != "" {
+			f.kind = strings.ToLower(x.AlbumType)
+		}
+	default:
+		return f, false
+	}
+	return f, true
+}
+
+// credits joins the artist names for one table cell. The record keeps them
+// apart, because a release credited to two people is two credits and not a name
+// with an ampersand in it, and a table cell is one string either way.
+func credits(names []string) string {
+	return strings.Join(names, ", ")
+}
+
+// anyRow renders a polymorphic search emission (Video/Channel/Playlist/Artist/Album/Track).
 func anyRow(v any) Row {
 	switch x := v.(type) {
 	case youtube.Video:
@@ -193,8 +311,10 @@ func anyRow(v any) Row {
 		return artistRow(x)
 	case youtube.Album:
 		return albumRow(x)
-	case youtube.Song:
-		return songRow(x)
+	case youtube.Track:
+		return trackRow(x)
+	case youtube.MusicItem:
+		return musicItemRow(x)
 	default:
 		return Row{Cols: []string{"value"}, Vals: []string{""}, Value: v}
 	}
