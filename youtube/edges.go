@@ -405,46 +405,95 @@ func FeaturedClaims(set *graph.Set, channelID string, featured []Channel, prov g
 }
 
 // AlbumClaims writes an album and its track list.
-func AlbumClaims(set *graph.Set, a Album, tracks []Song, prov graph.Provenance) int {
+func AlbumClaims(set *graph.Set, a Album, tracks []Track, prov graph.Provenance) int {
 	n := 0
-	add := func(ok bool) {
-		if ok {
-			n++
-		}
-	}
 	album := graph.AlbumURI(a.AlbumID)
 	if a.AlbumID != "" {
-		if artist := graph.ArtistURI(a.ArtistID); artist != "" {
-			add(set.Claim(album, graph.ByArtist, artist, prov, a.ArtistName))
-		}
+		n += artistCredits(set, album, a.ArtistNames, a.ArtistIDs, prov)
 	}
 	for i, t := range tracks {
-		n += songClaims(set, t, prov, i+1)
+		position := t.Position
+		if position == 0 {
+			position = i + 1
+		}
+		n += trackClaims(set, t, prov, position)
 	}
 	return n
 }
 
-// SongClaims writes one track.
-func SongClaims(set *graph.Set, s Song, prov graph.Provenance) int {
-	return songClaims(set, s, prov, 0)
+// TrackClaims writes one track.
+func TrackClaims(set *graph.Set, t Track, prov graph.Provenance) int {
+	return trackClaims(set, t, prov, t.Position)
 }
 
-func songClaims(set *graph.Set, s Song, prov graph.Provenance, position int) int {
-	if s.VideoID == "" {
+func trackClaims(set *graph.Set, t Track, prov graph.Provenance, position int) int {
+	if t.VideoID == "" {
 		return 0
 	}
-	me := graph.VideoURI(s.VideoID)
-	n := 0
-	add := func(ok bool) {
-		if ok {
+	me := graph.VideoURI(t.VideoID)
+	n := artistCredits(set, me, t.ArtistNames, t.ArtistIDs, prov)
+	if t.AlbumID != "" {
+		if set.ClaimAt(me, graph.InAlbum, graph.AlbumURI(t.AlbumID), prov, t.AlbumTitle, position) {
 			n++
 		}
 	}
-	if artist := graph.ArtistURI(s.ArtistID); artist != "" {
-		add(set.Claim(me, graph.ByArtist, artist, prov, s.ArtistName))
+	return n
+}
+
+// ArtistClaims writes what an artist page says about its own catalogue.
+//
+// There is no artist to album predicate: an album names its artist, so the
+// claims run that way round and the artist page is read as a list of albums
+// stating their credit. The videos shelf is the same claim about a video.
+func ArtistClaims(set *graph.Set, a Artist, prov graph.Provenance) int {
+	artist := graph.ArtistURI(a.ArtistID)
+	if artist == "" {
+		return 0
 	}
-	if s.AlbumID != "" {
-		add(set.ClaimAt(me, graph.InAlbum, graph.AlbumURI(s.AlbumID), prov, s.AlbumName, position))
+	n := 0
+	for _, list := range [][]MusicItem{a.Albums, a.Singles, a.Videos} {
+		for _, item := range list {
+			var me graph.URI
+			switch item.Kind {
+			case musicKindAlbum:
+				me = graph.AlbumURI(item.ID)
+			case musicKindTrack:
+				me = graph.VideoURI(item.ID)
+			}
+			if me == "" || item.ID == "" {
+				continue
+			}
+			if set.Claim(me, graph.ByArtist, artist, prov, a.Name) {
+				n++
+			}
+		}
+	}
+	for _, t := range a.TopTracks {
+		n += trackClaims(set, t, prov, 0)
+	}
+	return n
+}
+
+// artistCredits writes one by_artist claim per credit.
+//
+// A release credited to two artists is two claims and not a joined string,
+// because "Elton John & Dua Lipa" is not the name of anybody. A credit the page
+// did not link has no id, so it cannot be a claim at all and stays on the record
+// as a name.
+func artistCredits(set *graph.Set, me graph.URI, names, ids []string, prov graph.Provenance) int {
+	n := 0
+	for i, id := range ids {
+		artist := graph.ArtistURI(id)
+		if artist == "" || artist == me {
+			continue
+		}
+		note := ""
+		if i < len(names) {
+			note = names[i]
+		}
+		if set.Claim(me, graph.ByArtist, artist, prov, note) {
+			n++
+		}
 	}
 	return n
 }

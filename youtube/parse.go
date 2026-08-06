@@ -272,6 +272,34 @@ func extractText(v any) string {
 	return ""
 }
 
+// extractLines is extractText for a body whose line breaks are part of it.
+//
+// cleanWhitespace flattens a paragraph onto one line, which is what a title in a
+// table cell wants and the opposite of what lyrics want: a verse is lines, and
+// joining them with spaces turns a song into a paragraph.
+func extractLines(v any) string {
+	m, ok := v.(map[string]any)
+	if !ok {
+		return extractText(v)
+	}
+	var b strings.Builder
+	if s := stringValue(m["simpleText"]); s != "" {
+		b.WriteString(s)
+	}
+	for _, item := range arrayValue(m["runs"]) {
+		if rm, ok := item.(map[string]any); ok {
+			b.WriteString(stringValue(rm["text"]))
+		}
+	}
+	out := strings.ReplaceAll(b.String(), "\r\n", "\n")
+	out = strings.ReplaceAll(out, " ", " ")
+	lines := strings.Split(out, "\n")
+	for i, line := range lines {
+		lines[i] = strings.TrimRight(line, " \t")
+	}
+	return strings.TrimSpace(strings.Join(lines, "\n"))
+}
+
 // cleanWhitespace collapses runs of whitespace and strips non-breaking spaces.
 func cleanWhitespace(s string) string {
 	return strings.Join(strings.Fields(strings.ReplaceAll(s, " ", " ")), " ")
@@ -283,28 +311,30 @@ func parseCountText(s string) int64 {
 	if s == "" {
 		return 0
 	}
-	for _, suffix := range []string{
-		" views", " view", " subscribers", " subscriber",
-		" videos", " video", " comments", " comment",
-		" lessons", " lesson",
-	} {
-		s = strings.TrimSuffix(s, suffix)
+	// The number leads and the unit word follows it: "1.2M views", "10 songs",
+	// "121 views". Matching the number and ignoring whatever noun comes after
+	// beats a list of the nouns YouTube happens to use, which was missing "songs"
+	// and would miss every word of the next language somebody passes to --hl.
+	m := countTextRe.FindStringSubmatch(s)
+	if m == nil {
+		return 0
 	}
 	mult := float64(1)
-	switch {
-	case strings.HasSuffix(s, "k"):
+	switch m[2] {
+	case "k":
 		mult = 1_000
-		s = strings.TrimSuffix(s, "k")
-	case strings.HasSuffix(s, "m"):
+	case "m":
 		mult = 1_000_000
-		s = strings.TrimSuffix(s, "m")
-	case strings.HasSuffix(s, "b"):
+	case "b":
 		mult = 1_000_000_000
-		s = strings.TrimSuffix(s, "b")
 	}
-	f, _ := strconv.ParseFloat(strings.TrimSpace(s), 64)
+	f, _ := strconv.ParseFloat(m[1], 64)
 	return int64(f * mult)
 }
+
+// countTextRe matches the leading number of a rendered count and its compact
+// suffix, on a string already lowercased with its thousands commas removed.
+var countTextRe = regexp.MustCompile(`^([0-9]+(?:\.[0-9]+)?)\s*([kmb])?`)
 
 // compactCountRe matches a bare display count like "101K", "1.2M", "423", "1,234".
 var compactCountRe = regexp.MustCompile(`^\d[\d.,]*\s*[KMB]?$`)

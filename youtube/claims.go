@@ -177,10 +177,10 @@ func (c *Client) videoClaims(ctx context.Context, id string, opt ClaimOptions, c
 	}
 
 	if opt.Music {
-		if song, songErr := c.FetchSong(ctx, res.Video.VideoID, false); songErr == nil && song != nil {
-			prov := graph.Provenance{Source: song.URL, Surface: SurfaceMusic, Client: "WEB_REMIX"}
-			SongClaims(set, *song, prov)
-			SeenAsClaims(set, res.Video.VideoID, song.VideoID, prov, song.Title)
+		if track, trackErr := c.FetchTrack(ctx, res.Video.VideoID, false); trackErr == nil && track != nil {
+			prov := graph.Provenance{Source: track.URL, Surface: SurfaceMusic, Client: "WEB_REMIX"}
+			TrackClaims(set, *track, prov)
+			SeenAsClaims(set, res.Video.VideoID, track.VideoID, prov, track.Title)
 		}
 	}
 	return nil
@@ -266,33 +266,31 @@ func (c *Client) playlistClaims(ctx context.Context, id string, opt ClaimOptions
 }
 
 func (c *Client) albumClaims(ctx context.Context, id string, col *Collector) error {
-	album, songs, err := c.FetchAlbum(ctx, id)
+	album, tracks, err := c.FetchAlbum(ctx, id)
 	if err != nil {
 		return err
 	}
 	if album == nil {
 		return fmt.Errorf("album not found: %s", id)
 	}
-	AlbumClaims(col.Set, *album, songs, graph.Provenance{Source: album.URL, Surface: SurfaceMusic, Client: "WEB_REMIX"})
+	AlbumClaims(col.Set, *album, tracks, graph.Provenance{Source: album.URL, Surface: SurfaceMusic, Client: "WEB_REMIX"})
 	col.record(*album)
 	return nil
 }
 
 func (c *Client) artistClaims(ctx context.Context, id string, col *Collector) error {
-	artist, albums, songs, err := c.FetchArtist(ctx, id)
+	artist, err := c.FetchArtist(ctx, id)
 	if err != nil {
 		return err
 	}
 	if artist == nil {
 		return fmt.Errorf("artist not found: %s", id)
 	}
-	prov := graph.Provenance{Source: artist.URL, Surface: SurfaceMusic, Client: "WEB_REMIX"}
-	col.record(*artist)
-	for _, a := range albums {
-		AlbumClaims(col.Set, a, nil, prov)
-	}
-	for _, s := range songs {
-		SongClaims(col.Set, s, prov)
+	ArtistClaims(col.Set, *artist, graph.Provenance{Source: artist.URL, Surface: SurfaceMusic, Client: "WEB_REMIX"})
+	// An artist with a channel is the channel node, so the record has nowhere of
+	// its own to go and only the claims are kept. See recordURI.
+	if uri, _ := recordURI(*artist); uri != "" {
+		col.record(*artist)
 	}
 	return nil
 }

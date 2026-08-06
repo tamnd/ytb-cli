@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/tamnd/ytb-cli/pkg/graph"
+	"github.com/tamnd/ytb-cli/pkg/ytid"
 
 	_ "modernc.org/sqlite"
 )
@@ -275,8 +276,15 @@ func recordURI(record any) (graph.URI, graph.Kind) {
 	case Album:
 		return graph.AlbumURI(r.AlbumID), graph.Album
 	case Artist:
+		// An artist with a UC id is the channel, doc 04 section 2, and the channel
+		// node holds the channel record. Filing the music app's view of the artist
+		// there would put a record of one shape under a node of another kind and
+		// flip both on every read, so it is not filed and the claims carry it.
+		if ytid.IsChannel(r.ArtistID) {
+			return "", ""
+		}
 		return graph.ArtistURI(r.ArtistID), graph.Artist
-	// A Song is deliberately not here. It names a video node, and filing one
+	// A Track is deliberately not here. It names a video node, and filing one
 	// under that node would put the music app's view of a track where the video
 	// record goes, so the two would take turns overwriting each other depending on
 	// which read ran last.

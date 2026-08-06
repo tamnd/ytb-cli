@@ -332,12 +332,18 @@ func WireID(playlistID string) string {
 	return "VL" + s
 }
 
-// StripWire removes a VL prefix. Everything that stores or prints an id runs it
-// through here, because VL is routing and not identity.
+// StripWire removes a browse prefix. Everything that stores or prints an id runs
+// it through here, because a prefix is routing and not identity.
+//
+// VL is what www browses a playlist with. MPSP is the same idea on music, where
+// a podcast show browses as MPSP in front of the PL id its episodes live under,
+// and the show and the playlist are the same thing under two addresses.
 func StripWire(id string) string {
 	s := strings.TrimSpace(id)
-	if rest := strings.TrimPrefix(s, "VL"); rest != s && rest != "" {
-		return rest
+	for _, prefix := range []string{"VL", "MPSP"} {
+		if rest := strings.TrimPrefix(s, prefix); rest != s && rest != "" {
+			return rest
+		}
 	}
 	return s
 }

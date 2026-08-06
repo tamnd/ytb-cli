@@ -690,65 +690,171 @@ type CommentOptions struct {
 	Sort     string // "top" | "new"
 }
 
-// --- YouTube Music ---
+// --- YouTube Music, doc 03 section 12 ---
+//
+// music.youtube.com is a second app over the same catalogue, on surface s10 with
+// its own renderers and its own answers, so it gets its own record kinds. The
+// same id is "1.8B views" on www and "2B plays" on music, with different artist
+// attribution, which is why a track is not folded into the video record.
+//
+// Nothing here is classified by a rendered word. Every endpoint the payload
+// hands out is typed: a browse endpoint carries a pageType and a watch endpoint
+// carries a musicVideoType, so an album is still an album under --hl ja, where
+// the shelf is not headed "Albums" any more.
 
-// Artist is a YouTube Music artist.
+// MusicItem is one lockup on a music page: a shelf entry that names something
+// else rather than describing itself. Kind is read off the endpoint, so it is
+// what the payload says the thing is and not what the shelf it sat in was
+// called.
+type MusicItem struct {
+	// Kind is album, track, playlist or artist.
+	Kind string `json:"kind"`
+	ID   string `json:"id"`
+	URL  string `json:"url,omitempty"`
+
+	Title string `json:"title,omitempty"`
+	// Subtitle is the second line as rendered, kept whole because its parts are
+	// language-dependent and the fields below already hold the ones with a shape.
+	Subtitle string `json:"subtitle,omitempty"`
+	// Shelf is the rendered heading this sat under: "Albums", "Live performances".
+	// It is a label for a reader, not a type. The type is Kind.
+	Shelf string `json:"shelf,omitempty"`
+
+	// PlaylistID is the OLAK5uy_ playlist that plays an album lockup.
+	PlaylistID string `json:"playlist_id,omitempty"`
+	// AlbumType is the word an album lockup states for itself, "Single" or "EP".
+	// An entry in the albums shelf states nothing, so empty means album.
+	AlbumType string `json:"album_type,omitempty"`
+	Year      string `json:"year,omitempty"`
+	// MusicVideoType is ATV for an art track and OMV, UGC or OFFICIAL_SOURCE_MUSIC
+	// for a video, off the watch endpoint.
+	MusicVideoType string `json:"music_video_type,omitempty"`
+	// CountText is the rendered number the lockup carried, "1.8B views" on a video
+	// and "2B plays" on a track. Which one it is is the lockup's business.
+	CountText string `json:"count_text,omitempty"`
+
+	ArtistNames []string    `json:"artist_names,omitempty"`
+	ArtistIDs   []string    `json:"artist_ids,omitempty"`
+	Thumbnails  []Thumbnail `json:"thumbnails,omitempty"`
+}
+
+// Artist is a YouTube Music artist page.
 type Artist struct {
-	ArtistID        string    `json:"artist_id"`
-	Name            string    `json:"name"`
-	Description     string    `json:"description"`
-	SubscribersText string    `json:"subscribers_text"`
-	ThumbnailURL    string    `json:"thumbnail_url"`
-	URL             string    `json:"url"`
-	FetchedAt       time.Time `json:"fetched_at"`
+	// ArtistID is the UC channel id, or an MPLA browse id for an artist with no
+	// channel of their own.
+	ArtistID string `json:"id" kit:"id" table:"id"`
+	URL      string `json:"url,omitempty" table:"url,url"`
+
+	Name        string `json:"name,omitempty" table:"name,truncate"`
+	Description string `json:"description,omitempty" kit:"body" table:"-"`
+	// ChannelID is the channel the subscribe button names. It is the same id as
+	// ArtistID whenever the artist has a channel, and browsing a person's user
+	// channel can land on the artist page of their official artist channel, in
+	// which case the two differ and this is the one that was asked for.
+	ChannelID string `json:"channel_id,omitempty" kit:"link,kind=youtube/channel" table:"-"`
+	// Handle is the @name, which a person's own channel renders where an official
+	// artist channel renders a listener count.
+	Handle string `json:"handle,omitempty" table:"-"`
+
+	SubscriberCount     int64  `json:"subscriber_count,omitempty" table:"subscribers"`
+	SubscriberCountText string `json:"subscriber_count_text,omitempty" table:"-"`
+	// MonthlyListenersText is music's own number and has no counterpart on www.
+	MonthlyListenersText string `json:"monthly_listeners_text,omitempty" table:"-"`
+	// MetadataParts is a rendered fragment this read did not recognise, kept
+	// verbatim rather than dropped. A lockup's count lands here: a search row
+	// renders subscribers and a top result card renders a monthly audience, only
+	// the unit word separates them, and both of the fields above mean one of the
+	// two. The artist page states them properly and that read fills them in.
+	MetadataParts []string `json:"metadata_parts,omitempty" table:"-"`
+
+	Thumbnails []Thumbnail `json:"thumbnails,omitempty" table:"-"`
+
+	// TopTracks is the songs shelf, which is a list of rows rather than lockups
+	// and carries a play count per row.
+	TopTracks []Track `json:"top_tracks,omitempty" table:"-"`
+	// Albums and Singles split the discography the way the page does. A singles
+	// entry names its own type where an albums entry says only the year, so the
+	// split survives a language change.
+	Albums  []MusicItem `json:"albums,omitempty" table:"-"`
+	Singles []MusicItem `json:"singles,omitempty" table:"-"`
+	// Videos holds every video lockup on the page, live performances included,
+	// each carrying the shelf it came from.
+	Videos         []MusicItem `json:"videos,omitempty" table:"-"`
+	Playlists      []MusicItem `json:"playlists,omitempty" table:"-"`
+	RelatedArtists []MusicItem `json:"related_artists,omitempty" table:"-"`
+
+	Envelope
 }
 
-// Album is a YouTube Music album.
+// Album is a YouTube Music album, single or EP.
 type Album struct {
-	AlbumID         string    `json:"album_id"`
-	Title           string    `json:"title"`
-	ArtistID        string    `json:"artist_id"`
-	ArtistName      string    `json:"artist_name"`
-	AlbumType       string    `json:"album_type"`
-	Year            string    `json:"year"`
-	TrackCount      int       `json:"track_count"`
-	DurationText    string    `json:"duration_text"`
-	ThumbnailURL    string    `json:"thumbnail_url"`
-	AudioPlaylistID string    `json:"audio_playlist_id"`
-	Description     string    `json:"description"`
-	URL             string    `json:"url"`
-	FetchedAt       time.Time `json:"fetched_at"`
+	// AlbumID is the MPREb browse id. PlaylistID is the OLAK5uy_ playlist that
+	// holds the same tracks and is what www knows the album by.
+	AlbumID    string `json:"id" kit:"id" table:"id"`
+	PlaylistID string `json:"playlist_id,omitempty" kit:"link,kind=youtube/playlist" table:"-"`
+	URL        string `json:"url,omitempty" table:"url,url"`
+
+	Title string `json:"title,omitempty" table:"title,truncate"`
+	// ArtistNames and ArtistIDs are plural because a compilation or a collab is
+	// credited to more than one artist, and an id is present only for a credit the
+	// page linked.
+	ArtistNames []string `json:"artist_names,omitempty" table:"artist,truncate"`
+	ArtistIDs   []string `json:"artist_ids,omitempty" table:"-"`
+
+	// AlbumType is the page's own word: Album, Single, EP.
+	AlbumType string `json:"album_type,omitempty" table:"-"`
+	Year      string `json:"year,omitempty" table:"year"`
+
+	// TrackCount is the number of rows this read saw. TrackCountText is what the
+	// header said, and the two disagree when a track is not available here.
+	TrackCount     int    `json:"track_count,omitempty" table:"tracks"`
+	TrackCountText string `json:"track_count_text,omitempty" table:"-"`
+	DurationText   string `json:"duration_text,omitempty" table:"-"`
+
+	Description string      `json:"description,omitempty" kit:"body" table:"-"`
+	Thumbnails  []Thumbnail `json:"thumbnails,omitempty" table:"-"`
+
+	Envelope
 }
 
-// Song is a YouTube Music song.
-type Song struct {
-	VideoID         string    `json:"video_id"`
-	Title           string    `json:"title"`
-	ArtistID        string    `json:"artist_id"`
-	ArtistName      string    `json:"artist_name"`
-	AlbumID         string    `json:"album_id"`
-	AlbumName       string    `json:"album_name"`
-	DurationSeconds int       `json:"duration_seconds"`
-	DurationText    string    `json:"duration_text"`
-	PlaysText       string    `json:"plays_text"`
-	IsExplicit      bool      `json:"is_explicit"`
-	VideoType       string    `json:"video_type"`
-	ThumbnailURL    string    `json:"thumbnail_url"`
-	Lyrics          string    `json:"lyrics"`
-	URL             string    `json:"url"`
-	FetchedAt       time.Time `json:"fetched_at"`
-}
+// Track is a song as YouTube Music describes it.
+//
+// The id is a video id, so yt://track/<id> and yt://video/<id> would name one
+// thing seen through two apps, and doc 04 links the two records with a claim
+// rather than merging them.
+type Track struct {
+	VideoID string `json:"id" kit:"id" table:"id"`
+	URL     string `json:"url,omitempty" table:"url,url"`
 
-// AlbumTrack is the album↔song join.
-type AlbumTrack struct {
-	AlbumID  string `json:"album_id"`
-	VideoID  string `json:"video_id"`
-	Position int    `json:"position"`
-}
+	Title       string   `json:"title,omitempty" table:"title,truncate"`
+	ArtistNames []string `json:"artist_names,omitempty" table:"artist,truncate"`
+	ArtistIDs   []string `json:"artist_ids,omitempty" table:"-"`
+	AlbumID     string   `json:"album_id,omitempty" table:"-"`
+	AlbumTitle  string   `json:"album_title,omitempty" table:"album,truncate"`
 
-// ArtistAlbum is the artist↔album join.
-type ArtistAlbum struct {
-	ArtistID  string `json:"artist_id"`
-	AlbumID   string `json:"album_id"`
-	AlbumType string `json:"album_type"`
+	DurationSeconds int    `json:"duration_seconds,omitempty" table:"-"`
+	DurationText    string `json:"duration_text,omitempty" table:"duration"`
+	// PlaysText is music's count and is not the view count: the art track and the
+	// official video of one song are two ids with two numbers.
+	PlaysText  string `json:"plays_text,omitempty" table:"-"`
+	IsExplicit bool   `json:"is_explicit,omitempty" table:"-"`
+	// MusicVideoType is ATV for an art track and OMV, UGC or OFFICIAL_SOURCE_MUSIC
+	// for a video. It is the field that says which of the two a row is.
+	MusicVideoType string `json:"music_video_type,omitempty" table:"-"`
+	Year           string `json:"year,omitempty" table:"-"`
+	// Position is the track number on an album page and zero everywhere else.
+	Position int `json:"position,omitempty" table:"-"`
+	// MetadataParts is a rendered fragment this read did not recognise, kept
+	// verbatim rather than dropped. A podcast episode renders its publish date
+	// and the show it is from where a song renders its artist, and neither of
+	// those has a field here.
+	MetadataParts []string `json:"metadata_parts,omitempty" table:"-"`
+
+	Thumbnails []Thumbnail `json:"thumbnails,omitempty" table:"-"`
+	Lyrics     string      `json:"lyrics,omitempty" kit:"body" table:"-"`
+	// LyricsSource is the footer credit, "Source: Musixmatch". Lyrics without it
+	// are still lyrics, but the credit is part of what the page served.
+	LyricsSource string `json:"lyrics_source,omitempty" table:"-"`
+
+	Envelope
 }
