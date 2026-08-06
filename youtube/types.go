@@ -337,20 +337,22 @@ func (c ChannelCounts) String() string {
 
 // Comment is one comment or reply. Replies carry the parent comment id in ParentID.
 type Comment struct {
-	ID                 string    `json:"id" kit:"id" table:"id"`
-	VideoID            string    `json:"video_id" kit:"link,kind=youtube/video" table:"-"`
-	ParentID           string    `json:"parent_id" table:"-"`
-	AuthorChannelID    string    `json:"author_channel_id" kit:"link,kind=youtube/channel" table:"-"`
-	AuthorDisplayName  string    `json:"author_display_name" table:"author,truncate"`
-	AuthorProfileImage string    `json:"author_profile_image_url" table:"-"`
-	TextDisplay        string    `json:"text_display" kit:"body" table:"text,truncate"`
-	LikeCount          int64     `json:"like_count" table:"likes"`
-	ReplyCount         int       `json:"reply_count" table:"replies"`
-	IsOwnerComment     bool      `json:"is_owner_comment" table:"-"`
-	PublishedText      string    `json:"published_text" table:"published"`
-	PublishedAt        time.Time `json:"published_at" table:"-"`
-	UpdatedAt          time.Time `json:"updated_at" table:"-"`
-	FetchedAt          time.Time `json:"fetched_at" table:"-"`
+	ID                 string `json:"id" kit:"id" table:"id"`
+	VideoID            string `json:"video_id" kit:"link,kind=youtube/video" table:"-"`
+	ParentID           string `json:"parent_id" table:"-"`
+	AuthorChannelID    string `json:"author_channel_id" kit:"link,kind=youtube/channel" table:"-"`
+	AuthorDisplayName  string `json:"author_display_name" table:"author,truncate"`
+	AuthorProfileImage string `json:"author_profile_image_url" table:"-"`
+	TextDisplay        string `json:"text_display" kit:"body" table:"text,truncate"`
+	LikeCount          int64  `json:"like_count" table:"likes"`
+	ReplyCount         int    `json:"reply_count" table:"replies"`
+	IsOwnerComment     bool   `json:"is_owner_comment" table:"-"`
+	// PublishedText is what YouTube says, and it is all YouTube says: "3 years
+	// ago", rounded, with no exact time behind it at any tier. There is no
+	// published_at on this record on purpose. A zero timestamp in the json is a
+	// claim about when the comment was written, and it would be a false one.
+	PublishedText string    `json:"published_text" table:"published"`
+	FetchedAt     time.Time `json:"fetched_at" table:"-"`
 }
 
 // Chapter is one chapter marker on a video.

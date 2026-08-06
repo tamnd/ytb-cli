@@ -142,8 +142,6 @@ func (s *Store) initSchema() error {
 			reply_count          INTEGER DEFAULT 0,
 			is_owner_comment     INTEGER DEFAULT 0,
 			published_text       TEXT,
-			published_at         TEXT,
-			updated_at           TEXT,
 			fetched_at           TEXT
 		)`,
 		`CREATE TABLE IF NOT EXISTS chapters (
@@ -366,13 +364,12 @@ func (s *Store) UpsertComment(c Comment) error {
 	_, err := s.db.Exec(`INSERT OR REPLACE INTO comments (
 		id, video_id, parent_id, author_channel_id, author_display_name,
 		author_profile_image, text_display, like_count, reply_count,
-		is_owner_comment, published_text, published_at, updated_at, fetched_at
-	) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+		is_owner_comment, published_text, fetched_at
+	) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
 		c.ID, c.VideoID, storeNullStr(c.ParentID), storeNullStr(c.AuthorChannelID),
 		storeNullStr(c.AuthorDisplayName), storeNullStr(c.AuthorProfileImage),
 		storeNullStr(c.TextDisplay), c.LikeCount, c.ReplyCount,
-		storeBool(c.IsOwnerComment), storeNullStr(c.PublishedText),
-		storeNullTime(c.PublishedAt), storeNullTime(c.UpdatedAt), storeTime(c.FetchedAt),
+		storeBool(c.IsOwnerComment), storeNullStr(c.PublishedText), storeTime(c.FetchedAt),
 	)
 	return err
 }
