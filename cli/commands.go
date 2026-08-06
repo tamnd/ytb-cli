@@ -10,6 +10,7 @@ import "github.com/tamnd/any-cli/kit"
 func registerEscapeHatches(app *kit.App) {
 	app.AddCommand(newFormatsCmd())
 	app.AddCommand(newTranscriptCmd())
+	app.AddCommand(newCaptionsCmd())
 	app.AddCommand(newChaptersCmd())
 	app.AddCommand(newSponsorBlockCmd())
 	app.AddCommand(newThumbnailCmd())

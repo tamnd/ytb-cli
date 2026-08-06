@@ -320,7 +320,7 @@ func getVideo(ctx context.Context, in videoRef, emit func(*Video) error) error {
 		res, err := in.Client.FetchVideo(ctx, ref, opt)
 		if err != nil {
 			if single {
-				return mapErr(err)
+				return ExitError(err)
 			}
 			continue
 		}
@@ -340,7 +340,7 @@ func getVideo(ctx context.Context, in videoRef, emit func(*Video) error) error {
 func getChannel(ctx context.Context, in channelReadRef, emit func(*Channel) error) error {
 	ch, err := in.Client.FetchChannel(ctx, in.Ref, ChannelOptions{NoAbout: in.NoAbout, Counts: in.Counts})
 	if err != nil {
-		return mapErr(err)
+		return ExitError(err)
 	}
 	if ch == nil {
 		return errs.NotFound("channel %q not found", in.Ref)
@@ -351,7 +351,7 @@ func getChannel(ctx context.Context, in channelReadRef, emit func(*Channel) erro
 func getChannelAbout(ctx context.Context, in channelRef, emit func(*ChannelAbout) error) error {
 	about, err := in.Client.FetchChannelAbout(ctx, in.Ref)
 	if err != nil {
-		return mapErr(err)
+		return ExitError(err)
 	}
 	if about == nil {
 		return errs.NotFound("channel %q has no about panel", in.Ref)
@@ -362,7 +362,7 @@ func getChannelAbout(ctx context.Context, in channelRef, emit func(*ChannelAbout
 func getPlaylist(ctx context.Context, in playlistRef, emit func(*Playlist) error) error {
 	pl, err := in.Client.FetchPlaylist(ctx, in.Ref)
 	if err != nil {
-		return mapErr(err)
+		return ExitError(err)
 	}
 	if pl == nil {
 		return errs.NotFound("playlist %q not found", in.Ref)
@@ -371,7 +371,7 @@ func getPlaylist(ctx context.Context, in playlistRef, emit func(*Playlist) error
 }
 
 func listUploads(ctx context.Context, in uploadsRef, emit func(Video) error) error {
-	return mapErr(in.Client.StreamUploads(ctx, in.Ref, UploadsOptions{
+	return ExitError(in.Client.StreamUploads(ctx, in.Ref, UploadsOptions{
 		Kind:  in.Kind,
 		Via:   in.Via,
 		Exact: in.Exact,
@@ -382,7 +382,7 @@ func listUploads(ctx context.Context, in uploadsRef, emit func(Video) error) err
 func listFeed(ctx context.Context, in feedRef, emit func(Video) error) error {
 	videos, err := in.Client.FetchChannelFeed(ctx, in.Ref)
 	if err != nil {
-		return mapErr(err)
+		return ExitError(err)
 	}
 	for _, v := range videos {
 		if err := emit(v); err != nil {
@@ -393,11 +393,11 @@ func listFeed(ctx context.Context, in feedRef, emit func(Video) error) error {
 }
 
 func listChannelPlaylists(ctx context.Context, in pagedRef, emit func(Playlist) error) error {
-	return mapErr(in.Client.StreamChannelPlaylists(ctx, in.Ref, pageOpts(in.MaxPages, false), emit))
+	return ExitError(in.Client.StreamChannelPlaylists(ctx, in.Ref, pageOpts(in.MaxPages, false), emit))
 }
 
 func listItems(ctx context.Context, in pagedRef, emit func(Video) error) error {
-	return mapErr(in.Client.StreamPlaylistItems(ctx, in.Ref, pageOpts(in.MaxPages, false), func(pv PlaylistVideo, v Video) error {
+	return ExitError(in.Client.StreamPlaylistItems(ctx, in.Ref, pageOpts(in.MaxPages, false), func(pv PlaylistVideo, v Video) error {
 		if v.VideoID == "" {
 			v.VideoID = pv.VideoID
 		}
@@ -411,7 +411,7 @@ func listItems(ctx context.Context, in pagedRef, emit func(Video) error) error {
 func listRelated(ctx context.Context, in playlistRef, emit func(Video) error) error {
 	res, err := in.Client.FetchVideo(ctx, in.Ref, VideoOptions{Next: true})
 	if err != nil {
-		return mapErr(err)
+		return ExitError(err)
 	}
 	if res == nil {
 		return errs.NotFound("video %q not found", in.Ref)
@@ -429,19 +429,19 @@ func listRelated(ctx context.Context, in playlistRef, emit func(Video) error) er
 
 func listComments(ctx context.Context, in commentsRef, emit func(Comment) error) error {
 	opt := CommentOptions{MaxPages: in.MaxPages, Replies: in.Replies, Sort: in.Sort}
-	return mapErr(in.Client.StreamComments(ctx, in.Ref, opt, emit))
+	return ExitError(in.Client.StreamComments(ctx, in.Ref, opt, emit))
 }
 
 func listCommunity(ctx context.Context, in pagedRef, emit func(CommunityPost) error) error {
-	return mapErr(in.Client.StreamCommunity(ctx, in.Ref, pageOpts(in.MaxPages, false), emit))
+	return ExitError(in.Client.StreamCommunity(ctx, in.Ref, pageOpts(in.MaxPages, false), emit))
 }
 
 func listHashtag(ctx context.Context, in hashtagRef, emit func(Video) error) error {
-	return mapErr(in.Client.StreamHashtag(ctx, in.Tag, pageOpts(in.MaxPages, false), emit))
+	return ExitError(in.Client.StreamHashtag(ctx, in.Tag, pageOpts(in.MaxPages, false), emit))
 }
 
 func listTrending(ctx context.Context, in trendingRef, emit func(Video) error) error {
-	return mapErr(in.Client.Trending(ctx, in.Category, pageOpts(in.MaxPages, false), emit))
+	return ExitError(in.Client.Trending(ctx, in.Category, pageOpts(in.MaxPages, false), emit))
 }
 
 func search(ctx context.Context, in searchRef, emit func(any) error) error {
@@ -460,13 +460,13 @@ func search(ctx context.Context, in searchRef, emit func(any) error) error {
 		HDR:            in.HDR,
 		VR180:          in.VR180,
 	}
-	return mapErr(in.Client.Search(ctx, strings.Join(in.Query, " "), filters, pageOpts(in.MaxPages, false), emit))
+	return ExitError(in.Client.Search(ctx, strings.Join(in.Query, " "), filters, pageOpts(in.MaxPages, false), emit))
 }
 
 func suggest(ctx context.Context, in suggestRef, emit func(Suggestion) error) error {
 	suggestions, err := in.Client.Suggest(ctx, strings.Join(in.Query, " "))
 	if err != nil {
-		return mapErr(err)
+		return ExitError(err)
 	}
 	for _, s := range suggestions {
 		if err := emit(Suggestion{Text: s}); err != nil {
@@ -593,11 +593,16 @@ func expandStdin(refs []string) []string {
 	return out
 }
 
-// mapErr converts a youtube library error into the kit error kind that carries
-// the right exit code, so a host renders the same outcomes the binary does. The
-// stream stop sentinels (kit's own limit signal and youtube's ErrStop) are clean
-// stops, never failures.
-func mapErr(err error) error {
+// ExitError converts a youtube library error into the kit error kind that
+// carries the right exit code, so a host renders the same outcomes the binary
+// does. The stream stop sentinels (kit's own limit signal and youtube's ErrStop)
+// are clean stops, never failures.
+//
+// It is exported because the record operations below are not the only callers.
+// The escape-hatch commands in cli/ hold the client themselves, and without this
+// "this video has no caption track" leaves as a plain error and exits 1, which
+// says the tool broke rather than that the video has no captions.
+func ExitError(err error) error {
 	switch {
 	case err == nil, errors.Is(err, ErrStop):
 		return nil
@@ -606,8 +611,12 @@ func mapErr(err error) error {
 		// thing, not a failed read, and the difference matters to a script walking a
 		// list of addresses.
 		return errs.NotFound("%s", err)
-	case errors.Is(err, ErrCommentsRestricted):
-		return errs.Unsupported("comments are hidden by Restricted Mode; YouTube applies this to some datacenter requests")
+	case errors.Is(err, ErrNoCaptions), errors.Is(err, ErrNoSuchCaptionTrack):
+		// Exit 3. The video really has none, or has none in the language asked for,
+		// and neither is a refusal: aqz-KE-bpKQ answers OK with an empty caption
+		// list, and asking dQw4w9WgXcQ for Klingon gets a full list back that does
+		// not contain it.
+		return errs.NoResults("%s", err)
 	case IsRefusal(err):
 		// Exit 4 means YouTube answered and the answer was no, per doc 05 section 9,
 		// and the kit's kind for exit 4 is NeedAuth. That name fits most refusals,
@@ -621,10 +630,18 @@ func mapErr(err error) error {
 		// nothing they asked about.
 		r, _ := AsRefusal(err)
 		if r.Remedy != "" {
-			return errs.NeedAuth("%s\n%s", r.Message, r.Remedy)
+			return errs.NeedAuth("%s", noFinalPeriod(r.Message+"\n"+r.Remedy))
 		}
-		return errs.NeedAuth("%s", r.Message)
+		return errs.NeedAuth("%s", noFinalPeriod(r.Message))
 	default:
 		return err
 	}
 }
+
+// noFinalPeriod drops one trailing period.
+//
+// fang prints every error as err.Error()+".", unconditionally, so a message that
+// already ends in a sentence comes out with two. Ours can be written without the
+// period; YouTube's cannot, since it is quoted whole, which is why the trim
+// happens here at the last moment rather than in the strings themselves.
+func noFinalPeriod(s string) string { return strings.TrimSuffix(strings.TrimSpace(s), ".") }

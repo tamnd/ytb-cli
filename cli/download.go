@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/tamnd/any-cli/kit"
+	"github.com/tamnd/ytb-cli/pkg/srv3"
 	"github.com/tamnd/ytb-cli/youtube"
 )
 
@@ -375,16 +376,22 @@ func (a *App) embedThumbnail(ctx context.Context, videoID, mediaPath, ffmpeg str
 }
 
 func (a *App) writeSubtitle(ctx context.Context, videoID string, o downloadOpts, fields youtube.OutputFields, mediaPath string) error {
-	_, segs, err := a.Client.Transcript(ctx, videoID, o.subLangs)
+	doc, track, err := a.Client.Transcript(ctx, videoID, youtube.TranscriptOptions{Lang: o.subLangs})
 	if err != nil {
 		return err
 	}
-	if len(segs) == 0 {
-		return fmt.Errorf("no subtitle segments for %q", o.subLangs)
+	if len(doc.Cues) == 0 {
+		return fmt.Errorf("no subtitle lines for %q", o.subLangs)
 	}
-	out := youtube.RenderSubtitles(segs, youtube.SubtitleFormat(o.subFormat))
+	out, err := doc.Render(srv3.Format(o.subFormat))
+	if err != nil {
+		return err
+	}
 	base := strings.TrimSuffix(mediaPath, filepath.Ext(mediaPath))
-	subPath := fmt.Sprintf("%s.%s.%s", base, o.subLangs, o.subFormat)
+	// The file is named for the track that was written, which is not always the
+	// one asked for: with no --sub-langs the default track wins and naming the
+	// file "video..srt" would say nothing about what is in it.
+	subPath := fmt.Sprintf("%s.%s.%s", base, track.LanguageCode, o.subFormat)
 	if err := os.WriteFile(subPath, []byte(out), 0o644); err != nil {
 		return err
 	}
