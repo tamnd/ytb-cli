@@ -3,8 +3,10 @@ package youtube
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"net/url"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -135,12 +137,21 @@ func extractQuotedConfig(html, key string) string {
 // --- Tree walking and primitive helpers ---
 
 // walkJSON visits every map node in v depth-first, calling fn on each one.
+//
+// Children are visited in key order, and that is not a tidiness thing. A watch
+// page names the same video in more than one place and the two mentions do not
+// always agree: fcnDmrtj6Sk is bylined to the artist channel in one and to the
+// topic channel in the other. Every collector downstream keeps the first one it
+// sees, so ranging over the map directly meant the exported author of that
+// video changed between two runs over the same cached bytes. Sorting the keys
+// is what makes ytb rdf byte stable, and a dump that reorders itself cannot be
+// diffed.
 func walkJSON(v any, fn func(map[string]any)) {
 	switch x := v.(type) {
 	case map[string]any:
 		fn(x)
-		for _, val := range x {
-			walkJSON(val, fn)
+		for _, key := range slices.Sorted(maps.Keys(x)) {
+			walkJSON(x[key], fn)
 		}
 	case []any:
 		for _, val := range x {
