@@ -43,6 +43,11 @@ type Cache struct {
 	// hits and misses are counted so `ytb crawl` can report a request budget it
 	// actually spent rather than one it estimated.
 	hits, misses int
+	// bypass makes every read a miss while still storing what comes back. It is
+	// what ytb archive turns on: the point of a capture is what YouTube is serving
+	// now, and the point of still writing is that the parse step then sees the
+	// same bytes the capture kept.
+	bypass bool
 }
 
 // cacheEntry is what gets written. StoredAt is in the file rather than taken
@@ -70,6 +75,23 @@ func NewCache(dir string, ttl time.Duration) *Cache {
 // as optional without a nil check of its own.
 func (c *Cache) Enabled() bool {
 	return c != nil && c.dir != "" && c.ttl > 0
+}
+
+// SetBypass makes every Get a miss until it is turned off again, without
+// stopping Put. Only ytb archive uses it, and it puts it back afterwards.
+func (c *Cache) SetBypass(on bool) {
+	if c == nil {
+		return
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.bypass = on
+}
+
+func (c *Cache) bypassing() bool {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.bypass
 }
 
 // Stats returns the hit and miss counts for this run.
@@ -108,7 +130,7 @@ func (k CacheKey) String() string {
 // Get returns a cached response, or ok false when there is none or it has
 // expired.
 func (c *Cache) Get(k CacheKey) (status int, body []byte, ok bool) {
-	if !c.Enabled() {
+	if !c.Enabled() || c.bypassing() {
 		return 0, nil, false
 	}
 	raw, err := os.ReadFile(c.path(k))
