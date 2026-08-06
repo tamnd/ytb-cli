@@ -50,7 +50,7 @@ func (c *Client) Call(ctx context.Context, spec ClientSpec, verb string, body ma
 		return nil, err
 	}
 	url := effective.Endpoint(verb) + "?key=" + cfg.APIKey + "&prettyPrint=false"
-	data, err := c.doInnerTube(ctx, effective, url, raw, cfg.VisitorData)
+	data, err := c.doInnerTube(ctx, effective, url, raw, cfg.VisitorData, subject)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,11 @@ func (c *Client) Call(ctx context.Context, spec ClientSpec, verb string, body ma
 }
 
 // doInnerTube performs the POST, through the cache and the retry loop.
-func (c *Client) doInnerTube(ctx context.Context, spec ClientSpec, url string, body []byte, visitorData string) ([]byte, error) {
+//
+// subject is not sent anywhere. It is written into the reads log as the URL's
+// fragment, because every browse in a crawl goes to the same address and a log
+// that cannot tell one from another is a log nobody can check a record against.
+func (c *Client) doInnerTube(ctx context.Context, spec ClientSpec, url string, body []byte, visitorData, subject string) ([]byte, error) {
 	key := CacheKey{
 		Method: http.MethodPost,
 		// The harvested key is stripped from the cache key. It rotates, and an
@@ -115,17 +119,36 @@ func (c *Client) doInnerTube(ctx context.Context, spec ClientSpec, url string, b
 			req.Header.Set(k, v)
 		}
 		c.setLanguageHeaders(req)
+		read := Read{
+			Method: http.MethodPost,
+			// The harvested key is stripped for the same reason the cache key strips
+			// it: it rotates, it is not ours, and a log full of it is a log nobody can
+			// paste into a bug report.
+			URL:     logURL(url, subject),
+			Surface: surfaceForURL(url, spec.Name),
+			Client:  spec.Name,
+			Headers: sentHeaders(req.Header),
+			At:      time.Now(),
+		}
 		resp, err := c.http.Do(req)
 		if err != nil {
+			read.Error = err.Error()
+			c.noteRead(read)
 			lastErr = err
 			continue
 		}
 		data, err := io.ReadAll(resp.Body)
 		_ = resp.Body.Close()
+		read.Status = resp.StatusCode
+		read.Bytes = len(data)
+		read.Body = data
 		if err != nil {
+			read.Error = err.Error()
+			c.noteRead(read)
 			lastErr = err
 			continue
 		}
+		c.noteRead(read)
 		if resp.StatusCode == 429 || resp.StatusCode >= 500 {
 			lastErr = fmt.Errorf("POST %s as %s: HTTP %d", url, spec.Name, resp.StatusCode)
 			continue

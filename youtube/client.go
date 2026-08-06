@@ -32,6 +32,7 @@ type Client struct {
 	cfgCache  *ytcfgCache
 	cache     *Cache
 	onRequest func(method, url string)
+	onRead    func(Read)
 }
 
 // SetOnRequest installs a hook called once for every request that actually goes
@@ -145,17 +146,32 @@ func (c *Client) Fetch(ctx context.Context, url string) ([]byte, int, error) {
 		req.Header.Set("User-Agent", c.userAgents[rand.Intn(len(c.userAgents))])
 		req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
 		c.setLanguageHeaders(req)
+		read := Read{
+			Method:  http.MethodGet,
+			URL:     c.localise(url),
+			Surface: surfaceForURL(url, ""),
+			Headers: sentHeaders(req.Header),
+			At:      time.Now(),
+		}
 		resp, err := c.http.Do(req)
 		if err != nil {
+			read.Error = err.Error()
+			c.noteRead(read)
 			lastErr = err
 			continue
 		}
 		body, err := io.ReadAll(resp.Body)
 		_ = resp.Body.Close()
+		read.Status = resp.StatusCode
+		read.Bytes = len(body)
+		read.Body = body
 		if err != nil {
+			read.Error = err.Error()
+			c.noteRead(read)
 			lastErr = err
 			continue
 		}
+		c.noteRead(read)
 		if resp.StatusCode == 429 || resp.StatusCode >= 500 {
 			lastErr = fmt.Errorf("GET %s: HTTP %d", url, resp.StatusCode)
 			continue
