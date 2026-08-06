@@ -420,7 +420,7 @@ func ExtractHashtags(text string) []string {
 // ParseVideoPage parses a watch page into a Video with its related videos and the
 // continuation token for the rest of them. The record itself is built in
 // videoparse.go; this is the page-shaped wrapper around it.
-func ParseVideoPage(data *PageData, pageURL string) (*Video, []RelatedVideo, string, error) {
+func ParseVideoPage(data *PageData, pageURL string) (*Video, []Video, string, error) {
 	videoID := ExtractVideoID(pageURL)
 	if videoID == "" {
 		return nil, nil, "", fmt.Errorf("cannot extract video id")
@@ -434,7 +434,7 @@ func ParseVideoPage(data *PageData, pageURL string) (*Video, []RelatedVideo, str
 	if data.ClientVersion != "" {
 		v.addClient("WEB")
 	}
-	return v, parseRelatedVideos(data.InitialData, v.VideoID), extractRelatedContinuationToken(data.InitialData), nil
+	return v, ParseRelatedShelf(data.InitialData, v.VideoID), extractRelatedContinuationToken(data.InitialData), nil
 }
 
 // pageHeaderMetadataParts returns the text.content of every metadataPart under a
@@ -1210,10 +1210,15 @@ func ParseContinuationPlaylists(data map[string]any) ([]Playlist, string) {
 	return dedupePlaylists(playlists), contToken
 }
 
-func parseRelatedVideos(root any, videoID string) []RelatedVideo {
-	var out []RelatedVideo
+// ParseRelatedShelf reads the secondaryResults shelf as the rows it is.
+//
+// Each row is a lockup with a title and a byline on it, and reducing the shelf
+// to a list of ids throws away twenty video titles and twenty channel ids that
+// the response already paid for. RelatedVideos below is the join the store
+// holds, derived from these.
+func ParseRelatedShelf(root any, videoID string) []Video {
+	var out []Video
 	seen := map[string]struct{}{}
-	pos := 0
 	for _, v := range dedupeVideos(parseVideosFromTree(root)) {
 		if v.VideoID == "" || v.VideoID == videoID {
 			continue
@@ -1222,27 +1227,24 @@ func parseRelatedVideos(root any, videoID string) []RelatedVideo {
 			continue
 		}
 		seen[v.VideoID] = struct{}{}
-		pos++
-		out = append(out, RelatedVideo{VideoID: videoID, RelatedVideoID: v.VideoID, Position: pos})
+		out = append(out, v)
+	}
+	return out
+}
+
+// RelatedVideos turns a shelf into the join rows the store holds. Position is
+// the shelf's own order, one based.
+func RelatedVideos(videoID string, shelf []Video) []RelatedVideo {
+	out := make([]RelatedVideo, 0, len(shelf))
+	for i, v := range shelf {
+		out = append(out, RelatedVideo{VideoID: videoID, RelatedVideoID: v.VideoID, Position: i + 1})
 	}
 	return out
 }
 
 // ParseContinuationRelatedVideos extracts related videos and next token from a /next continuation.
-func ParseContinuationRelatedVideos(data map[string]any, videoID string) ([]RelatedVideo, string) {
-	videos := parseVideosFromTree(data)
-	videos = dedupeVideos(videos)
-	var out []RelatedVideo
-	pos := 0
-	for _, v := range videos {
-		if v.VideoID == "" || v.VideoID == videoID {
-			continue
-		}
-		pos++
-		out = append(out, RelatedVideo{VideoID: videoID, RelatedVideoID: v.VideoID, Position: pos})
-	}
-	contToken := extractContinuationToken(data)
-	return out, contToken
+func ParseContinuationRelatedVideos(data map[string]any, videoID string) ([]Video, string) {
+	return ParseRelatedShelf(data, videoID), extractContinuationToken(data)
 }
 
 func parseCommentCountText(root any) string {

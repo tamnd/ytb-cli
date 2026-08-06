@@ -417,10 +417,7 @@ func listRelated(ctx context.Context, in playlistRef, emit func(Video) error) er
 		return errs.NotFound("video %q not found", in.Ref)
 	}
 	for _, r := range res.Related {
-		if err := emit(Video{
-			VideoID: r.RelatedVideoID,
-			URL:     "https://www.youtube.com/watch?v=" + r.RelatedVideoID,
-		}); err != nil {
+		if err := emit(r); err != nil {
 			return err
 		}
 	}

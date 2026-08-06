@@ -560,14 +560,14 @@ func (w *Walker) neighbors(ctx context.Context, n *Node, vres *VideoResult, edge
 		if edges.Has(EdgeRelated) && vres != nil {
 			i := 0
 			for _, r := range vres.Related {
-				if r.RelatedVideoID == "" {
+				if r.VideoID == "" {
 					continue
 				}
 				if streamMax > 0 && i >= streamMax {
 					break
 				}
-				addEdge(r.RelatedVideoID, EdgeRelated)
-				out = append(out, frontier{kind: KindVideo, ref: r.RelatedVideoID, depth: n.Depth + 1, via: EdgeRelated, parent: src})
+				addEdge(r.VideoID, EdgeRelated)
+				out = append(out, frontier{kind: KindVideo, ref: r.VideoID, depth: n.Depth + 1, via: EdgeRelated, parent: src})
 				i++
 			}
 		}

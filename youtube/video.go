@@ -12,11 +12,14 @@ var ErrStop = errors.New("youtube: stop iteration")
 
 // VideoResult holds the full output of FetchVideo.
 type VideoResult struct {
-	Video        Video
-	Formats      []VideoFormat
-	Captions     []CaptionTrack
-	Chapters     []Chapter
-	Related      []RelatedVideo
+	Video    Video
+	Formats  []VideoFormat
+	Captions []CaptionTrack
+	Chapters []Chapter
+	// Related is the shelf as it was rendered, titles and bylines included, so a
+	// watch page is twenty related claims and twenty published claims rather than
+	// twenty bare ids. RelatedVideos turns it into the join the store holds.
+	Related      []Video
 	CommentToken string
 }
 

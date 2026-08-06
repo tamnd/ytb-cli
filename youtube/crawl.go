@@ -156,7 +156,7 @@ func crawlVideo(ctx context.Context, c *Client, store *Store, url string, opt Cr
 	for _, ch := range result.Chapters {
 		_ = store.UpsertChapter(ch)
 	}
-	for _, rv := range result.Related {
+	for _, rv := range RelatedVideos(result.Video.VideoID, result.Related) {
 		_ = store.UpsertRelatedVideo(rv)
 	}
 	return nil
