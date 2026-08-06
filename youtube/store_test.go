@@ -110,12 +110,19 @@ func TestStoreRecordSurvivesLaterSighting(t *testing.T) {
 	}
 }
 
-// A Song names a video node, so filing one there would put the music app's view
-// of a track where the video record goes.
+// A Track names a video node, so filing one there would put the music app's view
+// of a track where the video record goes. An Artist with a channel id is the
+// same story about the channel node.
 func TestStoreRefusesRecordItCannotPlace(t *testing.T) {
 	s := testStore(t)
-	if _, err := s.PutRecord(Song{VideoID: "dQw4w9WgXcQ", Title: "Never Gonna Give You Up"}); err == nil {
-		t.Fatal("a Song was filed as a node record")
+	if _, err := s.PutRecord(Track{VideoID: "dQw4w9WgXcQ", Title: "Never Gonna Give You Up"}); err == nil {
+		t.Fatal("a Track was filed as a node record")
+	}
+	if _, err := s.PutRecord(Artist{ArtistID: "UCuAXFkgsw1L7xaCfnd5JJOw", Name: "Rick Astley"}); err == nil {
+		t.Fatal("an artist with a channel id was filed over the channel record")
+	}
+	if _, err := s.PutRecord(Artist{ArtistID: "MPLAUCuAXFkgsw1L7xaCfnd5JJOw", Name: "Rick Astley"}); err != nil {
+		t.Fatalf("an artist with no channel of its own has its own node: %v", err)
 	}
 }
 

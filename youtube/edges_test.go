@@ -91,8 +91,8 @@ func emitEveryPredicate(set *graph.Set) {
 	FeaturedClaims(set, testChannelID, []Channel{{ChannelID: otherChannel, Title: "Another channel"}}, prov)
 
 	musicProv := graph.Provenance{Source: "https://music.youtube.com/browse/MPREb_test", Surface: SurfaceMusic, Client: "WEB_REMIX"}
-	AlbumClaims(set, Album{AlbumID: "MPREb_test", Title: "Whenever You Need Somebody", ArtistID: testChannelID, ArtistName: "Rick Astley"},
-		[]Song{{VideoID: "fcnDmrtj6Sk", Title: "One", ArtistID: testChannelID, ArtistName: "Rick Astley", AlbumID: "MPREb_test", AlbumName: "Whenever You Need Somebody"}}, musicProv)
+	AlbumClaims(set, Album{AlbumID: "MPREb_test", Title: "Whenever You Need Somebody", ArtistNames: []string{"Rick Astley"}, ArtistIDs: []string{testChannelID}},
+		[]Track{{VideoID: "fcnDmrtj6Sk", Title: "One", ArtistNames: []string{"Rick Astley"}, ArtistIDs: []string{testChannelID}, AlbumID: "MPREb_test", AlbumTitle: "Whenever You Need Somebody"}}, musicProv)
 
 	SeenAsClaims(set, testVideoID, "JNEK3G9Mkfg", musicProv, "the art track")
 }

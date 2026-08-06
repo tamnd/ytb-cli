@@ -222,6 +222,13 @@ func TestVLGoesOnTheWireAndNowhereElse(t *testing.T) {
 	if got := Classify("VL" + bare).ID; got != bare {
 		t.Errorf("Classify(%q).ID = %q, want the prefix gone", "VL"+bare, got)
 	}
+	// MPSP is the same idea on music: a podcast show browses as MPSP in front of
+	// the playlist its episodes are in, and the show and the playlist are one
+	// thing under two addresses.
+	const show = "PLtQiqTbYDL79aDD07TbjRq798JKkgV_nF"
+	if got := StripWire("MPSP" + show); got != show {
+		t.Errorf("StripWire(%q) = %q, want %q", "MPSP"+show, got, show)
+	}
 }
 
 // TestMixIsUnviewableRatherThanAURL asserts the mix answer. Browsing RD<video id>
