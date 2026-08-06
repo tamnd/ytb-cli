@@ -114,9 +114,9 @@ func (a *App) Line(s string) error {
 	return err
 }
 
-// StorePath is the fixed location of the typed crawl store, under the data dir.
-// Unlike kit's generic --db record tee, this store carries the rich youtube
-// schema the crawl, queue, export, and db commands read and write.
+// StorePath is the fixed location of the graph store, under the data dir.
+// Unlike kit's generic --db record tee, this store carries the nodes, claims and
+// reads that crawl, archive, export, query and db read and write.
 func (a *App) StorePath() string {
 	dir := a.DataDir
 	if dir == "" {

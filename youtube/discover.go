@@ -205,9 +205,14 @@ func joinEdges(edges []Edge) string {
 // Exactly one of the entity pointers is set, matching Kind. Node is what Walk
 // hands to its callback and what the CLI renders.
 type Node struct {
-	Kind     NodeKind       `json:"kind"`
-	Depth    int            `json:"depth"`
-	Via      Edge           `json:"via,omitempty"`
+	Kind  NodeKind `json:"kind"`
+	Depth int      `json:"depth"`
+	Via   Edge     `json:"via,omitempty"`
+	// Fetched says the walk asked about this object rather than reading it off
+	// somebody else's page. A related shelf gives thirty videos as a title and a
+	// byline, and a lockup is not a record: writing one down as if it were would
+	// say this video has no description and no likes.
+	Fetched  bool           `json:"fetched"`
 	Parent   string         `json:"parent,omitempty"`
 	Video    *Video         `json:"video,omitempty"`
 	Channel  *Channel       `json:"channel,omitempty"`
@@ -481,6 +486,7 @@ func (w *Walker) hydrate(ctx context.Context, f frontier, expand bool, edges Edg
 				return nil, nil, fmt.Errorf("video not found: %s", f.ref)
 			}
 			n.Video = &res.Video
+			n.Fetched = true
 			return n, res, nil
 		}
 		n.Video = f.video
@@ -490,6 +496,7 @@ func (w *Walker) hydrate(ctx context.Context, f frontier, expand bool, edges Edg
 			// node we already have and expand whatever else applies.
 			if res, err := w.g.FetchVideo(ctx, f.video.VideoID, VideoOptions{Next: true}); err == nil && res != nil {
 				n.Video = &res.Video
+				n.Fetched = true
 				return n, res, nil
 			}
 		}
@@ -504,6 +511,7 @@ func (w *Walker) hydrate(ctx context.Context, f frontier, expand bool, edges Edg
 				return nil, nil, fmt.Errorf("channel not found: %s", f.ref)
 			}
 			n.Channel = ch
+			n.Fetched = true
 		} else {
 			n.Channel = f.channel
 		}
@@ -518,15 +526,20 @@ func (w *Walker) hydrate(ctx context.Context, f frontier, expand bool, edges Edg
 				return nil, nil, fmt.Errorf("playlist not found: %s", f.ref)
 			}
 			n.Playlist = pl
+			n.Fetched = true
 		} else {
 			n.Playlist = f.playlist
 		}
 		return n, nil, nil
 	case KindComment:
+		// A comment and a post arrive whole from their stream rather than as a
+		// lockup, so there is nothing left to fetch and nothing lost by storing one.
 		n.Comment = f.comment
+		n.Fetched = f.comment != nil
 		return n, nil, nil
 	case KindPost:
 		n.Post = f.post
+		n.Fetched = f.post != nil
 		return n, nil, nil
 	}
 	return nil, nil, nil

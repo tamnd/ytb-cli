@@ -152,28 +152,6 @@ func captionRow(t youtube.CaptionTrack) Row {
 	}
 }
 
-func queueRow(q youtube.QueueItem) Row {
-	return Row{
-		Cols: []string{"id", "url", "entity_type", "status", "priority"},
-		Vals: []string{
-			i64a(q.ID), q.URL, q.EntityType, q.Status, itoa(q.Priority),
-		},
-		Value: q,
-	}
-}
-
-func jobRow(j youtube.JobRecord) Row {
-	return Row{
-		Cols: []string{"job_id", "name", "type", "status", "started", "completed"},
-		Vals: []string{
-			j.JobID, j.Name, j.Type, j.Status,
-			j.StartedAt.Format("2006-01-02T15:04:05Z"),
-			j.CompletedAt.Format("2006-01-02T15:04:05Z"),
-		},
-		Value: j,
-	}
-}
-
 func artistRow(a youtube.Artist) Row {
 	return Row{
 		Cols:  []string{"id", "name", "subscribers", "url"},

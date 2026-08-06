@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/tamnd/any-cli/kit"
+	"github.com/tamnd/ytb-cli/pkg/graph"
 	"github.com/tamnd/ytb-cli/youtube"
 )
 
@@ -17,8 +18,8 @@ const defaultDiscoverBudget = 500
 // follows theirs, hop by hop, emitting one row per node as it is reached.
 //
 // It shares the read group with the per-object commands because it is a read; it
-// only touches the store when --store is set, where it persists each node and
-// records every traversed edge into the edges table.
+// only touches the store when --store is set, where it writes each node it
+// reached as a record.
 func newDiscoverCmd() kit.Command {
 	var (
 		depth  int
@@ -54,15 +55,18 @@ nodes (default 500). Comments are served only when YouTube is not applying its
 per-IP Restricted Mode to this network; when it is, the comment edges are noted
 and skipped and the rest of the walk continues.
 
-Add --store to persist every node into its typed table and record each traversed
-edge into the edges table, so a walk doubles as a crawl. Query it afterwards with
-ytb db query.`,
+Add --store to write every node it reached into the store. A node the walk
+fetched is stored as a record; a node it only saw in a shelf is stored as a
+sighting with no record, so a later crawl still knows to go and read it. It
+writes nodes and not claims: the edge names above are walk instructions rather
+than the predicates a claim is made of, so ytb crawl is what writes the graph.
+Query either afterwards with ytb query.`,
 		Args: kit.MinimumNArgs(1),
 		Flags: func(f *kit.FlagSet) {
 			f.IntVar(&depth, "depth", 1, "hops to follow from each seed (0 = seeds only)")
 			f.IntVar(&fanout, "fanout", 25, "max neighbors to follow per edge (0 = unlimited)")
 			f.StringVar(&follow, "follow", "content", "edges to follow ("+youtube.EdgeHelp()+")")
-			f.BoolVar(&store, "store", false, "persist nodes and edges into the local store")
+			f.BoolVar(&store, "store", false, "write every node reached into the local store")
 		},
 		Run: func(ctx context.Context, args []string) error {
 			app := appFromCtx(ctx)
@@ -96,16 +100,11 @@ ytb db query.`,
 				Edges:  edges,
 				Note:   func(s string) { app.logf("note: %s", s) },
 			}
-			if st != nil {
-				opts.OnEdge = func(src, dst string, e youtube.Edge) {
-					_ = st.UpsertEdge(src, dst, string(e))
-				}
-			}
 
 			n := 0
 			err = app.Client.Walk(ctx, seeds, opts, func(nd *youtube.Node) error {
 				if st != nil {
-					_ = st.UpsertNode(nd)
+					storeWalkNode(st, nd)
 				}
 				if e := app.Out.Emit(nodeRow(nd)); e != nil {
 					return e
@@ -128,6 +127,53 @@ ytb db query.`,
 			return nil
 		},
 	}
+}
+
+// storeWalkNode writes a walked node into the store.
+//
+// Records only, and only for the nodes the walk actually asked about. The walk's
+// edge names are how a person describes a hop rather than the predicates the
+// claims table is built on: "uploads" is a walk instruction and published is a
+// claim about the world, so writing the first as the second would put rows in
+// the store that no crawl would produce and no query over doc 04's vocabulary
+// would find. Use ytb crawl for claims.
+//
+// A node the walk only saw in somebody else's shelf is written down as a
+// sighting with no record, which is what leaves it on the next crawl's frontier
+// instead of marking it read on the strength of a title.
+func storeWalkNode(st *youtube.Store, nd *youtube.Node) {
+	var rec any
+	var uri graph.URI
+	switch nd.Kind {
+	case youtube.KindVideo:
+		if nd.Video != nil {
+			rec, uri = *nd.Video, graph.VideoURI(nd.Video.VideoID)
+		}
+	case youtube.KindChannel:
+		if nd.Channel != nil {
+			rec, uri = *nd.Channel, graph.ChannelURI(nd.Channel.ChannelID)
+		}
+	case youtube.KindPlaylist:
+		if nd.Playlist != nil {
+			rec, uri = *nd.Playlist, graph.PlaylistURI(nd.Playlist.PlaylistID)
+		}
+	case youtube.KindComment:
+		if nd.Comment != nil {
+			rec, uri = *nd.Comment, graph.CommentURI(nd.Comment.ID)
+		}
+	case youtube.KindPost:
+		if nd.Post != nil {
+			rec, uri = *nd.Post, graph.PostURI(nd.Post.PostID)
+		}
+	}
+	if rec == nil {
+		return
+	}
+	if !nd.Fetched {
+		_ = st.Sight(uri)
+		return
+	}
+	_, _ = st.PutRecord(rec)
 }
 
 // parseSeeds turns the positional arguments into walk seeds, reporting an
