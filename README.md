@@ -66,7 +66,7 @@ YouTube gates the caption endpoints.
 | `ytb music artist <id\|url>` | a Music artist's profile and releases |
 | `ytb music album <id\|url>` | a Music album |
 | `ytb music playlist <id\|url>` | a Music playlist |
-| `ytb music song <id\|url>` | a Music track |
+| `ytb music track <id\|url>` | a Music track; `--lyrics` |
 | `ytb download <id\|url>` | download media via yt-dlp |
 | `ytb extract <id\|url>` | extract a specific stream via yt-dlp; `--audio`, `--video` |
 | `ytb crawl <seed>...` | walk the graph from seeds into the store; `--depth`, `--budget`, `--resume` |

@@ -278,18 +278,20 @@ A field that does not apply is absent rather than zero, so an audio format has n
 
 | Subcommand | What it does |
 | --- | --- |
-| `search <query>` | Search artists, albums and songs |
-| `artist <browseId|url>` | Artist profile with albums and top songs |
-| `album <browseId|url>` | Album header and track list |
-| `playlist <id|url>` | Music playlist and tracks |
-| `song <video-id>` | Song detail (with `--lyrics` if available) |
+| `search <query>` | Search everything, or one kind with `--type` |
+| `artist <browseId\|url>` | Artist profile with discography, top songs, videos and related artists |
+| `album <browseId\|url>` | Album header and track list |
+| `playlist <id\|url>` | Music playlist and tracks |
+| `track <video-id>` | Track detail (with `--lyrics` if available) |
 
 Notable subcommand flags:
 
 | Flag | Subcommand | Meaning |
 | --- | --- | --- |
-| `--type` | `music search` | `Song`, `Album`, `Artist`, `Playlist` |
-| `--lyrics` | `music song` | Fetch lyrics if available |
+| `--type` | `music search` | `song`, `video`, `album`, `artist`, `playlist`, `podcast`, `episode` |
+| `--lyrics` | `music track` | Fetch the lyrics tab if it has any |
+
+Every row is classified by the type on its own endpoint and never by the word the page rendered next to it, so a search reads the same in any `--hl`. `music_video_type` is `ATV` for an art track and `OMV`, `UGC` or `OFFICIAL_SOURCE_MUSIC` for a video of the same song, which is what keeps the two ids of one song apart. A count with no type on it, like `116 songs` against `121 views`, is kept verbatim in `metadata_parts` rather than filed as an item count.
 
 ## download
 
