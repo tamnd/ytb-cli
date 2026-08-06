@@ -3,23 +3,101 @@ package youtube
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
+
+	"github.com/tamnd/ytb-cli/pkg/graph"
 
 	_ "modernc.org/sqlite"
 )
 
-// Store is the SQLite-backed persistence layer for all crawled YouTube data.
+// store.go is the graph on disk. Spec 3005 doc 04 section 4.
+//
+// Three tables and no more. An earlier ytb had a table per record type, which
+// meant a new kind of thing was a migration, a video nobody had fetched had
+// nowhere to live, and the answer to "what have I not looked at yet" was a
+// query nobody could write. Nodes and claims replace all of it: a node is
+// something with a URI, its record is the last read of it or null when nobody
+// has read it, and a claim is one observation of one edge.
+//
+// The claims key is the triple plus the source plus the client, because the same
+// endpoint answers differently depending on which app ytb said it was. Two rows
+// differing only by client are two observations and collapsing them would lose
+// the fact that only one of the two carries anything.
+
+// Store is the SQLite file. One file, opened read-write by everything that
+// crawls and read-only by everything that asks.
 type Store struct {
-	db   *sql.DB
-	path string
+	db       *sql.DB
+	path     string
+	readOnly bool
 }
 
-// OpenStore opens (or creates) the SQLite database at path and ensures all
-// tables exist.
+// storeSchema is the whole thing. Doc 04 section 4 gives the three tables; the
+// indexes and the two extra columns on claims are explained where they appear.
+const storeSchema = `
+CREATE TABLE IF NOT EXISTS nodes (
+	uri        TEXT PRIMARY KEY,
+	kind       TEXT NOT NULL,
+	record     JSON,
+	first_seen INTEGER NOT NULL,
+	last_seen  INTEGER NOT NULL
+);
+
+-- The frontier query, which is the one a crawl runs on every hop: everything of
+-- a kind that nothing has read.
+CREATE INDEX IF NOT EXISTS nodes_unread ON nodes(kind) WHERE record IS NULL;
+
+CREATE TABLE IF NOT EXISTS claims (
+	from_uri  TEXT NOT NULL,
+	predicate TEXT NOT NULL,
+	to_uri    TEXT NOT NULL,
+	source    TEXT NOT NULL,
+	surface   TEXT NOT NULL DEFAULT '',
+	client    TEXT NOT NULL DEFAULT '',
+	tier      INTEGER NOT NULL DEFAULT 0,
+	-- note and position are not in the doc's SQL block and are kept anyway. The
+	-- note is the title the lockup carried, and on a node nobody has fetched it is
+	-- the only human-readable thing in the store about that node. The position is
+	-- what a playlist's order rides on.
+	note      TEXT NOT NULL DEFAULT '',
+	position  INTEGER NOT NULL DEFAULT 0,
+	seen_at   INTEGER NOT NULL,
+	PRIMARY KEY (from_uri, predicate, to_uri, source, client)
+);
+
+CREATE INDEX IF NOT EXISTS claims_to ON claims(to_uri, predicate);
+CREATE INDEX IF NOT EXISTS claims_predicate ON claims(predicate);
+
+CREATE TABLE IF NOT EXISTS reads (
+	url     TEXT NOT NULL,
+	surface TEXT NOT NULL DEFAULT '',
+	client  TEXT NOT NULL DEFAULT '',
+	status  INTEGER NOT NULL DEFAULT 0,
+	bytes   INTEGER NOT NULL DEFAULT 0,
+	at      INTEGER NOT NULL,
+	error   TEXT NOT NULL DEFAULT ''
+);
+
+CREATE INDEX IF NOT EXISTS reads_at ON reads(at);
+`
+
+// storeTables is what Reset drops. It is spelled out rather than read out of
+// sqlite_master so a reset never drops a table something else put in the file.
+var storeTables = []string{"nodes", "claims", "reads"}
+
+// ErrOldStore is what an .db written by a ytb before the graph store gets.
+// Migrating it is not worth writing: the old file held records with no
+// provenance on them, and a claim without its source is not a claim this tool
+// would have written.
+var ErrOldStore = errors.New("this store was written by an older ytb and its schema is gone")
+
+// OpenStore opens the file read-write, creating it and its directory.
 func OpenStore(path string) (*Store, error) {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return nil, fmt.Errorf("create store dir: %w", err)
@@ -28,650 +106,507 @@ func OpenStore(path string) (*Store, error) {
 	if err != nil {
 		return nil, fmt.Errorf("open sqlite %s: %w", path, err)
 	}
-	// Enable WAL mode for better concurrent read performance.
 	if _, err := db.Exec(`PRAGMA journal_mode=WAL`); err != nil {
 		_ = db.Close()
 		return nil, fmt.Errorf("enable WAL: %w", err)
 	}
 	s := &Store{db: db, path: path}
-	if err := s.initSchema(); err != nil {
+	if err := s.checkAge(); err != nil {
+		_ = db.Close()
+		return nil, err
+	}
+	if _, err := db.Exec(storeSchema); err != nil {
+		_ = db.Close()
+		return nil, fmt.Errorf("create schema: %w", err)
+	}
+	return s, nil
+}
+
+// OpenStoreReadOnly opens the file with mode=ro, which is what ytb query uses.
+//
+// The point is that a finger slip that says delete is refused by SQLite rather
+// than by a check in this tool. A check here would be one regular expression
+// away from being wrong, and the database has the answer already.
+func OpenStoreReadOnly(path string) (*Store, error) {
+	if _, err := os.Stat(path); err != nil {
+		return nil, fmt.Errorf("no store at %s: %w", path, err)
+	}
+	db, err := sql.Open("sqlite", "file:"+path+"?mode=ro")
+	if err != nil {
+		return nil, fmt.Errorf("open sqlite %s: %w", path, err)
+	}
+	s := &Store{db: db, path: path, readOnly: true}
+	if err := s.checkAge(); err != nil {
 		_ = db.Close()
 		return nil, err
 	}
 	return s, nil
 }
 
-func (s *Store) initSchema() error {
-	stmts := []string{
-		`CREATE TABLE IF NOT EXISTS videos (
-			video_id              TEXT PRIMARY KEY,
-			title                 TEXT,
-			description           TEXT,
-			channel_id            TEXT,
-			channel_name          TEXT,
-			duration_seconds      INTEGER,
-			duration_text         TEXT,
-			view_count            INTEGER,
-			comment_count         INTEGER,
-			like_count            INTEGER,
-			published_text        TEXT,
-			published_at          TEXT,
-			upload_date           TEXT,
-			is_live               INTEGER DEFAULT 0,
-			is_short              INTEGER DEFAULT 0,
-			category              TEXT,
-			tags                  TEXT DEFAULT '[]',
-			thumbnail_url         TEXT,
-			url                   TEXT,
-			embed_url             TEXT,
-			transcript            TEXT,
-			transcript_language   TEXT,
-			available_countries   TEXT DEFAULT '[]',
-			is_family_safe        INTEGER DEFAULT 1,
-			allow_ratings         INTEGER DEFAULT 1,
-			age_restricted        INTEGER DEFAULT 0,
-			location_description  TEXT,
-			hashtags              TEXT DEFAULT '[]',
-			fetched_at            TEXT
-		)`,
-		`CREATE TABLE IF NOT EXISTS channels (
-			channel_id           TEXT PRIMARY KEY,
-			handle               TEXT,
-			title                TEXT,
-			description          TEXT,
-			avatar_url           TEXT,
-			banner_url           TEXT,
-			subscribers_text     TEXT,
-			videos_text          TEXT,
-			views_text           TEXT,
-			country              TEXT,
-			joined_date_text     TEXT,
-			uploads_playlist_id  TEXT,
-			url                  TEXT,
-			subscriber_count     INTEGER,
-			video_count          INTEGER,
-			view_count           INTEGER,
-			keywords             TEXT DEFAULT '[]',
-			trailer_video_id     TEXT,
-			is_verified          INTEGER DEFAULT 0,
-			fetched_at           TEXT
-		)`,
-		`CREATE TABLE IF NOT EXISTS playlists (
-			playlist_id       TEXT PRIMARY KEY,
-			title             TEXT,
-			description       TEXT,
-			channel_id        TEXT,
-			channel_name      TEXT,
-			video_count       INTEGER,
-			view_count_text   TEXT,
-			last_updated_text TEXT,
-			url               TEXT,
-			fetched_at        TEXT
-		)`,
-		`CREATE TABLE IF NOT EXISTS playlist_videos (
-			playlist_id TEXT NOT NULL,
-			video_id    TEXT NOT NULL,
-			position    INTEGER,
-			PRIMARY KEY (playlist_id, video_id)
-		)`,
-		`CREATE TABLE IF NOT EXISTS related_videos (
-			video_id         TEXT NOT NULL,
-			related_video_id TEXT NOT NULL,
-			position         INTEGER,
-			PRIMARY KEY (video_id, related_video_id)
-		)`,
-		`CREATE TABLE IF NOT EXISTS caption_tracks (
-			video_id          TEXT NOT NULL,
-			language_code     TEXT NOT NULL,
-			name              TEXT,
-			base_url          TEXT,
-			kind              TEXT,
-			is_auto_generated INTEGER DEFAULT 0,
-			fetched_at        TEXT,
-			PRIMARY KEY (video_id, language_code)
-		)`,
-		`CREATE TABLE IF NOT EXISTS comments (
-			id                   TEXT PRIMARY KEY,
-			video_id             TEXT NOT NULL,
-			parent_id            TEXT,
-			author_channel_id    TEXT,
-			author_display_name  TEXT,
-			author_profile_image TEXT,
-			text_display         TEXT,
-			like_count           INTEGER DEFAULT 0,
-			reply_count          INTEGER DEFAULT 0,
-			is_owner_comment     INTEGER DEFAULT 0,
-			published_text       TEXT,
-			fetched_at           TEXT
-		)`,
-		`CREATE TABLE IF NOT EXISTS chapters (
-			video_id      TEXT NOT NULL,
-			title         TEXT,
-			start_seconds INTEGER NOT NULL,
-			thumbnail_url TEXT,
-			position      INTEGER,
-			PRIMARY KEY (video_id, start_seconds)
-		)`,
-		`CREATE TABLE IF NOT EXISTS community_posts (
-			post_id        TEXT PRIMARY KEY,
-			channel_id     TEXT NOT NULL,
-			author_name    TEXT,
-			author_avatar  TEXT,
-			content_text   TEXT,
-			like_count     INTEGER DEFAULT 0,
-			reply_count    INTEGER DEFAULT 0,
-			vote_count     TEXT,
-			published_text TEXT,
-			attachments    TEXT DEFAULT '[]',
-			fetched_at     TEXT
-		)`,
-		`CREATE TABLE IF NOT EXISTS video_formats (
-			video_id       TEXT NOT NULL,
-			itag           INTEGER NOT NULL,
-			mime_type      TEXT,
-			quality        TEXT,
-			quality_label  TEXT,
-			width          INTEGER,
-			height         INTEGER,
-			fps            INTEGER,
-			bitrate        INTEGER,
-			content_length INTEGER,
-			is_adaptive    INTEGER DEFAULT 0,
-			audio_quality  TEXT,
-			PRIMARY KEY (video_id, itag)
-		)`,
-		`CREATE TABLE IF NOT EXISTS queue (
-			id          INTEGER PRIMARY KEY AUTOINCREMENT,
-			url         TEXT NOT NULL,
-			entity_type TEXT NOT NULL,
-			status      TEXT DEFAULT 'pending',
-			priority    INTEGER DEFAULT 0,
-			created_at  TEXT,
-			updated_at  TEXT
-		)`,
-		`CREATE UNIQUE INDEX IF NOT EXISTS idx_queue_url ON queue(url)`,
-		`CREATE INDEX IF NOT EXISTS idx_queue_status_priority ON queue(status, priority DESC, created_at)`,
-		`CREATE TABLE IF NOT EXISTS jobs (
-			job_id       TEXT PRIMARY KEY,
-			name         TEXT,
-			type         TEXT,
-			status       TEXT,
-			started_at   TEXT,
-			completed_at TEXT
-		)`,
-		`CREATE TABLE IF NOT EXISTS edges (
-			src        TEXT NOT NULL,
-			dst        TEXT NOT NULL,
-			kind       TEXT NOT NULL,
-			created_at TEXT,
-			PRIMARY KEY (src, dst, kind)
-		)`,
-		`CREATE INDEX IF NOT EXISTS idx_edges_kind ON edges(kind)`,
+// checkAge refuses a file from the record-per-table days by name, because the
+// alternative is a confusing "no such table: nodes" from three commands down.
+func (s *Store) checkAge() error {
+	var name string
+	err := s.db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='videos'`).Scan(&name)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil
 	}
-	for _, stmt := range stmts {
-		if _, err := s.db.Exec(stmt); err != nil {
-			return fmt.Errorf("init schema: %w\nstatement: %s", err, stmt[:min(len(stmt), 80)])
-		}
-	}
-	return nil
-}
-
-// --- Video ---
-
-func (s *Store) UpsertVideo(v Video) error {
-	_, err := s.db.Exec(`INSERT OR REPLACE INTO videos (
-		video_id, title, description, channel_id, channel_name,
-		duration_seconds, duration_text, view_count, comment_count, like_count,
-		published_text, published_at, upload_date, is_live, is_short,
-		category, tags, thumbnail_url, url, embed_url, transcript, transcript_language,
-		available_countries, is_family_safe, allow_ratings, age_restricted,
-		location_description, hashtags, fetched_at
-	) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-		v.VideoID, storeNullStr(v.Title), storeNullStr(v.Description),
-		storeNullStr(v.ChannelID), storeNullStr(v.ChannelTitle),
-		storeNullInt(v.DurationSeconds), storeNullStr(v.DurationText),
-		v.ViewCount, v.CommentCount, v.LikeCount,
-		storeNullStr(v.PublishedText), storeNullTime(v.PublishedAt),
-		storeNullTime(v.UploadDate), storeBoolPtr(v.IsLiveContent), storeBoolPtr(v.IsShort),
-		storeNullStr(v.Category), jsonString(v.Keywords),
-		storeNullStr(v.ThumbnailURL), storeNullStr(v.URL), storeNullStr(v.EmbedURL),
-		storeNullStr(v.Transcript), storeNullStr(v.TranscriptLanguage),
-		jsonString(v.AvailableCountries),
-		storeBoolPtr(v.IsFamilySafe), storeBoolPtr(v.AllowRatings), storeBoolPtr(v.AgeRestricted),
-		storeNullStr(v.LocationDescription), jsonString(v.Hashtags),
-		storeTime(v.FetchedAt),
-	)
-	return err
-}
-
-// --- Channel ---
-
-func (s *Store) UpsertChannel(c Channel) error {
-	_, err := s.db.Exec(`INSERT OR REPLACE INTO channels (
-		channel_id, handle, title, description, avatar_url, banner_url,
-		subscribers_text, videos_text, views_text, country, joined_date_text,
-		uploads_playlist_id, url,
-		subscriber_count, video_count, view_count, keywords, trailer_video_id, is_verified,
-		fetched_at
-	) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-		c.ChannelID, storeNullStr(c.Handle), storeNullStr(c.Title),
-		storeNullStr(c.Description), storeNullStr(largestThumbnail(c.Avatar)), storeNullStr(largestThumbnail(c.Banner)),
-		storeNullStr(c.SubscriberCountText), storeNullStr(c.VideoCountText), storeNullStr(""),
-		storeNullStr(c.Country), storeNullStr(c.JoinedText),
-		storeNullStr(c.UploadsPlaylistID), storeNullStr(c.URL),
-		storeNullInt64(c.SubscriberCount), storeNullInt64(c.VideoCount), storeNullInt64(c.ViewCount),
-		jsonString(c.Keywords), storeNullStr(""), storeBool(c.IsVerified),
-		storeTime(c.FetchedAt),
-	)
-	return err
-}
-
-// storedChannel bridges the channels table to the Channel record.
-//
-// The table predates the record. It keeps one avatar_url and one banner_url
-// where the record keeps the whole rendition list, and it keeps a views_text
-// column the record has no field for at all. Milestone 12 rewrites the schema;
-// until then this reads what is there and puts it back where it belongs, rather
-// than leaving Avatar empty on every channel read out of the store.
-type storedChannel struct {
-	avatarURL string
-	bannerURL string
-	viewsText string
-}
-
-// dest is the scan destination list, in the column order both channel queries
-// select. Keeping it in one place is what stops the two from drifting apart.
-func (r *storedChannel) dest(c *Channel) []any {
-	return []any{
-		&c.ChannelID, &c.Handle, &c.Title,
-		&c.Description, &r.avatarURL, &r.bannerURL,
-		&c.SubscriberCountText, &c.VideoCountText,
-		&r.viewsText, &c.Country,
-		&c.JoinedText, &c.UploadsPlaylistID,
-		&c.URL,
-	}
-}
-
-// apply folds the columns with no field of their own back onto the record. The
-// counts are read back off their text because the query does not select the
-// numeric columns, and a record with "4.52M subscribers" on it and a zero
-// subscriber_count would read as a channel that lost its audience.
-func (r storedChannel) apply(c *Channel) {
-	if r.avatarURL != "" {
-		c.Avatar = []Thumbnail{{URL: r.avatarURL, Source: ThumbnailFromPayload}}
-	}
-	if r.bannerURL != "" {
-		c.Banner = []Thumbnail{{URL: r.bannerURL, Source: ThumbnailFromPayload}}
-	}
-	c.SubscriberCount = parseCountText(c.SubscriberCountText)
-	c.SubscriberCountIsApproximate = true
-	c.VideoCount = parseCountText(c.VideoCountText)
-	c.ViewCount = parseCountText(r.viewsText)
-	c.JoinedAt = parseJoinedDate(c.JoinedText)
-}
-
-// --- Playlist ---
-
-func (s *Store) UpsertPlaylist(p Playlist) error {
-	_, err := s.db.Exec(`INSERT OR REPLACE INTO playlists (
-		playlist_id, title, description, channel_id, channel_name,
-		video_count, view_count_text, last_updated_text, url, fetched_at
-	) VALUES (?,?,?,?,?,?,?,?,?,?)`,
-		p.PlaylistID, storeNullStr(p.Title), storeNullStr(p.Description),
-		storeNullStr(p.ChannelID), storeNullStr(p.ChannelTitle),
-		p.VideoCount, storeNullStr(p.ViewCountText), storeNullStr(p.UpdatedText),
-		storeNullStr(p.URL), storeTime(p.FetchedAt),
-	)
-	return err
-}
-
-// --- PlaylistVideo ---
-
-func (s *Store) UpsertPlaylistVideo(pv PlaylistVideo) error {
-	_, err := s.db.Exec(
-		`INSERT OR REPLACE INTO playlist_videos (playlist_id, video_id, position) VALUES (?,?,?)`,
-		pv.PlaylistID, pv.VideoID, pv.Position,
-	)
-	return err
-}
-
-// --- RelatedVideo ---
-
-func (s *Store) UpsertRelatedVideo(rv RelatedVideo) error {
-	_, err := s.db.Exec(
-		`INSERT OR REPLACE INTO related_videos (video_id, related_video_id, position) VALUES (?,?,?)`,
-		rv.VideoID, rv.RelatedVideoID, rv.Position,
-	)
-	return err
-}
-
-// --- CaptionTrack ---
-
-func (s *Store) UpsertCaptionTrack(ct CaptionTrack) error {
-	_, err := s.db.Exec(
-		`INSERT OR REPLACE INTO caption_tracks
-			(video_id, language_code, name, base_url, kind, is_auto_generated, fetched_at)
-			VALUES (?,?,?,?,?,?,?)`,
-		ct.VideoID, ct.LanguageCode, storeNullStr(ct.Name), storeNullStr(ct.BaseURL),
-		storeNullStr(ct.Kind), storeBool(ct.IsAutoGenerated), storeTime(ct.FetchedAt),
-	)
-	return err
-}
-
-// --- Comment ---
-
-func (s *Store) UpsertComment(c Comment) error {
-	_, err := s.db.Exec(`INSERT OR REPLACE INTO comments (
-		id, video_id, parent_id, author_channel_id, author_display_name,
-		author_profile_image, text_display, like_count, reply_count,
-		is_owner_comment, published_text, fetched_at
-	) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
-		c.ID, c.VideoID, storeNullStr(c.ParentID), storeNullStr(c.AuthorChannelID),
-		storeNullStr(c.AuthorDisplayName), storeNullStr(c.AuthorProfileImage),
-		storeNullStr(c.TextDisplay), c.LikeCount, c.ReplyCount,
-		storeBool(c.IsOwnerComment), storeNullStr(c.PublishedText), storeTime(c.FetchedAt),
-	)
-	return err
-}
-
-// --- Chapter ---
-
-func (s *Store) UpsertChapter(ch Chapter) error {
-	_, err := s.db.Exec(
-		`INSERT OR REPLACE INTO chapters (video_id, title, start_seconds, thumbnail_url, position)
-			VALUES (?,?,?,?,?)`,
-		ch.VideoID, storeNullStr(ch.Title), ch.StartSeconds,
-		storeNullStr(ch.ThumbnailURL), ch.Position,
-	)
-	return err
-}
-
-// --- CommunityPost ---
-
-func (s *Store) UpsertCommunityPost(p CommunityPost) error {
-	_, err := s.db.Exec(`INSERT OR REPLACE INTO community_posts (
-		post_id, channel_id, author_name, author_avatar, content_text,
-		like_count, reply_count, vote_count, published_text, attachments, fetched_at
-	) VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
-		p.PostID, p.ChannelID, storeNullStr(p.AuthorName), storeNullStr(p.AuthorAvatar),
-		storeNullStr(p.ContentText), p.LikeCount, p.ReplyCount,
-		storeNullStr(p.VoteCount), storeNullStr(p.PublishedText), p.Attachments,
-		storeTime(p.FetchedAt),
-	)
-	return err
-}
-
-// --- Graph edges and nodes ---
-
-// UpsertEdge records one traversed link of the discovery graph, keyed by the
-// (src, dst, kind) triple so re-walking is idempotent. src and dst are entity
-// ids; kind is the Edge string ("channel", "uploads", ...). It is the sink
-// `ytb discover --store` feeds from WalkOptions.OnEdge.
-func (s *Store) UpsertEdge(src, dst, kind string) error {
-	_, err := s.db.Exec(
-		`INSERT OR IGNORE INTO edges (src, dst, kind, created_at) VALUES (?,?,?,?)`,
-		src, dst, kind, storeTime(time.Now()),
-	)
-	return err
-}
-
-// UpsertNode persists a discovered node into its typed table, dispatching on the
-// node kind. It is what `ytb discover --store` calls for every emitted node, so
-// a walk fills videos/channels/playlists/comments/community_posts exactly as the
-// per-object reads do, with the edges table joining them.
-func (s *Store) UpsertNode(n *Node) error {
-	switch n.Kind {
-	case KindVideo:
-		if n.Video != nil {
-			return s.UpsertVideo(*n.Video)
-		}
-	case KindChannel:
-		if n.Channel != nil {
-			return s.UpsertChannel(*n.Channel)
-		}
-	case KindPlaylist:
-		if n.Playlist != nil {
-			return s.UpsertPlaylist(*n.Playlist)
-		}
-	case KindComment:
-		if n.Comment != nil {
-			return s.UpsertComment(*n.Comment)
-		}
-	case KindPost:
-		if n.Post != nil {
-			return s.UpsertCommunityPost(*n.Post)
-		}
-	}
-	return nil
-}
-
-// --- VideoFormat ---
-
-func (s *Store) UpsertVideoFormat(f VideoFormat) error {
-	_, err := s.db.Exec(`INSERT OR REPLACE INTO video_formats (
-		video_id, itag, mime_type, quality, quality_label, width, height,
-		fps, bitrate, content_length, is_adaptive, audio_quality
-	) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
-		f.VideoID, f.ITag, storeNullStr(f.MimeType), storeNullStr(f.Quality),
-		storeNullStr(f.QualityLabel), storeNullInt(f.Width), storeNullInt(f.Height),
-		storeNullInt(f.FPS), f.Bitrate, f.ContentLength, storeBool(f.IsAdaptive),
-		storeNullStr(f.AudioQuality),
-	)
-	return err
-}
-
-// --- Queue ---
-
-// Enqueue adds a URL to the crawl queue. Duplicate URLs are silently ignored.
-func (s *Store) Enqueue(url, entity string, priority int) error {
-	now := storeTime(time.Now())
-	_, err := s.db.Exec(
-		`INSERT OR IGNORE INTO queue (url, entity_type, priority, status, created_at, updated_at)
-			VALUES (?,?,?,'pending',?,?)`,
-		url, entity, priority, now, now,
-	)
-	return err
-}
-
-// NextPending atomically pops the highest-priority pending item and marks it
-// in_progress. Returns nil, nil if the queue is empty.
-func (s *Store) NextPending() (*QueueItem, error) {
-	tx, err := s.db.Begin()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	defer func() { _ = tx.Rollback() }()
-
-	row := tx.QueryRow(
-		`SELECT id, url, entity_type, status, priority
-			FROM queue
-			WHERE status = 'pending'
-			ORDER BY priority DESC, created_at ASC
-			LIMIT 1`)
-	var it QueueItem
-	if err := row.Scan(&it.ID, &it.URL, &it.EntityType, &it.Status, &it.Priority); err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		}
-		return nil, err
-	}
-	now := storeTime(time.Now())
-	if _, err := tx.Exec(
-		`UPDATE queue SET status='in_progress', updated_at=? WHERE id=?`, now, it.ID,
-	); err != nil {
-		return nil, err
-	}
-	if err := tx.Commit(); err != nil {
-		return nil, err
-	}
-	it.Status = "in_progress"
-	return &it, nil
+	return fmt.Errorf("%s: %w, so delete it and crawl again", s.path, ErrOldStore)
 }
 
-// MarkStatus updates the status of a queue item by its row ID.
-func (s *Store) MarkStatus(id int64, status string) error {
-	_, err := s.db.Exec(
-		`UPDATE queue SET status=?, updated_at=? WHERE id=?`,
-		status, storeTime(time.Now()), id,
-	)
+// Path is the file. Vacuum, Close and Reset are what they say.
+func (s *Store) Path() string { return s.path }
+
+func (s *Store) Close() error { return s.db.Close() }
+
+func (s *Store) Vacuum() error {
+	_, err := s.db.Exec(`VACUUM`)
 	return err
 }
 
-// ListQueue returns up to limit items with the given status.
-func (s *Store) ListQueue(status string, limit int) ([]QueueItem, error) {
+func (s *Store) Reset() error {
+	for _, t := range storeTables {
+		if _, err := s.db.Exec(`DROP TABLE IF EXISTS ` + t); err != nil {
+			return fmt.Errorf("drop %s: %w", t, err)
+		}
+	}
+	_, err := s.db.Exec(storeSchema)
+	return err
+}
+
+// --- nodes ---
+
+// StoredNode is a row of the nodes table. Record is nil on a node something
+// named and nothing has read, which is most of them.
+type StoredNode struct {
+	URI       graph.URI       `json:"uri" kit:"id" table:"uri"`
+	Kind      graph.Kind      `json:"kind" table:"kind"`
+	Record    json.RawMessage `json:"record,omitempty" table:"-"`
+	FirstSeen time.Time       `json:"first_seen" table:"-"`
+	LastSeen  time.Time       `json:"last_seen" table:"last_seen"`
+}
+
+// Read reports whether anything has actually fetched this node.
+func (n StoredNode) Read() bool { return len(n.Record) > 0 }
+
+// Sight records that a claim named this node, without claiming to have read it.
+//
+// This is the half of the store that makes a crawl resumable. One watch page
+// names a channel, thirty related videos and a handful of links, and every one
+// of those is something ytb has heard of and not looked at.
+func (s *Store) Sight(uri graph.URI) error {
+	p, ok := graph.Parse(uri)
+	if !ok || p.IsFragment() {
+		// A fragment is a part of a node rather than a node: a caption track and a
+		// chapter have no address and nothing will ever fetch one on its own.
+		return nil
+	}
+	return s.putNode(uri, p.Kind, nil)
+}
+
+// PutRecord writes what a read returned, under the URI the record names.
+//
+// It takes the record itself rather than a URI and a blob so the caller cannot
+// file a channel under a video's URI, and it returns the URI it used so the
+// caller can say what it stored.
+func (s *Store) PutRecord(record any) (graph.URI, error) {
+	uri, kind := recordURI(record)
+	if uri == "" {
+		return "", fmt.Errorf("%T names no node, so there is nowhere to put it", record)
+	}
+	blob, err := json.Marshal(record)
+	if err != nil {
+		return "", err
+	}
+	return uri, s.putNode(uri, kind, blob)
+}
+
+// putNode is the upsert both of those end in.
+//
+// A node met twice keeps the better sighting. A later sighting with no record
+// does not erase a record that is there, which is what stops a related shelf
+// naming a video ytb read last week from blanking it, and last_seen moves
+// whichever sighting carried a record.
+func (s *Store) putNode(uri graph.URI, kind graph.Kind, record []byte) error {
+	now := time.Now().Unix()
+	var blob any
+	if len(record) > 0 {
+		blob = string(record)
+	}
+	_, err := s.db.Exec(`
+		INSERT INTO nodes (uri, kind, record, first_seen, last_seen)
+		VALUES (?, ?, ?, ?, ?)
+		ON CONFLICT(uri) DO UPDATE SET
+			kind       = CASE WHEN excluded.kind <> '' THEN excluded.kind ELSE nodes.kind END,
+			record     = COALESCE(excluded.record, nodes.record),
+			first_seen = MIN(nodes.first_seen, excluded.first_seen),
+			last_seen  = MAX(nodes.last_seen, excluded.last_seen)`,
+		string(uri), string(kind), blob, now, now)
+	if err != nil {
+		return fmt.Errorf("put node %s: %w", uri, err)
+	}
+	return nil
+}
+
+// recordURI says where a record belongs. It is the one place that maps a Go
+// type to a node, and a type missing from it is a compile-time-invisible bug, so
+// every caller checks the empty URI.
+func recordURI(record any) (graph.URI, graph.Kind) {
+	switch r := record.(type) {
+	case Video:
+		return graph.VideoURI(r.VideoID), graph.Video
+	case *Video:
+		return graph.VideoURI(r.VideoID), graph.Video
+	case Channel:
+		return graph.ChannelURI(r.ChannelID), graph.Channel
+	case *Channel:
+		return graph.ChannelURI(r.ChannelID), graph.Channel
+	case Playlist:
+		return graph.PlaylistURI(r.PlaylistID), graph.Playlist
+	case *Playlist:
+		return graph.PlaylistURI(r.PlaylistID), graph.Playlist
+	case Comment:
+		return graph.CommentURI(r.ID), graph.Comment
+	case CommunityPost:
+		return graph.PostURI(r.PostID), graph.Post
+	case Album:
+		return graph.AlbumURI(r.AlbumID), graph.Album
+	case Artist:
+		return graph.ArtistURI(r.ArtistID), graph.Artist
+	// A Song is deliberately not here. It names a video node, and filing one
+	// under that node would put the music app's view of a track where the video
+	// record goes, so the two would take turns overwriting each other depending on
+	// which read ran last.
+	default:
+		return "", ""
+	}
+}
+
+// Node reads one node back, record and all.
+func (s *Store) Node(uri graph.URI) (*StoredNode, error) {
+	row := s.db.QueryRow(`SELECT uri, kind, record, first_seen, last_seen FROM nodes WHERE uri = ?`, string(uri))
+	n, err := scanNode(row)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	return n, err
+}
+
+// Frontier is what a crawl reads next: nodes of a kind that nothing has fetched,
+// oldest sighting first so a walk does not keep rediscovering the same corner.
+//
+// An empty kind means every kind, and only the kinds ytb can actually read come
+// back. A hashtag and an external URL are named by claims and are not reads.
+func (s *Store) Frontier(kind graph.Kind, limit int) ([]graph.URI, error) {
 	if limit <= 0 {
 		limit = 100
 	}
-	rows, err := s.db.Query(
-		`SELECT id, url, entity_type, status, priority
-			FROM queue WHERE status=? ORDER BY priority DESC, created_at ASC LIMIT ?`,
-		status, limit,
-	)
+	q := `SELECT uri FROM nodes WHERE record IS NULL`
+	args := []any{}
+	if kind != "" {
+		q += ` AND kind = ?`
+		args = append(args, string(kind))
+	} else {
+		q += ` AND kind IN ('video','channel','playlist','album','artist')`
+	}
+	q += ` ORDER BY first_seen, uri LIMIT ?`
+	args = append(args, limit)
+
+	rows, err := s.db.Query(q, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer func() { _ = rows.Close() }()
-	var out []QueueItem
+	var out []graph.URI
 	for rows.Next() {
-		var it QueueItem
-		if err := rows.Scan(&it.ID, &it.URL, &it.EntityType, &it.Status, &it.Priority); err != nil {
+		var uri string
+		if err := rows.Scan(&uri); err != nil {
 			return out, err
 		}
-		out = append(out, it)
+		out = append(out, graph.URI(uri))
 	}
 	return out, rows.Err()
 }
 
-// --- Jobs ---
+// Nodes lists nodes of a kind, read or not, for anything that wants to page
+// through the store without writing SQL.
+func (s *Store) Nodes(kind graph.Kind, limit int) ([]StoredNode, error) {
+	q := `SELECT uri, kind, record, first_seen, last_seen FROM nodes`
+	args := []any{}
+	if kind != "" {
+		q += ` WHERE kind = ?`
+		args = append(args, string(kind))
+	}
+	q += ` ORDER BY uri`
+	if limit > 0 {
+		q += ` LIMIT ?`
+		args = append(args, limit)
+	}
+	rows, err := s.db.Query(q, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	var out []StoredNode
+	for rows.Next() {
+		n, err := scanNode(rows)
+		if err != nil {
+			return out, err
+		}
+		out = append(out, *n)
+	}
+	return out, rows.Err()
+}
 
-// RecordJob inserts or replaces a job record.
-func (s *Store) RecordJob(j JobRecord) error {
-	_, err := s.db.Exec(
-		`INSERT OR REPLACE INTO jobs (job_id, name, type, status, started_at, completed_at)
-			VALUES (?,?,?,?,?,?)`,
-		j.JobID, storeNullStr(j.Name), storeNullStr(j.Type), storeNullStr(j.Status),
-		storeNullTime(j.StartedAt), storeNullTime(j.CompletedAt),
+// scanner is what Node and Nodes have in common: sql.Row and sql.Rows both scan.
+type scanner interface{ Scan(dest ...any) error }
+
+func scanNode(sc scanner) (*StoredNode, error) {
+	var (
+		uri, kind string
+		record    []byte
+		first     int64
+		last      int64
 	)
+	if err := sc.Scan(&uri, &kind, &record, &first, &last); err != nil {
+		return nil, err
+	}
+	return &StoredNode{
+		URI:       graph.URI(uri),
+		Kind:      graph.Kind(kind),
+		Record:    record,
+		FirstSeen: time.Unix(first, 0).UTC(),
+		LastSeen:  time.Unix(last, 0).UTC(),
+	}, nil
+}
+
+// --- claims ---
+
+// PutClaims writes a set of claims and every node they named, in one
+// transaction, and returns how many rows the claims table gained.
+//
+// The nodes come along because that is the whole point of the plane: a claim
+// naming a video is a video the store now knows exists. Writing the claim
+// without the node would leave the frontier empty on a store full of claims.
+func (s *Store) PutClaims(edges []graph.Edge) (int, error) {
+	if len(edges) == 0 {
+		return 0, nil
+	}
+	tx, err := s.db.Begin()
+	if err != nil {
+		return 0, err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	claim, err := tx.Prepare(`
+		INSERT INTO claims (from_uri, predicate, to_uri, source, surface, client, tier, note, position, seen_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		ON CONFLICT(from_uri, predicate, to_uri, source, client) DO UPDATE SET
+			surface  = excluded.surface,
+			tier     = excluded.tier,
+			-- A later sighting with a note beats an earlier one without, the same
+			-- rule graph.Set follows in memory. A note is a label rather than part of
+			-- the claim, so it is the one column an observation may overwrite.
+			note     = CASE WHEN excluded.note <> '' THEN excluded.note ELSE claims.note END,
+			position = CASE WHEN excluded.position <> 0 THEN excluded.position ELSE claims.position END,
+			seen_at  = excluded.seen_at`)
+	if err != nil {
+		return 0, err
+	}
+	defer func() { _ = claim.Close() }()
+
+	node, err := tx.Prepare(`
+		INSERT INTO nodes (uri, kind, record, first_seen, last_seen)
+		VALUES (?, ?, NULL, ?, ?)
+		ON CONFLICT(uri) DO UPDATE SET last_seen = MAX(nodes.last_seen, excluded.last_seen)`)
+	if err != nil {
+		return 0, err
+	}
+	defer func() { _ = node.Close() }()
+
+	now := time.Now().Unix()
+	seen := map[graph.URI]bool{}
+	written := 0
+	for _, e := range edges {
+		for _, end := range []graph.URI{e.From, e.To} {
+			if seen[end] {
+				continue
+			}
+			seen[end] = true
+			p, ok := graph.Parse(end)
+			if !ok || p.IsFragment() {
+				continue
+			}
+			if _, err := node.Exec(string(end), string(p.Kind), now, now); err != nil {
+				return written, fmt.Errorf("put node %s: %w", end, err)
+			}
+		}
+		res, err := claim.Exec(
+			string(e.From), string(e.Predicate), string(e.To),
+			e.Source, e.Surface, e.Client, e.Tier, e.Note, e.Position, now)
+		if err != nil {
+			return written, fmt.Errorf("put claim %s %s %s: %w", e.From, e.Predicate, e.To, err)
+		}
+		if n, err := res.RowsAffected(); err == nil && n > 0 {
+			written++
+		}
+	}
+	return written, tx.Commit()
+}
+
+// Claims reads claims back, filtered by whichever ends the caller gave.
+func (s *Store) Claims(from graph.URI, p graph.Predicate, to graph.URI, limit int) ([]graph.Edge, error) {
+	q := `SELECT from_uri, predicate, to_uri, source, surface, client, tier, note, position FROM claims WHERE 1=1`
+	var args []any
+	if from != "" {
+		q += ` AND from_uri = ?`
+		args = append(args, string(from))
+	}
+	if p != "" {
+		q += ` AND predicate = ?`
+		args = append(args, string(p))
+	}
+	if to != "" {
+		q += ` AND to_uri = ?`
+		args = append(args, string(to))
+	}
+	q += ` ORDER BY from_uri, predicate, position, to_uri, source, client`
+	if limit > 0 {
+		q += ` LIMIT ?`
+		args = append(args, limit)
+	}
+	rows, err := s.db.Query(q, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	var out []graph.Edge
+	for rows.Next() {
+		var e graph.Edge
+		if err := rows.Scan(&e.From, &e.Predicate, &e.To, &e.Source, &e.Surface, &e.Client, &e.Tier, &e.Note, &e.Position); err != nil {
+			return out, err
+		}
+		out = append(out, e)
+	}
+	return out, rows.Err()
+}
+
+// --- reads ---
+
+// PutRead appends one request to the audit log.
+//
+// This is what makes a record's sources checkable afterwards. A claim says a URL
+// asserted it; this table says that URL was fetched, when, as which client, and
+// what came back, which is the difference between a provenance field and a
+// provenance field somebody can verify.
+func (s *Store) PutRead(r Read) error {
+	at := r.At
+	if at.IsZero() {
+		at = time.Now()
+	}
+	_, err := s.db.Exec(
+		`INSERT INTO reads (url, surface, client, status, bytes, at, error) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		r.URL, r.Surface, r.Client, r.Status, r.Bytes, at.Unix(), r.Error)
 	return err
 }
 
-// ListJobs returns up to limit jobs ordered by started_at DESC.
-func (s *Store) ListJobs(limit int) ([]JobRecord, error) {
-	if limit <= 0 {
-		limit = 50
-	}
-	rows, err := s.db.Query(
-		`SELECT job_id, COALESCE(name,''), COALESCE(type,''), COALESCE(status,''),
-			COALESCE(started_at,''), COALESCE(completed_at,'')
-			FROM jobs ORDER BY started_at DESC LIMIT ?`,
-		limit,
-	)
+// --- stats and query ---
+
+// StatRow is one line of ytb db stats: which table, which bucket, how many.
+type StatRow struct {
+	Table string `json:"table" table:"table"`
+	Key   string `json:"key" kit:"id" table:"key"`
+	Rows  int64  `json:"rows" table:"rows"`
+	// Bytes is filled on the reads rows only, because how much a crawl downloaded
+	// is the number that says whether a budget was spent on watch pages or on
+	// feeds.
+	Bytes int64 `json:"bytes,omitempty" table:"bytes"`
+}
+
+// Stats is nodes by kind, claims by predicate, and reads by surface, client and
+// status, which is the fastest way to see that a crawl was mostly 400s.
+func (s *Store) Stats() ([]StatRow, error) {
+	var out []StatRow
+
+	rows, err := s.db.Query(`
+		SELECT kind, COUNT(*), SUM(CASE WHEN record IS NULL THEN 1 ELSE 0 END)
+		FROM nodes GROUP BY kind ORDER BY kind`)
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = rows.Close() }()
-	var out []JobRecord
 	for rows.Next() {
-		var j JobRecord
-		var startedStr, completedStr string
-		if err := rows.Scan(&j.JobID, &j.Name, &j.Type, &j.Status, &startedStr, &completedStr); err != nil {
+		var kind string
+		var total, unread int64
+		if err := rows.Scan(&kind, &total, &unread); err != nil {
+			_ = rows.Close()
 			return out, err
 		}
-		j.StartedAt, _ = parseStoreTime(startedStr)
-		j.CompletedAt, _ = parseStoreTime(completedStr)
-		out = append(out, j)
+		out = append(out, StatRow{Table: "nodes", Key: kind, Rows: total})
+		if unread > 0 {
+			// The unread count is on its own row rather than in a column, because it
+			// is the frontier and it is the number a crawl is deciding on.
+			out = append(out, StatRow{Table: "nodes", Key: kind + " (not read)", Rows: unread})
+		}
 	}
-	return out, rows.Err()
-}
-
-// --- Queries ---
-
-// Stats returns row counts for all major tables.
-func (s *Store) Stats() (map[string]int64, error) {
-	tables := []string{
-		"videos", "channels", "playlists", "playlist_videos", "related_videos",
-		"caption_tracks", "comments", "chapters", "community_posts", "video_formats",
-		"queue", "jobs", "edges",
+	if err := closeRows(rows); err != nil {
+		return out, err
 	}
-	out := make(map[string]int64, len(tables))
-	for _, t := range tables {
+
+	rows, err = s.db.Query(`SELECT predicate, COUNT(*) FROM claims GROUP BY predicate ORDER BY COUNT(*) DESC, predicate`)
+	if err != nil {
+		return out, err
+	}
+	for rows.Next() {
+		var p string
 		var n int64
-		_ = s.db.QueryRow(`SELECT COUNT(*) FROM ` + t).Scan(&n)
-		out[t] = n
-	}
-	return out, nil
-}
-
-// SearchVideos performs a LIKE search on video title and description.
-func (s *Store) SearchVideos(q string, limit int) ([]Video, error) {
-	if limit <= 0 {
-		limit = 20
-	}
-	pat := "%" + strings.ToLower(q) + "%"
-	rows, err := s.db.Query(`
-		SELECT video_id, COALESCE(title,''), COALESCE(description,''),
-		       COALESCE(channel_id,''), COALESCE(channel_name,''),
-		       COALESCE(duration_seconds,0), COALESCE(duration_text,''),
-		       COALESCE(view_count,0), COALESCE(published_text,''), COALESCE(url,'')
-		FROM videos
-		WHERE lower(title) LIKE ? OR lower(description) LIKE ?
-		ORDER BY
-			CASE WHEN lower(title) LIKE ? THEN 0 ELSE 1 END,
-			view_count DESC
-		LIMIT ?`, pat, pat, pat, limit)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = rows.Close() }()
-	var out []Video
-	for rows.Next() {
-		var v Video
-		if err := rows.Scan(
-			&v.VideoID, &v.Title, &v.Description,
-			&v.ChannelID, &v.ChannelTitle,
-			&v.DurationSeconds, &v.DurationText,
-			&v.ViewCount, &v.PublishedText, &v.URL,
-		); err != nil {
+		if err := rows.Scan(&p, &n); err != nil {
+			_ = rows.Close()
 			return out, err
 		}
-		out = append(out, v)
+		out = append(out, StatRow{Table: "claims", Key: p, Rows: n})
 	}
-	return out, rows.Err()
-}
+	if err := closeRows(rows); err != nil {
+		return out, err
+	}
 
-// SearchChannels performs a LIKE search on channel title, description, and handle.
-func (s *Store) SearchChannels(q string, limit int) ([]Channel, error) {
-	if limit <= 0 {
-		limit = 20
-	}
-	pat := "%" + strings.ToLower(q) + "%"
-	rows, err := s.db.Query(`
-		SELECT channel_id, COALESCE(handle,''), COALESCE(title,''),
-		       COALESCE(description,''), COALESCE(subscribers_text,''), COALESCE(url,'')
-		FROM channels
-		WHERE lower(title) LIKE ? OR lower(description) LIKE ? OR lower(handle) LIKE ?
-		ORDER BY
-			CASE WHEN lower(title) LIKE ? THEN 0 ELSE 1 END,
-			title ASC
-		LIMIT ?`, pat, pat, pat, pat, limit)
+	rows, err = s.db.Query(`
+		SELECT surface, client, status, COUNT(*), SUM(bytes)
+		FROM reads GROUP BY surface, client, status ORDER BY COUNT(*) DESC, surface, client, status`)
 	if err != nil {
-		return nil, err
+		return out, err
 	}
-	defer func() { _ = rows.Close() }()
-	var out []Channel
 	for rows.Next() {
-		var c Channel
-		if err := rows.Scan(
-			&c.ChannelID, &c.Handle, &c.Title, &c.Description, &c.SubscriberCountText, &c.URL,
-		); err != nil {
+		var surface, client string
+		var status, n, bytes int64
+		if err := rows.Scan(&surface, &client, &status, &n, &bytes); err != nil {
+			_ = rows.Close()
 			return out, err
 		}
-		out = append(out, c)
+		key := surface
+		if client != "" {
+			key += " " + client
+		}
+		out = append(out, StatRow{Table: "reads", Key: fmt.Sprintf("%s %d", key, status), Rows: n, Bytes: bytes})
 	}
-	return out, rows.Err()
+	return out, closeRows(rows)
 }
 
-// Query executes a raw read-only SQL statement and returns column names + rows.
+func closeRows(rows *sql.Rows) error {
+	if err := rows.Err(); err != nil {
+		_ = rows.Close()
+		return err
+	}
+	return rows.Close()
+}
+
+// Query runs the caller's SQL and returns the columns and the rows.
+//
+// There is no wrapper and no query builder on purpose. The schema is three
+// tables a person can hold in their head, and the useful questions are ones
+// nobody would have thought to add a flag for.
 func (s *Store) Query(sqlText string) ([]string, [][]any, error) {
 	rows, err := s.db.Query(sqlText)
 	if err != nil {
@@ -697,314 +632,225 @@ func (s *Store) Query(sqlText string) ([]string, [][]any, error) {
 	return cols, out, rows.Err()
 }
 
-// Path returns the filesystem path of the database file.
-func (s *Store) Path() string { return s.path }
+// --- search ---
 
-// Vacuum runs SQLite VACUUM to reclaim space.
-func (s *Store) Vacuum() error {
-	_, err := s.db.Exec(`VACUUM`)
-	return err
+// SearchVideos looks for a phrase in the title and description of every video
+// record in the store. It is a LIKE over the JSON rather than an index: the
+// store is one file on one machine and a few thousand records, and an FTS table
+// that has to be kept in step with the records is a second thing to get wrong.
+func (s *Store) SearchVideos(q string, limit int) ([]Video, error) {
+	return searchRecords[Video](s, graph.Video, q, limit,
+		`json_extract(record,'$.title')`, `json_extract(record,'$.description')`)
 }
 
-// Reset drops and recreates all tables.
-func (s *Store) Reset() error {
-	tables := []string{
-		"videos", "channels", "playlists", "playlist_videos", "related_videos",
-		"caption_tracks", "comments", "chapters", "community_posts", "video_formats",
-		"queue", "jobs", "edges",
-	}
-	for _, t := range tables {
-		if _, err := s.db.Exec(`DROP TABLE IF EXISTS ` + t); err != nil {
-			return fmt.Errorf("drop %s: %w", t, err)
-		}
-	}
-	return s.initSchema()
+// SearchChannels is the same over channels, with the handle in the net.
+func (s *Store) SearchChannels(q string, limit int) ([]Channel, error) {
+	return searchRecords[Channel](s, graph.Channel, q, limit,
+		`json_extract(record,'$.title')`, `json_extract(record,'$.description')`, `json_extract(record,'$.handle')`)
 }
 
-// Close closes the underlying database connection.
-func (s *Store) Close() error { return s.db.Close() }
-
-// --- Store-internal read helpers used by export.go ---
-
-func (s *Store) storeGetChannel(idOrHandle string) (*Channel, error) {
-	h := strings.TrimPrefix(idOrHandle, "@")
-	r := s.db.QueryRow(`
-		SELECT channel_id, COALESCE(handle,''), COALESCE(title,''),
-		       COALESCE(description,''), COALESCE(avatar_url,''), COALESCE(banner_url,''),
-		       COALESCE(subscribers_text,''), COALESCE(videos_text,''),
-		       COALESCE(views_text,''), COALESCE(country,''),
-		       COALESCE(joined_date_text,''), COALESCE(uploads_playlist_id,''),
-		       COALESCE(url,'')
-		FROM channels
-		WHERE channel_id=? OR handle=? OR handle=?
-		   OR handle LIKE '%/@'||? OR handle LIKE '%/'||?
-		   OR lower(title)=lower(?)
-		LIMIT 1`,
-		idOrHandle, h, "@"+h, h, h, h)
-	var c Channel
-	var row storedChannel
-	if err := r.Scan(row.dest(&c)...); err != nil {
+func searchRecords[T any](s *Store, kind graph.Kind, q string, limit int, fields ...string) ([]T, error) {
+	if limit <= 0 {
+		limit = 20
+	}
+	pat := "%" + strings.ToLower(q) + "%"
+	where := make([]string, 0, len(fields))
+	args := []any{string(kind)}
+	for _, f := range fields {
+		where = append(where, "lower(COALESCE("+f+",'')) LIKE ?")
+		args = append(args, pat)
+	}
+	// The first field ranks: a phrase in the title beats the same phrase buried in
+	// a description, which is what a person searching for a title expects.
+	args = append(args, pat, limit)
+	rows, err := s.db.Query(`
+		SELECT record FROM nodes
+		WHERE kind = ? AND record IS NOT NULL AND (`+strings.Join(where, " OR ")+`)
+		ORDER BY CASE WHEN lower(COALESCE(`+fields[0]+`,'')) LIKE ? THEN 0 ELSE 1 END, uri
+		LIMIT ?`, args...)
+	if err != nil {
 		return nil, err
 	}
-	row.apply(&c)
-	return &c, nil
+	defer func() { _ = rows.Close() }()
+	var out []T
+	for rows.Next() {
+		var blob []byte
+		if err := rows.Scan(&blob); err != nil {
+			return out, err
+		}
+		var rec T
+		if err := json.Unmarshal(blob, &rec); err != nil {
+			continue
+		}
+		out = append(out, rec)
+	}
+	return out, rows.Err()
+}
+
+// --- read helpers used by export.go ---
+//
+// The Markdown exporter wants channels, their videos and their playlists, which
+// used to be a table each and is now a query each. A record that is not there is
+// not an error: the exporter writes what the store has read, and a video the
+// store has only heard of has nothing to write a page from.
+
+func (s *Store) storeGetChannel(idOrHandle string) (*Channel, error) {
+	if uri := graph.ChannelURI(idOrHandle); uri != "" {
+		n, err := s.Node(uri)
+		if err != nil {
+			return nil, err
+		}
+		if n != nil && n.Read() {
+			return unmarshalRecord[Channel](n.Record)
+		}
+	}
+	handle := strings.TrimPrefix(strings.TrimSpace(idOrHandle), "@")
+	var blob []byte
+	err := s.db.QueryRow(`
+		SELECT record FROM nodes
+		WHERE kind = 'channel' AND record IS NOT NULL
+		  AND lower(COALESCE(json_extract(record,'$.handle'),'')) IN (?, ?)
+		LIMIT 1`, strings.ToLower(handle), strings.ToLower("@"+handle)).Scan(&blob)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, fmt.Errorf("channel %q is not in the store", idOrHandle)
+	}
+	if err != nil {
+		return nil, err
+	}
+	return unmarshalRecord[Channel](blob)
 }
 
 func (s *Store) storeGetAllChannels() ([]Channel, error) {
-	rows, err := s.db.Query(`
-		SELECT channel_id, COALESCE(handle,''), COALESCE(title,''),
-		       COALESCE(description,''), COALESCE(avatar_url,''), COALESCE(banner_url,''),
-		       COALESCE(subscribers_text,''), COALESCE(videos_text,''),
-		       COALESCE(views_text,''), COALESCE(country,''),
-		       COALESCE(joined_date_text,''), COALESCE(uploads_playlist_id,''),
-		       COALESCE(url,'')
-		FROM channels ORDER BY title`)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = rows.Close() }()
-	var out []Channel
-	for rows.Next() {
-		var c Channel
-		var row storedChannel
-		if err := rows.Scan(row.dest(&c)...); err != nil {
-			return out, err
-		}
-		row.apply(&c)
-		out = append(out, c)
-	}
-	return out, rows.Err()
+	return recordsOfKind[Channel](s, graph.Channel, "")
 }
 
 func (s *Store) storeGetVideosByChannel(channelID, channelName string) ([]Video, error) {
-	rows, err := s.db.Query(`
-		SELECT video_id, COALESCE(title,''), COALESCE(description,''),
-		       COALESCE(channel_id,''), COALESCE(channel_name,''),
-		       COALESCE(duration_seconds,0), COALESCE(duration_text,''),
-		       COALESCE(view_count,0), COALESCE(comment_count,0), COALESCE(like_count,0),
-		       COALESCE(published_text,''), COALESCE(upload_date,''),
-		       is_live, is_short,
-		       COALESCE(tags,'[]'), COALESCE(thumbnail_url,''), COALESCE(url,''),
-		       COALESCE(transcript,''), COALESCE(transcript_language,''),
-		       COALESCE(published_at,'')
-		FROM videos WHERE channel_id=? OR channel_name=?
-		ORDER BY fetched_at DESC`,
-		channelID, channelName)
+	videos, err := recordsOfKind[Video](s, graph.Video, channelID)
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = rows.Close() }()
-	var out []Video
-	for rows.Next() {
-		var v Video
-		var tags, pubAtStr, uploadStr string
-		var isLive, isShort sql.NullBool
-		if err := rows.Scan(
-			&v.VideoID, &v.Title, &v.Description,
-			&v.ChannelID, &v.ChannelTitle,
-			&v.DurationSeconds, &v.DurationText,
-			&v.ViewCount, &v.CommentCount, &v.LikeCount,
-			&v.PublishedText, &uploadStr,
-			&isLive, &isShort,
-			&tags, &v.ThumbnailURL, &v.URL,
-			&v.Transcript, &v.TranscriptLanguage,
-			&pubAtStr,
-		); err != nil {
-			return out, err
+	for i := range videos {
+		if videos[i].ChannelTitle == "" {
+			videos[i].ChannelTitle = channelName
 		}
-		if tags != "" && tags != "[]" {
-			_ = json.Unmarshal([]byte(tags), &v.Keywords)
-		}
-		v.PublishedAt, _ = parseStoreTime(pubAtStr)
-		v.UploadDate, _ = parseStoreTime(uploadStr)
-		v.IsLiveContent = storeNullBoolPtr(isLive)
-		v.IsShort = storeNullBoolPtr(isShort)
-		out = append(out, v)
 	}
-	return out, rows.Err()
+	sort.SliceStable(videos, func(i, j int) bool {
+		return videos[i].PublishedAt.After(videos[j].PublishedAt)
+	})
+	return videos, nil
 }
 
 func (s *Store) storeGetPlaylistsByChannel(channelID, channelName string) ([]Playlist, error) {
-	rows, err := s.db.Query(`
-		SELECT playlist_id, COALESCE(title,''), COALESCE(description,''),
-		       COALESCE(channel_id,''), COALESCE(channel_name,''),
-		       COALESCE(video_count,0), COALESCE(view_count_text,''),
-		       COALESCE(last_updated_text,''), COALESCE(url,'')
-		FROM playlists WHERE channel_id=? OR channel_name=?
-		ORDER BY title`,
-		channelID, channelName)
+	playlists, err := recordsOfKind[Playlist](s, graph.Playlist, channelID)
+	if err != nil {
+		return nil, err
+	}
+	for i := range playlists {
+		if playlists[i].ChannelTitle == "" {
+			playlists[i].ChannelTitle = channelName
+		}
+	}
+	return playlists, nil
+}
+
+// recordsOfKind returns every record of a kind, optionally only the ones whose
+// record names a channel.
+func recordsOfKind[T any](s *Store, kind graph.Kind, channelID string) ([]T, error) {
+	q := `SELECT record FROM nodes WHERE kind = ? AND record IS NOT NULL`
+	args := []any{string(kind)}
+	if channelID != "" {
+		q += ` AND json_extract(record,'$.channel_id') = ?`
+		args = append(args, channelID)
+	}
+	q += ` ORDER BY uri`
+	rows, err := s.db.Query(q, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer func() { _ = rows.Close() }()
-	var out []Playlist
+	var out []T
 	for rows.Next() {
-		var p Playlist
-		if err := rows.Scan(
-			&p.PlaylistID, &p.Title, &p.Description,
-			&p.ChannelID, &p.ChannelTitle,
-			&p.VideoCount, &p.ViewCountText,
-			&p.UpdatedText, &p.URL,
-		); err != nil {
+		var blob []byte
+		if err := rows.Scan(&blob); err != nil {
 			return out, err
 		}
-		out = append(out, p)
+		rec, err := unmarshalRecord[T](blob)
+		if err != nil {
+			continue
+		}
+		out = append(out, *rec)
 	}
 	return out, rows.Err()
 }
 
+// storeGetPlaylistItems is the contains claims in their playlist's order, each
+// one filled in from the video's record where the store has read it.
 func (s *Store) storeGetPlaylistItems(playlistID string) ([]Video, error) {
-	rows, err := s.db.Query(`
-		SELECT pv.video_id,
-		       COALESCE(v.title,''), COALESCE(v.channel_name,''),
-		       COALESCE(v.duration_text,''), COALESCE(v.duration_seconds,0),
-		       COALESCE(v.view_count,0), COALESCE(v.thumbnail_url,''),
-		       COALESCE(v.description,''), COALESCE(v.published_text,''),
-		       COALESCE(v.upload_date,'')
-		FROM playlist_videos pv
-		LEFT JOIN videos v ON v.video_id=pv.video_id
-		WHERE pv.playlist_id=?
-		ORDER BY pv.position`, playlistID)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = rows.Close() }()
-	var out []Video
-	for rows.Next() {
-		var v Video
-		if err := rows.Scan(
-			&v.VideoID, &v.Title, &v.ChannelTitle,
-			&v.DurationText, &v.DurationSeconds,
-			&v.ViewCount, &v.ThumbnailURL,
-			&v.Description, &v.PublishedText, &v.UploadDate,
-		); err != nil {
-			return out, err
-		}
-		out = append(out, v)
-	}
-	return out, rows.Err()
+	return s.videosAcross(graph.PlaylistURI(playlistID), graph.Contains)
 }
 
 func (s *Store) storeGetRelated(videoID string) ([]Video, error) {
+	return s.videosAcross(graph.VideoURI(videoID), graph.RelatedTo)
+}
+
+// videosAcross follows one predicate and returns the videos on the far end.
+//
+// A node the store has read comes back as its record. A node it has only heard
+// of comes back as an id and the title the claim's note carried, which is the
+// whole reason the note is a column: a related shelf is thirty videos nobody
+// fetched and a list of thirty bare ids is not something a person can read.
+func (s *Store) videosAcross(from graph.URI, p graph.Predicate) ([]Video, error) {
 	rows, err := s.db.Query(`
-		SELECT rv.related_video_id,
-		       COALESCE(v.title,''), COALESCE(v.channel_name,''),
-		       COALESCE(v.duration_text,''), COALESCE(v.view_count,0)
-		FROM related_videos rv
-		LEFT JOIN videos v ON v.video_id=rv.related_video_id
-		WHERE rv.video_id=?
-		ORDER BY rv.position`, videoID)
+		SELECT c.to_uri, c.note, n.record
+		FROM claims c LEFT JOIN nodes n ON n.uri = c.to_uri
+		WHERE c.from_uri = ? AND c.predicate = ?
+		ORDER BY c.position, c.to_uri`, string(from), string(p))
 	if err != nil {
 		return nil, err
 	}
 	defer func() { _ = rows.Close() }()
 	var out []Video
+	seen := map[string]bool{}
 	for rows.Next() {
-		var v Video
-		if err := rows.Scan(
-			&v.VideoID, &v.Title, &v.ChannelTitle, &v.DurationText, &v.ViewCount,
-		); err != nil {
+		var uri, note string
+		var blob []byte
+		if err := rows.Scan(&uri, &note, &blob); err != nil {
 			return out, err
 		}
-		out = append(out, v)
+		parsed, ok := graph.Parse(graph.URI(uri))
+		if !ok || seen[parsed.ID] {
+			continue
+		}
+		seen[parsed.ID] = true
+		if len(blob) > 0 {
+			if v, err := unmarshalRecord[Video](blob); err == nil {
+				out = append(out, *v)
+				continue
+			}
+		}
+		out = append(out, Video{VideoID: parsed.ID, Title: note, URL: graph.URI(uri).URL()})
 	}
 	return out, rows.Err()
 }
 
+// storeGetChapters comes out of the video's own record rather than a table of
+// its own. A chapter has no id and no address, so it was never a node.
 func (s *Store) storeGetChapters(videoID string) ([]Chapter, error) {
-	rows, err := s.db.Query(`
-		SELECT video_id, COALESCE(title,''), start_seconds,
-		       COALESCE(thumbnail_url,''), COALESCE(position,0)
-		FROM chapters WHERE video_id=? ORDER BY position`, videoID)
+	n, err := s.Node(graph.VideoURI(videoID))
+	if err != nil || n == nil || !n.Read() {
+		return nil, err
+	}
+	v, err := unmarshalRecord[Video](n.Record)
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = rows.Close() }()
-	var out []Chapter
-	for rows.Next() {
-		var c Chapter
-		if err := rows.Scan(&c.VideoID, &c.Title, &c.StartSeconds, &c.ThumbnailURL, &c.Position); err != nil {
-			return out, err
-		}
-		out = append(out, c)
-	}
-	return out, rows.Err()
+	return v.Chapters, nil
 }
 
-// --- Low-level helpers (store-private, prefixed to avoid collision) ---
-
-func storeNullStr(s string) any {
-	if s == "" {
-		return nil
+func unmarshalRecord[T any](blob []byte) (*T, error) {
+	var rec T
+	if err := json.Unmarshal(blob, &rec); err != nil {
+		return nil, err
 	}
-	return s
-}
-
-func storeNullInt(v int) any {
-	if v == 0 {
-		return nil
-	}
-	return v
-}
-
-func storeNullInt64(v int64) any {
-	if v == 0 {
-		return nil
-	}
-	return v
-}
-
-// storeBoolPtr writes a flag as NULL when nobody answered, so the absent/false
-// distinction the record model keeps survives into SQL rather than being flattened
-// to a 0 that reads as "YouTube said no".
-func storeBoolPtr(b *bool) any {
-	if b == nil {
-		return nil
-	}
-	return storeBool(*b)
-}
-
-// storeNullBoolPtr is the read side of storeBoolPtr.
-func storeNullBoolPtr(b sql.NullBool) *bool {
-	if !b.Valid {
-		return nil
-	}
-	return boolPtr(b.Bool)
-}
-
-func storeBool(b bool) int {
-	if b {
-		return 1
-	}
-	return 0
-}
-
-func storeTime(t time.Time) string {
-	if t.IsZero() {
-		return ""
-	}
-	return t.UTC().Format(time.RFC3339)
-}
-
-func storeNullTime(t time.Time) any {
-	if t.IsZero() {
-		return nil
-	}
-	return t.UTC().Format(time.RFC3339)
-}
-
-func parseStoreTime(s string) (time.Time, error) {
-	if s == "" {
-		return time.Time{}, nil
-	}
-	return time.Parse(time.RFC3339, s)
-}
-
-// jsonString encodes a string slice as a compact JSON array.
-func jsonString(v []string) string {
-	if len(v) == 0 {
-		return "[]"
-	}
-	b, _ := json.Marshal(v)
-	return string(b)
+	return &rec, nil
 }
