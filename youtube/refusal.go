@@ -172,8 +172,9 @@ var messageRefusalPhrases = []string{
 	// Measured on @Computerphile's posts tab, selected with the params off its own
 	// strip: 200, no alerts, this in place of the 30 posts the channel has.
 	"Posts aren't currently available on this device",
-	// Measured in the comment section of a watch page from this address, which is
-	// also where CommentsRestricted reads it.
+	// Measured in the comment section of a watch page from this address. The full
+	// sentence is "Restricted Mode has hidden comments for this video." and
+	// comments.go quotes it whole rather than matching on it.
 	"Restricted Mode has hidden comments",
 }
 

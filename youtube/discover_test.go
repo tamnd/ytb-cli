@@ -301,7 +301,9 @@ func TestWalkCommentsThenCommenter(t *testing.T) {
 
 func TestWalkCommentsRestrictedDegrades(t *testing.T) {
 	g := newFakeGraph()
-	g.commErr = map[string]error{"vid1": ErrCommentsRestricted}
+	// The refusal a restricted network really answers with, verbatim.
+	g.commErr = map[string]error{"vid1": newRefusal("comments for vid1", "watch page",
+		"Restricted Mode has hidden comments for this video.")}
 	var notes []string
 	opts := WalkOptions{Depth: 1, Edges: edgePresets["comments"], Note: func(s string) { notes = append(notes, s) }}
 	var nodes []*Node

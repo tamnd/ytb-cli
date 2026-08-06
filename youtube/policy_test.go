@@ -383,14 +383,16 @@ func TestNoHardcodedTabParams(t *testing.T) {
 }
 
 // pathWalkersAllowed are the files still allowed to walk a continuation path by
-// hand, with why. Both remaining ones scope their walk to a section on purpose,
-// which the general finder cannot do for them.
+// hand, with why. The one that remains scopes its walk to a section on purpose,
+// which the general finder cannot do for it.
+//
+// comments.go used to be here and is not any more: milestone 8 rebuilt it on
+// FindContinuationToken and FindContinuationTokenUnder, so the reply token, the
+// sort chip token and the next-page token in the same response are told apart by
+// the marker they sit under rather than by a fixed path.
 var pathWalkersAllowed = map[string]string{
 	"parse.go": "extractCommentContinuationToken is scoped to comment-item-section, because a /next " +
 		"response holds the related-videos token as well and the two are not interchangeable",
-	"comments.go": "comment paging cannot be checked against real data from here: YouTube answers this " +
-		"address with Restricted Mode and hides comments, so the scoped walk stays until milestone 8 " +
-		"rebuilds comments where the responses can be seen",
 }
 
 // TestContinuationTokenSearchIsNotPathWalking asserts the token finder is asked

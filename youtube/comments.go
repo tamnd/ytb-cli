@@ -2,25 +2,30 @@ package youtube
 
 import (
 	"context"
-	"errors"
 	"fmt"
 )
 
-// ErrCommentsRestricted is returned when a video's comments are hidden by
-// Restricted Mode. YouTube applies Restricted Mode to some server and
-// datacenter requests regardless of cookies, so callers can present a clear
-// message rather than mistaking it for a video with no comments.
-var ErrCommentsRestricted = errors.New("comments hidden by Restricted Mode")
-
-// StreamComments streams comments (and optionally replies) for a video.
-// idOrURL may be a video ID or any URL form. Returning ErrStop from emit halts
-// iteration cleanly.
+// comments.go is the comment plane. Doc 05 section 4.
 //
-// The watch page's ytInitialData is the reliable source for both the comment
-// continuation token and the visitor session it is bound to; the /next API
-// strips the token for unauthenticated requests. Comment bodies arrive as
-// entity payloads (the modern model), with the classic commentRenderer kept as
-// a fallback for replies and older responses.
+// Two things shape it.
+//
+// The first is Restricted Mode. YouTube turns it on for some datacenter and
+// server addresses whatever cookies are sent, and when it is on the comment
+// section is replaced by a messageRenderer reading "Restricted Mode has hidden
+// comments for this video." Returning zero comments there is a claim the video
+// has none, which is a different statement and a false one. So it is a refusal
+// carrying YouTube's own sentence, and it exits 4.
+//
+// The second is where the token lives. The /next API strips the comment
+// continuation for an unauthenticated caller, so the watch page's ytInitialData
+// is the source, and the visitor id it was minted against has to be sent with
+// it. Every token here is found by searching for the key rather than by walking
+// a path, because the comment section carries a reply token, a sort chip token
+// and a next-page token in the same response, and telling them apart is what
+// continuation.go is for.
+
+// StreamComments streams a video's comments, and its replies when asked.
+// Returning ErrStop from emit halts iteration cleanly.
 func (c *Client) StreamComments(ctx context.Context, idOrURL string, opt CommentOptions, emit func(Comment) error) error {
 	videoID := ExtractVideoID(idOrURL)
 	if videoID == "" {
@@ -28,7 +33,6 @@ func (c *Client) StreamComments(ctx context.Context, idOrURL string, opt Comment
 	}
 
 	it := NewInnerTube(c)
-
 	data, _, err := c.FetchPageData(ctx, NormalizeVideoURL(idOrURL))
 	if err != nil {
 		return fmt.Errorf("comments page: %w", err)
@@ -40,28 +44,20 @@ func (c *Client) StreamComments(ctx context.Context, idOrURL string, opt Comment
 		visitor = data.VisitorData
 	}
 
-	if CommentsRestricted(initial) {
-		return ErrCommentsRestricted
+	if msg := commentsRefusalMessage(initial); msg != "" {
+		return newRefusal("comments for "+videoID, "watch page", msg)
 	}
 
-	contToken := FindCommentsToken(initial)
-	if contToken == "" {
-		// Fallback to the /next API token discovery for older response shapes.
-		if nextResp, err := it.NextMWEB(ctx, videoID); err == nil {
-			contToken = extractCommentContinuationToken(nextResp)
-			if contToken == "" {
-				contToken = extractCommentContFromNextResp(nextResp)
-			}
-		}
-	}
-	if contToken == "" {
-		return nil // no comments, or comments are disabled
+	token := FindCommentsToken(initial)
+	if token == "" {
+		// Nothing to page. A video with comments turned off says so on the page and
+		// carries no token, which is an answer and not a failure.
+		return nil
 	}
 
 	total := 0
 	pages := 0
-
-	for contToken != "" {
+	for token != "" {
 		if ctx.Err() != nil {
 			return ctx.Err()
 		}
@@ -72,68 +68,98 @@ func (c *Client) StreamComments(ctx context.Context, idOrURL string, opt Comment
 			return nil
 		}
 
-		resp, err := it.CommentContinuationWEB(ctx, contToken, visitor)
+		resp, err := it.CommentContinuationWEB(ctx, token, visitor)
 		if err != nil {
 			return fmt.Errorf("comment page %d: %w", pages+1, err)
 		}
+		// A continuation can refuse too, and it refuses the same way the page does.
+		if msg := commentsRefusalMessage(resp); msg != "" {
+			return newRefusal("comments for "+videoID, "comment continuation", msg)
+		}
 
 		entities := collectCommentEntities(resp)
-		var nextToken string
-		var stopped bool
-		batchCount := 0
+		batch := 0
+		stopped := false
 
 		walkJSON(resp, func(m map[string]any) {
 			if stopped {
 				return
 			}
-			// Modern model: a thread references its body by entity key.
-			if ctr, ok := m["commentThreadRenderer"].(map[string]any); ok {
-				comment := commentFromThread(ctr, entities, videoID)
-				if comment == nil {
-					return
-				}
-				if opt.Max > 0 && total+batchCount >= opt.Max {
-					return
-				}
-				if emitErr := emit(*comment); emitErr != nil {
-					stopped = true
-					return
-				}
-				batchCount++
-				if opt.Replies && comment.ReplyCount > 0 {
-					if replyCont := extractReplyToken(ctr); replyCont != "" {
-						batchCount += streamReplies(ctx, it, c, videoID, comment.ID, visitor, replyCont, opt, &total, emit)
-					}
-				}
+			ctr, ok := m["commentThreadRenderer"].(map[string]any)
+			if !ok {
 				return
 			}
-			// Continuation token for the next page.
-			if cir, ok := m["continuationItemRenderer"].(map[string]any); ok {
-				if ep := mapValue(cir, "continuationEndpoint"); ep != nil {
-					if cmd := mapValue(ep, "continuationCommand"); cmd != nil {
-						if tok := stringValue(cmd["token"]); tok != "" && nextToken == "" {
-							nextToken = tok
-						}
-					}
+			comment := commentFromThread(ctr, entities, videoID)
+			if comment == nil {
+				return
+			}
+			if opt.Max > 0 && total+batch >= opt.Max {
+				return
+			}
+			if err := emit(*comment); err != nil {
+				stopped = true
+				return
+			}
+			batch++
+			if opt.Replies && comment.ReplyCount > 0 {
+				// A reply thread is its own list under commentRepliesRenderer, which
+				// FindContinuationToken is right to skip and this is right to ask for.
+				if replyToken := FindContinuationTokenUnder(ctr, "commentRepliesViewModel"); replyToken != "" {
+					batch += streamReplies(ctx, it, videoID, comment.ID, visitor, replyToken, opt, total+batch, emit)
+				} else if replyToken := FindContinuationTokenUnder(ctr, "commentRepliesRenderer"); replyToken != "" {
+					batch += streamReplies(ctx, it, videoID, comment.ID, visitor, replyToken, opt, total+batch, emit)
 				}
 			}
 		})
 
-		total += batchCount
+		total += batch
 		pages++
 		if stopped {
 			return nil
 		}
-		contToken = nextToken
-		if batchCount == 0 {
+		token = FindContinuationToken(resp)
+		if batch == 0 {
 			break
 		}
 	}
 	return nil
 }
 
+// commentsRefusalMessage returns YouTube's sentence when the comment section was
+// replaced by one, and "" when it was not.
+//
+// The message is quoted rather than matched on, because it is localized and
+// because paraphrasing it throws away the only thing the reader can act on. What
+// is matched is the section: a messageRenderer standing where the comment items
+// should be. Elsewhere on a watch page a messageRenderer says ordinary things.
+func commentsRefusalMessage(root any) string {
+	msg := ""
+	walkJSON(root, func(m map[string]any) {
+		if msg != "" {
+			return
+		}
+		isr, ok := m["itemSectionRenderer"].(map[string]any)
+		if !ok || stringValue(isr["sectionIdentifier"]) != "comment-item-section" {
+			return
+		}
+		walkJSON(isr, func(mm map[string]any) {
+			if msg != "" {
+				return
+			}
+			mr, ok := mm["messageRenderer"].(map[string]any)
+			if !ok {
+				return
+			}
+			if text := extractText(mr["text"]); text != "" {
+				msg = text
+			}
+		})
+	})
+	return msg
+}
+
 // commentFromThread resolves a commentThreadRenderer to a Comment, preferring
-// the entity payload (modern) and falling back to an inline commentRenderer.
+// the entity payload and falling back to an inline commentRenderer.
 func commentFromThread(ctr map[string]any, entities map[string]*Comment, videoID string) *Comment {
 	if key := threadCommentKey(ctr); key != "" {
 		if c := entities[key]; c != nil {
@@ -161,76 +187,74 @@ func threadCommentKey(ctr map[string]any) string {
 	return stringValue(cvm["commentKey"])
 }
 
-// streamReplies pages through replies for a comment and emits each one.
-// Returns the number of replies emitted.
+// streamReplies pages one comment's replies and returns how many it emitted.
 func streamReplies(
 	ctx context.Context,
 	it *InnerTubeClient,
-	c *Client,
-	videoID, parentID, visitor, contToken string,
+	videoID, parentID, visitor, token string,
 	opt CommentOptions,
-	total *int,
+	before int,
 	emit func(Comment) error,
 ) int {
 	count := 0
-	for contToken != "" {
+	for token != "" {
 		if ctx.Err() != nil {
 			return count
 		}
-		_ = c // keep reference for future rate-limit use
-		resp, err := it.CommentContinuationWEB(ctx, contToken, visitor)
+		resp, err := it.CommentContinuationWEB(ctx, token, visitor)
 		if err != nil {
 			return count
 		}
 		entities := collectCommentEntities(resp)
-		var nextToken string
+		emitted := 0
 		walkJSON(resp, func(m map[string]any) {
-			// Modern reply: a commentViewModel referencing an entity key.
 			if cvm, ok := m["commentViewModel"].(map[string]any); ok {
-				if key := stringValue(cvm["commentKey"]); key != "" {
-					if c := entities[key]; c != nil {
-						if opt.Max > 0 && *total+count >= opt.Max {
-							return
-						}
-						clone := *c
-						clone.VideoID = videoID
-						clone.ParentID = parentID
-						if emitErr := emit(clone); emitErr != nil {
-							return
-						}
-						count++
-						return
-					}
+				key := stringValue(cvm["commentKey"])
+				if key == "" {
+					return
 				}
+				reply := entities[key]
+				if reply == nil {
+					return
+				}
+				if opt.Max > 0 && before+count >= opt.Max {
+					return
+				}
+				clone := *reply
+				clone.VideoID = videoID
+				clone.ParentID = parentID
+				if err := emit(clone); err != nil {
+					return
+				}
+				count++
+				emitted++
+				return
 			}
-			// Legacy reply renderer.
 			if rr, ok := m["commentRenderer"].(map[string]any); ok {
 				if stringValue(rr["commentId"]) == "" {
 					return
 				}
-				comment := ParseCommentRenderer(map[string]any{"commentRenderer": rr}, videoID, parentID)
-				if comment == nil {
+				reply := ParseCommentRenderer(map[string]any{"commentRenderer": rr}, videoID, parentID)
+				if reply == nil {
 					return
 				}
-				if opt.Max > 0 && *total+count >= opt.Max {
+				if opt.Max > 0 && before+count >= opt.Max {
 					return
 				}
-				if emitErr := emit(*comment); emitErr != nil {
+				if err := emit(*reply); err != nil {
 					return
 				}
 				count++
-			}
-			if cir, ok := m["continuationItemRenderer"].(map[string]any); ok {
-				if ep := mapValue(cir, "continuationEndpoint"); ep != nil {
-					if cmd := mapValue(ep, "continuationCommand"); cmd != nil {
-						if tok := stringValue(cmd["token"]); tok != "" && nextToken == "" {
-							nextToken = tok
-						}
-					}
-				}
+				emitted++
 			}
 		})
-		contToken = nextToken
+		// A reply page's own next token is under the replies renderer, which is the
+		// marker FindContinuationToken skips, so it is asked for by name.
+		next := FindContinuationTokenUnder(resp, "continuationItemRenderer")
+		if next == token || emitted == 0 {
+			return count
+		}
+		token = next
 	}
 	return count
 }

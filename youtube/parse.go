@@ -796,27 +796,6 @@ func ParseCommentRenderer(m map[string]any, videoID, parentID string) *Comment {
 	return c
 }
 
-// CommentsRestricted reports whether a watch page's comment section was hidden
-// by Restricted Mode. YouTube applies this to some server and datacenter
-// requests; the section then carries only a messageRenderer to that effect.
-func CommentsRestricted(root any) bool {
-	restricted := false
-	walkJSON(root, func(m map[string]any) {
-		isr, ok := m["itemSectionRenderer"].(map[string]any)
-		if !ok || stringValue(isr["sectionIdentifier"]) != "comment-item-section" {
-			return
-		}
-		walkJSON(isr, func(mm map[string]any) {
-			if mr, ok := mm["messageRenderer"].(map[string]any); ok {
-				if strings.Contains(extractText(mr["text"]), "Restricted Mode") {
-					restricted = true
-				}
-			}
-		})
-	})
-	return restricted
-}
-
 // FindCommentsToken finds the comment-section continuation token in a watch
 // page's ytInitialData (the reliable source: the /next API strips it for
 // unauthenticated requests).
@@ -1337,53 +1316,6 @@ func extractCommentContinuationToken(root any) string {
 		}
 	})
 	return token
-}
-
-// extractCommentContFromNextResp is a fallback for finding comment continuation tokens.
-func extractCommentContFromNextResp(root map[string]any) string {
-	var token string
-	walkJSON(root, func(m map[string]any) {
-		if token != "" {
-			return
-		}
-		if cir, ok := m["continuationItemRenderer"].(map[string]any); ok {
-			if ep := mapValue(cir, "continuationEndpoint"); ep != nil {
-				if cmd := mapValue(ep, "continuationCommand"); cmd != nil {
-					if t := stringValue(cmd["token"]); t != "" {
-						token = t
-					}
-				}
-			}
-		}
-	})
-	return token
-}
-
-// extractReplyToken finds the reply continuation token inside a commentThreadRenderer.
-func extractReplyToken(ctr map[string]any) string {
-	replies := mapValue(ctr, "replies")
-	if replies == nil {
-		return ""
-	}
-	crr := mapValue(replies, "commentRepliesRenderer")
-	if crr == nil {
-		return ""
-	}
-	contents := arrayValue(crr["contents"])
-	for _, item := range contents {
-		if im, ok := item.(map[string]any); ok {
-			if cir, ok := im["continuationItemRenderer"].(map[string]any); ok {
-				if ep := mapValue(cir, "continuationEndpoint"); ep != nil {
-					if cmd := mapValue(ep, "continuationCommand"); cmd != nil {
-						if tok := stringValue(cmd["token"]); tok != "" {
-							return tok
-						}
-					}
-				}
-			}
-		}
-	}
-	return ""
 }
 
 // --- Hashtag page parser ---
