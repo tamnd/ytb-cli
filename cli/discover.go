@@ -28,7 +28,7 @@ func newDiscoverCmd() kit.Command {
 	)
 	return kit.Command{
 		Use:     "discover <seed>...",
-		Aliases: []string{"walk", "graph"},
+		Aliases: []string{"walk"},
 		Group:   "read",
 		Short:   "Breadth-first walk of the graph linked from a video, channel, or playlist",
 		Long: `Walk the graph of linked YouTube objects, breadth first, starting from one or
