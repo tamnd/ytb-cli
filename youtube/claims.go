@@ -59,7 +59,18 @@ type Collector struct {
 	// Aliases are the addresses the site used for things this tool names by URI,
 	// so a comparison can tell a different spelling from a different answer.
 	Aliases map[string]string
+	// Records are the objects this read actually fetched, and only those.
+	//
+	// A watch page names thirty videos and fetches one. The thirty arrive as
+	// claims and as lockups, which are a title and a byline rather than a record,
+	// and filing one of those as a record would mark the node read and take it off
+	// the next crawl's frontier. So the rule is the narrow one: a record here is
+	// something the request was about.
+	Records []any
 }
+
+// record notes an object this read fetched.
+func (c *Collector) record(v any) { c.Records = append(c.Records, v) }
 
 // NewCollector returns a collector with an empty set.
 func NewCollector() *Collector { return &Collector{Set: graph.NewSet()} }
@@ -135,6 +146,7 @@ func (c *Client) videoClaims(ctx context.Context, id string, opt ClaimOptions, c
 	}
 	set := col.Set
 	VideoClaims(set, res.Video)
+	col.record(res.Video)
 	RelatedClaims(set, res.Video.VideoID, res.Related, res.Video.ProvFor("related"))
 	col.Statements = append(col.Statements, VideoStatements(res.Video)...)
 	if opt.Microdata {
@@ -156,6 +168,11 @@ func (c *Client) videoClaims(ctx context.Context, id string, opt ClaimOptions, c
 				Surface: SurfaceInnerTube,
 				Client:  "WEB",
 			})
+			// A comment is a record rather than a lockup: the read returned the whole
+			// of it, so there is nothing left to fetch and it is not frontier.
+			for _, cm := range comments {
+				col.record(cm)
+			}
 		}
 	}
 
@@ -179,6 +196,7 @@ func (c *Client) channelClaims(ctx context.Context, id string, opt ClaimOptions,
 	}
 	set := col.Set
 	ChannelClaims(set, *ch)
+	col.record(*ch)
 	col.Statements = append(col.Statements, ChannelStatements(*ch)...)
 
 	if opt.Featured {
@@ -202,6 +220,9 @@ func (c *Client) channelClaims(ctx context.Context, id string, opt ClaimOptions,
 				Surface: SurfaceInnerTube,
 				Client:  "WEB",
 			})
+			for _, p := range posts {
+				col.record(p)
+			}
 		}
 	}
 	return nil
@@ -218,6 +239,7 @@ func (c *Client) playlistClaims(ctx context.Context, id string, opt ClaimOptions
 			return fmt.Errorf("playlist not found: %s", id)
 		}
 		PlaylistClaims(set, *p)
+		col.record(*p)
 		col.Statements = append(col.Statements, PlaylistStatements(*p)...)
 		return nil
 	}
@@ -237,6 +259,7 @@ func (c *Client) playlistClaims(ctx context.Context, id string, opt ClaimOptions
 		return fmt.Errorf("playlist not found: %s", id)
 	}
 	PlaylistClaims(set, *p)
+	col.record(*p)
 	PlaylistItemClaims(set, p.PlaylistID, items, p.Prov())
 	col.Statements = append(col.Statements, PlaylistStatements(*p)...)
 	return nil
@@ -251,6 +274,7 @@ func (c *Client) albumClaims(ctx context.Context, id string, col *Collector) err
 		return fmt.Errorf("album not found: %s", id)
 	}
 	AlbumClaims(col.Set, *album, songs, graph.Provenance{Source: album.URL, Surface: SurfaceMusic, Client: "WEB_REMIX"})
+	col.record(*album)
 	return nil
 }
 
@@ -263,6 +287,7 @@ func (c *Client) artistClaims(ctx context.Context, id string, col *Collector) er
 		return fmt.Errorf("artist not found: %s", id)
 	}
 	prov := graph.Provenance{Source: artist.URL, Surface: SurfaceMusic, Client: "WEB_REMIX"}
+	col.record(*artist)
 	for _, a := range albums {
 		AlbumClaims(col.Set, a, nil, prov)
 	}
