@@ -105,21 +105,21 @@ ytb discover <ref> --fields depth,via,who,url -o table
 
 ## Persisting a walk
 
-Add `--store` to write every node and edge into the local store as the walk
+Add `--store` to write every node the walk reached into the local store as it
 streams, so you keep the graph as well as see it:
 
 ```sh
 ytb discover @MrBeast --follow all --depth 2 --store
-ytb db query "select kind, count(*) from edges group by kind order by 2 desc"
+ytb query "select kind, count(*) from nodes group by 1 order by 2 desc"
 ```
 
-Each node lands in its own typed table (`videos`, `channels`, `playlists`,
-`comments`, `community_posts`) and each traversed link lands in an `edges` table
-(`src`, `dst`, `kind`), so the graph is queryable afterwards. Re-walking is
-idempotent.
+A node the walk fetched is stored with its record. A node it only saw in
+somebody else's shelf is stored as a sighting with a null record, because a title
+on a shelf is not a record and writing it down as one would say this video has no
+description and no likes. Re-walking is idempotent.
 
-When you want a dataset built from an explicit worklist rather than a live walk,
-reach for [the crawl queue](/guides/the-store/), which drains a queue of URLs you
-load yourself; `discover` is the complement that finds the worklist by walking.
-See [the local store](/guides/the-store/) for inspecting and exporting what you
-collect.
+`discover` writes nodes and not claims. The edge names above are how a person
+describes a hop, while a claim is made of the closed predicate vocabulary that
+`ytb predicates` prints, so `ytb crawl` is what writes the graph. See [the local
+store](/guides/the-store/) for the crawl, the query surface, and exporting what
+you collect.

@@ -16,8 +16,8 @@ structured data. One pure-Go binary, no API key, no quota.
 
 It talks to the same public InnerTube endpoints the YouTube site uses, so there
 is no key to register and no quota to budget. Responses are cached on disk, so a
-repeat call is instant. Pass `--db` and every record is also upserted into a
-local SQLite store you can query with SQL.
+repeat call is instant. `ytb crawl` walks the graph into a local SQLite store you
+can query with SQL.
 
 `ytb` is an independent tool. It is not affiliated with YouTube or Google.
 
@@ -37,8 +37,9 @@ docker run --rm ghcr.io/tamnd/ytb:latest search 'lofi hip hop' -n 10
 
 Shell completion is built in: `ytb completion bash|zsh|fish|powershell`.
 
-`yt-dlp` is optional and only needed for `download`, `extract`, and as a
-transcript fallback when YouTube gates the caption endpoints.
+`ytb download` uses a native pure-Go engine. `yt-dlp` is optional and only needed
+for `extract`, for `download --use-yt-dlp`, and as a transcript fallback when
+YouTube gates the caption endpoints.
 
 ## Commands
 
@@ -68,12 +69,13 @@ transcript fallback when YouTube gates the caption endpoints.
 | `ytb music song <id\|url>` | a Music track |
 | `ytb download <id\|url>` | download media via yt-dlp |
 | `ytb extract <id\|url>` | extract a specific stream via yt-dlp; `--audio`, `--video` |
-| `ytb seed <query\|url>...` | load a worklist into the crawl queue |
-| `ytb crawl` | drain the crawl queue with workers |
-| `ytb queue` | inspect the crawl queue |
-| `ytb jobs` | recent crawl job history |
+| `ytb crawl <seed>...` | walk the graph from seeds into the store; `--depth`, `--budget`, `--resume` |
+| `ytb archive <id\|url>` | write one read down in full: page, payloads, headers, and what ytb parsed |
+| `ytb edges <id\|url>...` | the claims one read makes: subject, predicate, object, and who said so |
+| `ytb rdf <id\|url>...` | the same claims as n-triples, turtle, or json-ld |
+| `ytb query <sql>` | run SQL over the store, read-only |
 | `ytb export <handle\|id>` | render the store as interlinked Markdown |
-| `ytb db stats\|query\|search\|vacuum` | work with the local SQLite store |
+| `ytb db stats\|search\|path\|vacuum\|reset` | work with the local SQLite store |
 | `ytb config show\|init\|path` | show or reset configuration |
 | `ytb cache path\|info\|clear` | inspect or clear the on-disk cache |
 | `ytb serve` | serve all operations over HTTP |
@@ -131,34 +133,42 @@ ytb search 'go programming' -o url | ytb video -
     --gl           InnerTube content country (default US)
 -q, --quiet        suppress progress output
     --color        auto|always|never
-    --db           path to the optional SQLite store
+    --db           tee every record into a store (e.g. out.db, postgres://...)
+    --data-dir     override the data directory, which is where the store lives
     --no-cache     bypass the on-disk cache
     --dry-run      print the requests that would be made
 ```
 
 ## The local store
 
-Pass `--db <path>` and `ytb` also upserts every record it fetches into a SQLite
-database: videos, channels, playlists, comments, caption tracks, formats, and the
-relationships between them. That turns the same commands into a crawler and gives
-you SQL over what you have collected.
+`ytb crawl` walks the graph from a seed and writes what it saw into a SQLite file
+at `<data-dir>/ytb.db`, which `ytb db path` will print. There are three tables.
+`nodes` is everything with an identity, one row per URI, with the record as JSON
+and a null record for a node somebody named that nobody has fetched yet. `claims`
+is the edges, one row per observation, so the same edge seen on the watch page
+and in a browse response is two rows and each says where it came from. `reads` is
+the log: every request, what answered it, and how big it was.
 
 ```bash
-ytb uploads @MrBeast --db yt.db               # stream and persist in one pass
-ytb db stats --db yt.db                       # row counts per table
-ytb db query "select title, views from videos order by views desc limit 10" --db yt.db
-ytb db search videos "lofi" --db yt.db        # full-text search
-ytb export @MrBeast --db yt.db --out site/    # render the store as Markdown
+ytb crawl @MrBeast --depth 2 --budget 200     # walk the graph into the store
+ytb crawl --resume --budget 50                # keep going where it stopped
+ytb db stats                                  # nodes by kind, claims by predicate
+ytb db search "lofi"                          # full-text search over stored videos
+ytb export @MrBeast --out site/               # render the store as Markdown
 ```
 
-For larger collection runs, the `seed`/`crawl`/`queue`/`jobs` commands turn the
-store into a work queue:
+The unread nodes are the frontier, which is a query rather than a queue, so a
+crawl that stops is just a crawl with rows left to read:
 
 ```bash
-ytb search 'podcast' --enqueue --db yt.db         # seed from a search
-ytb crawl --db yt.db -j 8                         # drain with 8 workers
-ytb queue --db yt.db                              # see what is pending
+ytb query "select uri from nodes where record is null and kind='video' limit 20"
+ytb query "select predicate, count(*) c from claims group by 1 order by c desc"
 ```
+
+`ytb query` opens the file read-only, so a statement that would write is refused
+by SQLite itself. To keep the raw bytes as well, `ytb archive <id>` writes one
+read into a directory: the page, every InnerTube payload, the request headers
+with the session ones removed, and the records and claims ytb parsed out of them.
 
 ## Exit codes
 
@@ -177,8 +187,12 @@ ytb queue --db yt.db                              # see what is pending
 
 ```
 cmd/ytb/     thin main entry point
-cli/         cobra commands and output rendering
-youtube/     HTTP client, InnerTube transport, parsers, models, optional store
+cli/         commands and output rendering
+youtube/     HTTP client, InnerTube transport, parsers, models, crawl, store
+pkg/ytid/    id and URL classification
+pkg/graph/   URIs, predicates, and the claim vocabulary
+pkg/rdf/     n-triples, turtle, and json-ld writers
+pkg/srv3/    caption track parsing
 docs/        documentation site (Hugo, tago-doks theme)
 ```
 
@@ -189,9 +203,9 @@ make vet     # go vet ./...
 make fmt     # gofmt -s -w .
 ```
 
-Requires Go 1.23+. yt-dlp is optional; install it from
-[its releases](https://github.com/yt-dlp/yt-dlp) if you want `download`,
-`extract`, and transcript recovery.
+Requires Go 1.26+. yt-dlp is optional; install it from
+[its releases](https://github.com/yt-dlp/yt-dlp) if you want `extract`,
+`download --use-yt-dlp`, and transcript recovery.
 
 ## Releasing
 

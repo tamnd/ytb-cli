@@ -86,11 +86,11 @@ ytb music search "lo-fi" --type song --fields title,artist,duration
 ytb music artist UCabc123 -o jsonl
 ```
 
-Pass the global `--db` flag and ytb also persists what it fetches into the
-local SQLite store, just as it does for the video and channel commands:
+A crawl can read each video through YouTube Music too, which is where the album,
+the artist and the release year come from:
 
 ```sh
-ytb music album MPREb_abc123def --db yt.db
+ytb crawl @RickAstleyYT --music --depth 1
 ```
 
-See [The local store](../the-store/) for what gets persisted and how to query it.
+See [The local store](../the-store/) for what gets written and how to query it.

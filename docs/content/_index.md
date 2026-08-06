@@ -44,8 +44,8 @@ gated transcripts.
   playlist support, subtitles, SponsorBlock, and optional ffmpeg post-processing.
 - **Browse YouTube Music.** Search artists, albums, and songs, and open an
   artist, album, playlist, or song through the Music endpoints.
-- **Keep what you fetch.** Point any command at a local SQLite store and it
-  becomes a crawler, with a work queue, SQL access, and a Markdown exporter.
+- **Keep what you fetch.** `ytb crawl` walks the graph into a local SQLite
+  store of nodes, claims and reads, with SQL access and a Markdown exporter.
 
 ## Where to go next
 

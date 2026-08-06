@@ -66,15 +66,15 @@ never links ffmpeg, so it stays small and CGO-free.
 
 Two layers. The `ytb` Go package is the library: an HTTP client with polite
 rate limiting and retries, the InnerTube transport, the renderer-walking parsers,
-the data models, and an optional SQLite store. The `cli` package is the command
+the data models, and the crawl and its SQLite store. The `cli` package is the command
 tree on top, built on [Cobra](https://github.com/spf13/cobra) and
 [fang](https://github.com/charmbracelet/fang). The library never imports the
 CLI, so you can embed it directly in your own Go programs.
 
 Everything streams. A command fetches a page, emits rows as it parses them, and
-follows continuations until your limit is reached or the data runs out. Pass
-`--db` and the same stream is also written to SQLite, turning any command into an
-incremental crawler.
+follows continuations until your limit is reached or the data runs out. Nothing
+is kept unless you ask: `ytb crawl` is the command that writes, walking the graph
+from a seed into a local SQLite store on a budget counted in requests.
 
 With that model in mind, [install the binary](/getting-started/installation/) and
 take it for a [first run](/getting-started/quick-start/).

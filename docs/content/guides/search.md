@@ -83,13 +83,11 @@ ytb search "rust tutorial" -n 100 --fields title,views
 
 ## Enqueue into the store
 
-With a SQLite store attached (`--db`), `--enqueue` pushes the search results
-into the crawl queue instead of relying on a separate seeding step. A pool of
-workers can then drain the queue later. See [The store](/guides/the-store/) for
-the full crawl workflow.
+To collect what a search finds rather than just read it, pipe the results into a
+crawl. See [the local store](/guides/the-store/) for the full workflow.
 
 ```sh
-ytb search "podcast" --enqueue --db yt.db
+ytb search "podcast" -n 20 -o url | xargs ytb crawl --depth 1 --budget 100
 ```
 
 ## Related discovery commands

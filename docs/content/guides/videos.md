@@ -110,5 +110,6 @@ ytb formats dQw4w9WgXcQ --audio
 
 ## Persisting
 
-Add `--db <path>` to any of these and ytb writes everything it fetches into
-a local SQLite store as it streams. See [The store](/guides/the-store/).
+These commands stream and keep nothing. To collect a video and what it links to,
+run `ytb crawl <id>`, which writes the records and the claims into the local
+store. See [The store](/guides/the-store/).

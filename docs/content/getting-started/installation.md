@@ -27,11 +27,12 @@ moved it. Make sure that directory is on your `PATH`.
 docker run --rm ghcr.io/tamnd/ytb video dQw4w9WgXcQ -o json
 ```
 
-Mount a volume and point `--db` at it to keep a SQLite store across runs:
+Mount a volume and point `--data-dir` at it to keep the cache and the store
+across runs:
 
 ```bash
 docker run --rm -v "$PWD/data:/data" ghcr.io/tamnd/ytb \
-  uploads @MrBeast --db /data/yt.db
+  crawl @MrBeast --data-dir /data
 ```
 
 ## From source

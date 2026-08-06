@@ -26,7 +26,7 @@ Persistent flags accepted by every command.
 | `--timeout` | Per-request timeout (30s) |
 | `--hl` | InnerTube interface language (en) |
 | `--gl` | InnerTube content country (US) |
-| `--db` | Optional SQLite store; persist everything fetched |
+| `--db` | Tee every record into a generic store (e.g. `out.db`, `postgres://...`) |
 | `-q, --quiet` | Suppress progress output |
 | `-v, --verbose` | Increase verbosity (repeatable) |
 | `--color` | Color output: `auto`, `always`, `never` (auto) |
@@ -66,11 +66,10 @@ Persistent flags accepted by every command.
 | `sponsorblock` | List community SponsorBlock segments |
 | `thumbnail` | List a video's thumbnails, or fetch the best one |
 | `chapters` | List a video's chapter markers |
-| `seed` | Load a worklist into the crawl queue (needs `--db`) |
-| `crawl` | Process the crawl queue with workers (needs `--db`) |
-| `queue` | Inspect the crawl queue (needs `--db`) |
-| `jobs` | Recent crawl job history (needs `--db`) |
-| `export` | Render the store as interlinked Markdown (needs `--db`) |
+| `crawl` | Walk the graph from seeds into the store |
+| `archive` | Write one read down in full: page, payloads, headers, and what ytb parsed |
+| `query` | Run SQL over the store, read-only |
+| `export` | Render the store as interlinked Markdown |
 | `db` | The local SQLite store |
 | `config` | View and manage configuration |
 | `version` | Print version information |
@@ -192,7 +191,6 @@ This is the only surface outside the player that says whether a video is a short
 | `--live` | Live only |
 | `--360` | 360-degree video |
 | `--vr180` | VR180 only |
-| `--enqueue` | Push results into the crawl queue (needs `--db`) |
 
 ## trending
 
@@ -233,7 +231,7 @@ This is the only surface outside the player that says whether a video is a short
 | `--follow` | Edges to follow: a preset (`content`, `feed`, `comments`, `all`) or a comma-separated edge list (`channel`, `related`, `comments`, `uploads`, `playlists`, `community`, `items`, `owner`, `commenter`). Default `content` |
 | `--depth` | Hops to follow from each seed (default `1`; `0` = seeds only) |
 | `--fanout` | Max neighbors to follow per edge (default `25`; `0` = unlimited) |
-| `--store` | Persist every node into its typed table and each traversed edge into the `edges` table |
+| `--store` | Write every node reached into the local store: a record for what it fetched, a sighting for what it only saw |
 
 The comment edges (`comments`, `commenter`) are served only when YouTube is not applying its per-IP Restricted Mode to this network; when it is, they are noted on stderr and skipped and the rest of the walk continues. `-n/--limit` is the total node budget (default `500`).
 
@@ -358,40 +356,54 @@ A video with no `maxresdefault` answers that URL with a 1097 byte body that is s
 `description` means somebody typed `1:23 Verse 2` and the list is only as good as their typing.
 Both line layouts are read: the timestamp can come first, as in `0:00 Introduction`, or last, as in `Eyes To The Sky - 0:00:00`.
 
-## seed
-
-`ytb seed [item] [--flags]`. Enqueue items for the crawler (needs `--db`).
-
-| Flag | Meaning |
-| --- | --- |
-| `--file` | Newline-delimited worklist file |
-| `--entity` | Entity kind: `video`, `channel`, `playlist`, `search`, `hashtag`, `community` |
-| `--priority` | Queue priority (higher runs first) |
-
 ## crawl
 
-`ytb crawl [--flags]`. Process the crawl queue with workers (needs `--db`).
+`ytb crawl <seed>... [--flags]`. Read each seed, write its claims into the store, then read what those claims named, hop by hop, until the depth or the budget runs out.
+
+The budget is counted in requests rather than estimated, and a cache hit makes no request so it costs nothing.
+The frontier is every node the store has heard of and not read, which is a query and not a queue, so `--resume` with no seeds picks up where an earlier run stopped.
+Mixes, a channel's popular playlist, comments and formats are off the frontier by default, though none of them is refused as a seed.
 
 | Flag | Meaning |
 | --- | --- |
-| `--entity` | Only crawl one entity kind |
-| `--max-per-item` | Cap items fetched per queue entry |
+| `--depth` | Hops to follow from each seed (default 1; 0 = seeds only) |
+| `--budget` | Request budget for the whole crawl (default 200; 0 = no limit) |
+| `--items` | Playlist items to read per playlist (default 100; 0 = header only) |
+| `--comments` | Comments to read per video (default 0) |
+| `--posts` | Community posts to read per channel (default 0) |
+| `--captions` | Read each video's caption list (one ANDROID player call per video) |
+| `--featured` | Read each channel's featured channels shelf |
+| `--music` | Read each video through YouTube Music too |
+| `--uploads` | Put each channel's derived playlists on the frontier (default true) |
+| `--resume` | Start from the nodes the store has heard of and not read |
+| `--manifest` | Where to write the manifest (default `<data-dir>/crawls/crawl-<unix>.json`) |
 
-## queue
+## archive
 
-`ytb queue [--flags]`. Inspect the crawl queue (needs `--db`).
+`ytb archive <ref> [--flags]`. Write one read down in full: the page, every InnerTube payload, a `meta.json` naming each request and the file its answer went into, and a `record.json` with the records and claims ytb parsed.
+
+It needs the cache on, since it works by replaying what the cache stored, so `--no-cache` is refused.
+Session headers are removed from `meta.json` before it is written.
 
 | Flag | Meaning |
 | --- | --- |
-| `--status` | Filter by status: `pending`, `done`, `failed` |
+| `--dir` | Where to write (default `<data-dir>/archive/<ref>-<unix>`) |
+| `--items` | Playlist items to read, for a playlist ref |
+| `--comments` | Comments to read, for a video ref |
+| `--captions` | Read the caption list too |
 
-## jobs
+## query
 
-`ytb jobs [--flags]`. Recent crawl job history (needs `--db`). No notable flags beyond the globals.
+`ytb query <sql>`. Run one SQL statement over the store and print the rows. The file is opened read-only, so a statement that would write is refused by SQLite itself rather than by a check in ytb. No notable flags beyond the globals.
+
+```sh
+ytb query "select predicate, count(*) c from claims group by 1 order by c desc"
+ytb query "select uri from nodes where kind='video' and record is null limit 20"
+```
 
 ## export
 
-`ytb export [channel-id|@handle] [--flags]`. Render the stored data as an interlinked Markdown site (needs `--db`). With no argument, every channel in the store is exported.
+`ytb export [channel-id|@handle] [--flags]`. Render the stored data as an interlinked Markdown site. With no argument, every channel in the store is exported.
 
 | Flag | Meaning |
 | --- | --- |
@@ -399,12 +411,15 @@ Both line layouts are read: the timestamp can come first, as in `0:00 Introducti
 
 ## db
 
-`ytb db [command] [--flags]`. Inspect and query the optional SQLite store (`--db`). Pure-Go, no cgo.
+`ytb db [command]`. Inspect the store at `<data-dir>/ytb.db`. Pure-Go, no cgo.
+
+Three tables. `nodes` is everything with an identity, one row per URI, with the record as JSON and a null record for a node a claim named that nobody has fetched.
+`claims` is the edges, one row per observation, so the same edge seen on the watch page and in a browse response is two rows.
+`reads` is the log: every request, what answered it, and how big it was.
 
 | Subcommand | What it does |
 | --- | --- |
-| `stats` | Row counts per table |
-| `query <sql>` | Run a read-only SQL query |
+| `stats` | Nodes by kind, claims by predicate, reads by surface and client |
 | `search <query>` | Full-text search over stored data |
 | `path` | Print the db file location |
 | `vacuum` | Compact the database file |

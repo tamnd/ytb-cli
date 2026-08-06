@@ -99,16 +99,17 @@ Service and copyright.
 
 ## 6. Keep what you fetch
 
-Add `--db` to any command and ytb also writes everything into a local SQLite
-database, turning the same commands into an incremental crawler:
+`ytb crawl` walks the graph from a seed and writes what it saw into a local
+SQLite file under your data directory. Everything else just streams to stdout.
 
 ```bash
-ytb uploads @RickAstleyYT --db yt.db
-ytb db stats --db yt.db
-ytb db query "select title, view_count from videos order by view_count desc limit 5" --db yt.db
+ytb crawl @RickAstleyYT --depth 2 --budget 200
+ytb db stats
+ytb query "select uri from nodes where kind='video' and record is null limit 5"
 ```
 
-Without `--db`, no database is created and everything just streams to stdout.
+The nodes with no record are the frontier, so `ytb crawl --resume` picks up
+where the budget ran out. See [the local store](/guides/the-store/).
 
 ## Where to go next
 

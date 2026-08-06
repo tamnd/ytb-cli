@@ -53,7 +53,7 @@ writes:
 # timeout   = "30s"
 # hl        = "en"
 # gl        = "US"
-# db        = ""           # path to the optional SQLite store
+# db        = ""           # tee every record into a generic store
 # user_agent = ""
 # yt_dlp_bin = "yt-dlp"
 ```
@@ -102,7 +102,7 @@ These apply to every command. Defaults are in parentheses.
 | `--retries` (`3`) | Retry attempts on HTTP 429 and 5xx, for resilience |
 | `--timeout` (`30s`) | Per-request timeout |
 | `-j, --workers` (`4`) | Concurrency for detail fetches and the crawler |
-| `--db` | Path to the optional SQLite store |
+| `--db` | Tee every record into a generic store, separate from the crawl store |
 | `-o, --output` (`auto`) | Output format |
 | `-n, --limit` (`0`) | Max rows emitted, `0` is unlimited |
 | `--max-pages` (`0`) | Max continuation pages fetched, `0` is unlimited |
