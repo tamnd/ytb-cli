@@ -62,6 +62,10 @@ YouTube gates the caption endpoints.
 | `ytb suggest <term>` | search autocomplete terms |
 | `ytb transcript <id\|url>` | caption tracks and transcript text; `--timestamps`, `--lang` |
 | `ytb formats <id\|url>` | streaming format metadata; `--audio`, `--video`, `--muxed` |
+| `ytb captions <id\|url>` | the caption tracks a video has, and which of them fetch |
+| `ytb chapters <id\|url>` | a video's chapters, and where each one came from |
+| `ytb thumbnail <id\|url>` | thumbnail renditions, confirmed with a HEAD; `--fetch` |
+| `ytb sponsorblock <id\|url>` | community SponsorBlock segments; `--categories` |
 | `ytb music search <query>` | YouTube Music search |
 | `ytb music artist <id\|url>` | a Music artist's profile and releases |
 | `ytb music album <id\|url>` | a Music album |
@@ -73,13 +77,17 @@ YouTube gates the caption endpoints.
 | `ytb archive <id\|url>` | write one read down in full: page, payloads, headers, and what ytb parsed |
 | `ytb edges <id\|url>...` | the claims one read makes: subject, predicate, object, and who said so |
 | `ytb rdf <id\|url>...` | the same claims as n-triples, turtle, or json-ld |
+| `ytb graph <seed>...` | follow the frontier those claims name; `--depth`, `--budget` |
+| `ytb discover <seed>...` | breadth-first walk from a video, channel, or playlist |
+| `ytb predicates` | the closed vocabulary: every predicate, its domain and range |
+| `ytb id <ref>` | classify any id, handle, or URL, with no request at all |
 | `ytb query <sql>` | run SQL over the store, read-only |
 | `ytb export <handle\|id>` | render the store as interlinked Markdown |
 | `ytb db stats\|search\|path\|vacuum\|reset` | work with the local SQLite store |
 | `ytb config show\|init\|path` | show or reset configuration |
 | `ytb cache path\|info\|clear` | inspect or clear the on-disk cache |
-| `ytb serve` | serve all operations over HTTP |
-| `ytb mcp` | run as an MCP server over stdio |
+| `ytb serve` | one HTTP route per read, NDJSON, plus a generated OpenAPI spec |
+| `ytb mcp` | the same reads as MCP tools over stdio |
 | `ytb version` | print version, commit, and build date |
 
 Full reference and guides live at [ytb-cli.tamnd.com](https://ytb-cli.tamnd.com).
@@ -169,6 +177,24 @@ ytb query "select predicate, count(*) c from claims group by 1 order by c desc"
 by SQLite itself. To keep the raw bytes as well, `ytb archive <id>` writes one
 read into a directory: the page, every InnerTube payload, the request headers
 with the session ones removed, and the records and claims ytb parsed out of them.
+
+## Serve and MCP
+
+Every read is one registration, and that registration is three surfaces: the command, an HTTP route, and an MCP tool.
+Neither server has a read the command line lacks, and neither can be missing one, because there is no second implementation to keep in step.
+
+```bash
+ytb serve --addr 127.0.0.1:8080                              # 31 routes, NDJSON
+curl -s localhost:8080/v1/video?ref=dQw4w9WgXcQ
+curl -s "localhost:8080/v1/uploads?ref=@RickAstleyYT&kind=shorts&limit=5"
+curl -s localhost:8080/v1/openapi.json                       # the generated spec
+ytb mcp                                                      # the same set on stdio
+```
+
+Arguments go in the query as well as on the path, which is the form to use, because a path splits on slashes and half of what you pass ytb is a URL.
+Flags keep the names the command gives them: `--max-pages 3` is `&max-pages=3`.
+Nothing that writes is served, so `download`, `crawl`, `export`, `db` and `config` stay on the command line where they belong.
+[Reference](https://ytb-cli.tamnd.com/reference/serve-and-mcp/).
 
 ## Exit codes
 
