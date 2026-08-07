@@ -8,10 +8,6 @@ import (
 	"github.com/tamnd/ytb-cli/youtube"
 )
 
-// defaultDiscoverBudget caps a streaming walk when the user did not pass -n, so
-// `ytb discover <video>` always terminates instead of spidering YouTube forever.
-const defaultDiscoverBudget = 500
-
 // newDiscoverCmd is the breadth-first graph walk. Where the record reads each
 // answer one question about one object, discover chains them: from a seed video,
 // channel, or playlist it follows the object's links and from each neighbor it
@@ -90,7 +86,7 @@ Query either afterwards with ytb query.`,
 
 			budget := app.Limit
 			if budget <= 0 {
-				budget = defaultDiscoverBudget
+				budget = youtube.DefaultWalkBudget
 			}
 
 			opts := youtube.WalkOptions{

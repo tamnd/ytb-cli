@@ -115,52 +115,13 @@ fetched.
 			defer app.Client.SetOnRequest(nil)
 
 			set := graph.NewSet()
-			// read is by reference rather than by URI because a seed can be a handle,
-			// which has no URI until something resolves it, and reading the same
-			// channel twice under two spellings is still two requests.
-			read := map[string]bool{}
-			seen := map[graph.URI]bool{}
-			frontier := args
-			opt := o.options()
-
-			for hop := 0; hop <= depth; hop++ {
-				stopped := false
-				for _, ref := range frontier {
-					if read[ref] {
-						continue
-					}
-					if budget > 0 && spent.Load() >= int64(budget) {
-						app.logf("note: budget of %d requests reached at hop %d", budget, hop)
-						stopped = true
-						break
-					}
-					read[ref] = true
-					if err := app.Client.Claims(ctx, ref, opt, set); err != nil {
-						app.logf("note: %s", err)
-					}
-				}
-				if stopped || hop == depth {
-					break
-				}
-				// The frontier is what the claims named and nothing has read.
-				var next []string
-				for _, u := range set.Nodes() {
-					if seen[u] {
-						continue
-					}
-					seen[u] = true
-					if ref := readableRef(u); ref != "" && !read[ref] {
-						next = append(next, ref)
-					}
-				}
-				frontier = next
-				if len(frontier) == 0 {
-					break
-				}
+			walk := youtube.ClaimWalk{
+				Depth:  depth,
+				Budget: budget,
+				Note:   func(s string) { app.logf("note: %s", s) },
 			}
-
-			if set.Len() == 0 {
-				return noResults("no claims")
+			if err := app.Client.WalkClaims(ctx, args, o.options(), walk, set); err != nil {
+				return err
 			}
 			if listing {
 				for _, e := range set.Edges() {
@@ -288,20 +249,4 @@ func surfaceCell(e graph.Edge) string {
 		return e.Surface
 	}
 	return e.Surface + " " + e.Client
-}
-
-// readableRef turns a frontier node back into something Claims can read. A
-// comment, a hashtag and an external URL are named by claims and are not reads,
-// so they stay on the frontier and are never fetched.
-func readableRef(u graph.URI) string {
-	p, ok := graph.Parse(u)
-	if !ok || p.IsFragment() {
-		return ""
-	}
-	switch p.Kind {
-	case graph.Video, graph.Channel, graph.Playlist, graph.Album, graph.Artist:
-		return p.ID
-	default:
-		return ""
-	}
 }

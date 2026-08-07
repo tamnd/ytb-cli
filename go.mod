@@ -5,8 +5,7 @@ go 1.26.5
 require (
 	github.com/PuerkitoBio/goquery v1.12.0
 	github.com/mattn/go-isatty v0.0.24
-	github.com/tamnd/any-cli v0.4.10
-	golang.org/x/sync v0.22.0
+	github.com/tamnd/any-cli v0.4.11
 	modernc.org/sqlite v1.55.0
 )
 
@@ -40,6 +39,7 @@ require (
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/net v0.57.0 // indirect
+	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.40.0 // indirect
 	modernc.org/libc v1.74.4 // indirect

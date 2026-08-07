@@ -122,6 +122,12 @@ func (Domain) Register(app *kit.App) {
 	kit.Handle(app, kit.OpMeta{Name: "suggest", Group: "read",
 		Summary: "Search autocomplete suggestions",
 		Args:    []kit.Arg{{Name: "query", Help: "partial query", Variadic: true}}}, suggest)
+
+	// The reads whose command line is hand-written, in ops.go. They are the same
+	// registration as the ones above and differ only in carrying NoCLI, so serve
+	// and mcp offer the whole read surface rather than the part of it that had no
+	// table to lay out.
+	registerReadOps(app)
 }
 
 // newClient builds the YouTube client from the host-resolved config. The
@@ -193,7 +199,7 @@ func cacheTTL(s string) time.Duration {
 // --- inputs ---
 
 type videoRef struct {
-	Refs       []string `kit:"arg,variadic" help:"video id or URL (or - for stdin)"`
+	Refs       []string `kit:"arg,variadic,name=ref" help:"video id or URL (or - for stdin)"`
 	Formats    bool     `kit:"flag" help:"also read the stream list, one extra request"`
 	Captions   bool     `kit:"flag" help:"also list caption tracks that fetch, one extra request"`
 	Transcript bool     `kit:"flag" help:"fetch and attach the transcript text"`

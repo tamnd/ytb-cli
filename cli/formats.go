@@ -50,7 +50,7 @@ runs at 4 MiB/s.`,
 			}
 			var n int
 			for _, f := range list.Formats {
-				if !formatMatches(f, audio, video, muxed) {
+				if !youtube.FormatMatches(f, audio, video, muxed) {
 					continue
 				}
 				if err := app.Out.Emit(formatRow(f)); err != nil {
@@ -147,21 +147,6 @@ func streamMatches(s youtube.Stream, audio, video, muxed bool) bool {
 		return s.AudioOnly()
 	case video:
 		return s.VideoOnly()
-	default:
-		return true
-	}
-}
-
-func formatMatches(f youtube.VideoFormat, audio, video, muxed bool) bool {
-	isAudio := strings.HasPrefix(f.MimeType, "audio/")
-	isVideoOnly := f.IsAdaptive && strings.HasPrefix(f.MimeType, "video/")
-	switch {
-	case muxed:
-		return !f.IsAdaptive
-	case audio:
-		return isAudio
-	case video:
-		return isVideoOnly
 	default:
 		return true
 	}
