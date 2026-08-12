@@ -1,0 +1,255 @@
+{
+  "has_continuation": true,
+  "items": [
+    {
+      "avatar": [
+        {
+          "height": 176,
+          "source": "payload",
+          "url": "https://yt3.googleusercontent.com/MOWpaiGJdgN4aKMI-NGQLL4jMVP3aDORlQpOBWooi0GSE2TGt4_9ncyepk1pCh-yWQ795AhPbw=s176-c-k-c0x00ffffff-no-rj-mo",
+          "width": 176
+        }
+      ],
+      "client": [],
+      "description": "Richard Paul Astley is an English singer, songwriter, radio DJ and podcaster.",
+      "fetched_at": "",
+      "handle": "@RickAstleyYT",
+      "id": "UCuAXFkgsw1L7xaCfnd5JJOw",
+      "is_artist": false,
+      "is_verified": false,
+      "kind": "channel",
+      "missed": [
+        "a search result card: no keywords, no links, no tab strip, no join date and no lifetime view count"
+      ],
+      "sources": [],
+      "subscriber_count": 4520000,
+      "subscriber_count_is_approximate": true,
+      "subscriber_count_text": "4.52M subscribers",
+      "surfaces": [
+        "s2"
+      ],
+      "tier": 0,
+      "title": "Rick Astley",
+      "url": "https://www.youtube.com/@RickAstleyYT",
+      "via": {
+        "channel": "s2 officialCardViewModel, the card a search draws above its results"
+      },
+      "video_count": 433,
+      "video_count_text": "433 videos"
+    },
+    {
+      "channel_id": "UCuAXFkgsw1L7xaCfnd5JJOw",
+      "channel_title": "Rick Astley",
+      "client": [],
+      "duration_seconds": 214,
+      "duration_text": "3:34",
+      "embed_url": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      "fetched_at": "",
+      "id": "dQw4w9WgXcQ",
+      "kind": "video",
+      "missed": [
+        "listing row: no keywords, category, like count, available countries or playability",
+        "view count is the rounded lockup text, ytb video reads the exact one"
+      ],
+      "published_text": "16 years ago",
+      "short_url": "https://youtu.be/dQw4w9WgXcQ",
+      "sources": [],
+      "surfaces": [
+        "s2"
+      ],
+      "thumbnail_url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hq720.jpg?sqp=-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=\u0026rs=AOn4CLDX3LgTmArIBIk6uvvz4y5p95MOcg",
+      "thumbnails": [
+        {
+          "height": 202,
+          "source": "payload",
+          "url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hq720.jpg?sqp=-oaymwEjCOgCEMoBSFryq4qpAxUIARUAAAAAGAElAADIQj0AgKJDeAE=\u0026rs=AOn4CLA6t_8gXhVJaexTSRAZ4rQm4iSlKQ",
+          "width": 360
+        },
+        {
+          "height": 404,
+          "source": "payload",
+          "url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hq720.jpg?sqp=-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=\u0026rs=AOn4CLDX3LgTmArIBIk6uvvz4y5p95MOcg",
+          "width": 720
+        }
+      ],
+      "tier": 0,
+      "title": "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "via": {
+        "view_count": "s2 viewCountText, rounded"
+      },
+      "view_count": 1799092538,
+      "view_count_text": "1,799,092,538 views"
+    },
+    {
+      "channel_id": "UCuAXFkgsw1L7xaCfnd5JJOw",
+      "channel_title": "Rick Astley",
+      "client": [],
+      "duration_seconds": 231,
+      "duration_text": "3:51",
+      "embed_url": "https://www.youtube.com/embed/PXC_PYeB6F8",
+      "fetched_at": "",
+      "id": "PXC_PYeB6F8",
+      "kind": "video",
+      "missed": [
+        "listing row: no keywords, category, like count, available countries or playability",
+        "view count is the rounded lockup text, ytb video reads the exact one"
+      ],
+      "published_text": "1 month ago",
+      "short_url": "https://youtu.be/PXC_PYeB6F8",
+      "sources": [],
+      "surfaces": [
+        "s2"
+      ],
+      "thumbnail_url": "https://i.ytimg.com/vi/PXC_PYeB6F8/hq720.jpg?sqp=-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=\u0026rs=AOn4CLBOI71Q4oZb8VzwQPbYVw-YBs7niA",
+      "thumbnails": [
+        {
+          "height": 202,
+          "source": "payload",
+          "url": "https://i.ytimg.com/vi/PXC_PYeB6F8/hq720.jpg?sqp=-oaymwEjCOgCEMoBSFryq4qpAxUIARUAAAAAGAElAADIQj0AgKJDeAE=\u0026rs=AOn4CLA4E8Ahy50TBOygTKofGKW2FKeGsA",
+          "width": 360
+        },
+        {
+          "height": 404,
+          "source": "payload",
+          "url": "https://i.ytimg.com/vi/PXC_PYeB6F8/hq720.jpg?sqp=-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=\u0026rs=AOn4CLBOI71Q4oZb8VzwQPbYVw-YBs7niA",
+          "width": 720
+        }
+      ],
+      "tier": 0,
+      "title": "Rick Astley - Angels On My Side (Live at The O2, London, April 2026)",
+      "url": "https://www.youtube.com/watch?v=PXC_PYeB6F8",
+      "via": {
+        "view_count": "s2 viewCountText, rounded"
+      },
+      "view_count": 39402,
+      "view_count_text": "39,402 views"
+    },
+    {
+      "client": [],
+      "embed_url": "https://www.youtube.com/embed/GdbjNGtWPe4",
+      "fetched_at": "",
+      "id": "GdbjNGtWPe4",
+      "is_short": true,
+      "kind": "video",
+      "missed": [
+        "listing row: no keywords, category, like count, available countries or playability",
+        "view count is the rounded lockup text, ytb video reads the exact one",
+        "a shorts row carries no owner: no byline, no avatar and no channel link anywhere on it"
+      ],
+      "short_url": "https://youtu.be/GdbjNGtWPe4",
+      "sources": [],
+      "surfaces": [
+        "s2"
+      ],
+      "thumbnail_url": "https://i.ytimg.com/vi/GdbjNGtWPe4/oar2.jpg?sqp=-oaymwEkCJUDENAFSFqQAgHyq4qpAxMIARUAAAAAJQAAyEI9AICiQ3gB\u0026rs=AOn4CLDMLx_pWh8lVDq_ZtiMdiyQ7D4-MA\u0026usqp=CCk",
+      "thumbnails": [
+        {
+          "height": 720,
+          "source": "payload",
+          "url": "https://i.ytimg.com/vi/GdbjNGtWPe4/oar2.jpg?sqp=-oaymwEkCJUDENAFSFqQAgHyq4qpAxMIARUAAAAAJQAAyEI9AICiQ3gB\u0026rs=AOn4CLDMLx_pWh8lVDq_ZtiMdiyQ7D4-MA\u0026usqp=CCk",
+          "width": 405
+        },
+        {
+          "height": 608,
+          "source": "payload",
+          "url": "https://i.ytimg.com/vi/GdbjNGtWPe4/oar2.jpg?sqp=-oaymwEnCJUDEOAESFqQAgHyq4qpAxYIARUAAAAAJQAAyEI9AICiQ3gByAEB\u0026rs=AOn4CLCziw4N0lS9Y5YvPb2V-KANhV8dLg\u0026usqp=CCk",
+          "width": 405
+        }
+      ],
+      "tier": 0,
+      "title": "39 years of Never Gonna Give You Up!🕺Next year it’s the big 4-0… how should we celebrate? Team Rick",
+      "url": "https://www.youtube.com/shorts/GdbjNGtWPe4",
+      "via": {
+        "view_count": "s2 overlayMetadata.secondaryText, rounded"
+      },
+      "view_count": 22000,
+      "view_count_text": "22K views"
+    },
+    {
+      "client": [],
+      "embed_url": "https://www.youtube.com/embed/YJi5uH8YHG8",
+      "fetched_at": "",
+      "id": "YJi5uH8YHG8",
+      "is_short": true,
+      "kind": "video",
+      "missed": [
+        "listing row: no keywords, category, like count, available countries or playability",
+        "view count is the rounded lockup text, ytb video reads the exact one",
+        "a shorts row carries no owner: no byline, no avatar and no channel link anywhere on it"
+      ],
+      "short_url": "https://youtu.be/YJi5uH8YHG8",
+      "sources": [],
+      "surfaces": [
+        "s2"
+      ],
+      "thumbnail_url": "https://i.ytimg.com/vi/YJi5uH8YHG8/oar2.jpg?sqp=-oaymwEkCJUDENAFSFqQAgHyq4qpAxMIARUAAAAAJQAAyEI9AICiQ3gB\u0026rs=AOn4CLDZ9pXZjac4KPf0Rqd8wClhucJ1fg\u0026usqp=CCk",
+      "thumbnails": [
+        {
+          "height": 720,
+          "source": "payload",
+          "url": "https://i.ytimg.com/vi/YJi5uH8YHG8/oar2.jpg?sqp=-oaymwEkCJUDENAFSFqQAgHyq4qpAxMIARUAAAAAJQAAyEI9AICiQ3gB\u0026rs=AOn4CLDZ9pXZjac4KPf0Rqd8wClhucJ1fg\u0026usqp=CCk",
+          "width": 405
+        },
+        {
+          "height": 608,
+          "source": "payload",
+          "url": "https://i.ytimg.com/vi/YJi5uH8YHG8/oar2.jpg?sqp=-oaymwEnCJUDEOAESFqQAgHyq4qpAxYIARUAAAAAJQAAyEI9AICiQ3gByAEB\u0026rs=AOn4CLA09tTV65D_DOfUk_DxH0CwQ4IVZA\u0026usqp=CCk",
+          "width": 405
+        }
+      ],
+      "tier": 0,
+      "title": "Copenhagen, you were amazing. Tak 🇩🇰♥️ #rickastley #tivoligardens",
+      "url": "https://www.youtube.com/shorts/YJi5uH8YHG8",
+      "via": {
+        "view_count": "s2 overlayMetadata.secondaryText, rounded"
+      },
+      "view_count": 13000,
+      "view_count_text": "13K views"
+    },
+    {
+      "channel_id": "UCuAXFkgsw1L7xaCfnd5JJOw",
+      "channel_title": "Rick Astley",
+      "client": [],
+      "duration_seconds": 204,
+      "duration_text": "3:24",
+      "embed_url": "https://www.youtube.com/embed/yPYZpwSpKmA",
+      "fetched_at": "",
+      "id": "yPYZpwSpKmA",
+      "kind": "video",
+      "missed": [
+        "listing row: no keywords, category, like count, available countries or playability",
+        "view count is the rounded lockup text, ytb video reads the exact one"
+      ],
+      "published_text": "16 years ago",
+      "short_url": "https://youtu.be/yPYZpwSpKmA",
+      "sources": [],
+      "surfaces": [
+        "s2"
+      ],
+      "thumbnail_url": "https://i.ytimg.com/vi/yPYZpwSpKmA/hq720.jpg?sqp=-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=\u0026rs=AOn4CLCWdwu8ZJrNYsFMJHCVBb14ZVWgRg",
+      "thumbnails": [
+        {
+          "height": 202,
+          "source": "payload",
+          "url": "https://i.ytimg.com/vi/yPYZpwSpKmA/hq720.jpg?sqp=-oaymwEjCOgCEMoBSFryq4qpAxUIARUAAAAAGAElAADIQj0AgKJDeAE=\u0026rs=AOn4CLDKKHbNIBZRD3kL5gEsJCw9e2gx6A",
+          "width": 360
+        },
+        {
+          "height": 404,
+          "source": "payload",
+          "url": "https://i.ytimg.com/vi/yPYZpwSpKmA/hq720.jpg?sqp=-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=\u0026rs=AOn4CLCWdwu8ZJrNYsFMJHCVBb14ZVWgRg",
+          "width": 720
+        }
+      ],
+      "tier": 0,
+      "title": "Rick Astley - Together Forever (Official Video) [4K Remaster]",
+      "url": "https://www.youtube.com/watch?v=yPYZpwSpKmA",
+      "via": {
+        "view_count": "s2 viewCountText, rounded"
+      },
+      "view_count": 204040315,
+      "view_count_text": "204,040,315 views"
+    }
+  ]
+}

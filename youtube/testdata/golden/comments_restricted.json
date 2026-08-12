@@ -1,0 +1,6 @@
+{
+  "Message": "Restricted Mode has hidden comments for this video.",
+  "Remedy": "Restricted Mode is set on the network or the account, not the video.\nSix client-side bypasses were tried while writing the spec and none worked.\nA different network, or `ytb auth import --cookies` with an account that has it off, is what clears it.",
+  "Subject": "comments for dQw4w9WgXcQ",
+  "Surface": "watch page"
+}

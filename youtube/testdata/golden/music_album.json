@@ -1,0 +1,374 @@
+{
+  "album": {
+    "album_type": "Album",
+    "artist_ids": [
+      "UCwZEU0wAwIyZb4x5G_KJp2w"
+    ],
+    "artist_names": [
+      "Rick Astley"
+    ],
+    "client": [
+      "WEB_REMIX"
+    ],
+    "description": "Whenever You Need Somebody is the debut studio album by English singer Rick Astley, released on 16 November 1987 by RCA Records. It is his highest-selling album and has sold 15.2 million copies worldwide. The album is listed as the 136th best-selling album in Spain and was the seventh best-selling album of 1987 in the United Kingdom. A remastered version, containing rare remixes and extended versions, was released on 12 April 2010. From Wikipedia (https://en.wikipedia.org/wiki/Wheneve...) under Creative Commons Attribution CC-BY-SA 3.0 (https://creativecommons.org/licenses/...)",
+    "duration_text": "36 minutes",
+    "fetched_at": "",
+    "id": "MPREb_dcYZhAh5urI",
+    "kind": "album",
+    "missed": [],
+    "playlist_id": "OLAK5uy_nmDUsWOMoEcz0SsVqUwir0oxu-k1oUyXE",
+    "sources": [
+      "https://music.youtube.com/browse/MPREb_dcYZhAh5urI"
+    ],
+    "surfaces": [
+      "s10"
+    ],
+    "thumbnails": [
+      {
+        "height": 60,
+        "source": "payload",
+        "url": "https://yt3.googleusercontent.com/eC9DfRcYSk4FE-fvDCJSu_4xsKdVMKxwmFTYFZwP8OqB7R4TKxAjKoR-Kp1lXeRi2WddPFYulSte4eW-=w60-h60-l90-rj",
+        "width": 60
+      }
+    ],
+    "tier": 0,
+    "title": "Whenever You Need Somebody",
+    "track_count": 10,
+    "track_count_text": "10 songs",
+    "url": "https://music.youtube.com/browse/MPREb_dcYZhAh5urI",
+    "via": {},
+    "year": "1987"
+  },
+  "tracks": [
+    {
+      "album_id": "MPREb_dcYZhAh5urI",
+      "album_title": "Whenever You Need Somebody",
+      "artist_ids": [
+        "UCwZEU0wAwIyZb4x5G_KJp2w"
+      ],
+      "artist_names": [
+        "Rick Astley"
+      ],
+      "client": [
+        "WEB_REMIX"
+      ],
+      "duration_seconds": 214,
+      "duration_text": "3:34",
+      "fetched_at": "",
+      "id": "dQw4w9WgXcQ",
+      "kind": "track",
+      "missed": [],
+      "music_video_type": "OMV",
+      "plays_text": "2B plays",
+      "position": 1,
+      "sources": [
+        "https://music.youtube.com/browse/MPREb_dcYZhAh5urI"
+      ],
+      "surfaces": [
+        "s10"
+      ],
+      "tier": 0,
+      "title": "Never Gonna Give You Up",
+      "url": "https://music.youtube.com/watch?v=dQw4w9WgXcQ",
+      "via": {},
+      "year": "1987"
+    },
+    {
+      "album_id": "MPREb_dcYZhAh5urI",
+      "album_title": "Whenever You Need Somebody",
+      "artist_ids": [
+        "UCwZEU0wAwIyZb4x5G_KJp2w"
+      ],
+      "artist_names": [
+        "Rick Astley"
+      ],
+      "client": [
+        "WEB_REMIX"
+      ],
+      "duration_seconds": 234,
+      "duration_text": "3:54",
+      "fetched_at": "",
+      "id": "BeyEGebJ1l4",
+      "kind": "track",
+      "missed": [],
+      "music_video_type": "OMV",
+      "plays_text": "26M plays",
+      "position": 2,
+      "sources": [
+        "https://music.youtube.com/browse/MPREb_dcYZhAh5urI"
+      ],
+      "surfaces": [
+        "s10"
+      ],
+      "tier": 0,
+      "title": "Whenever You Need Somebody",
+      "url": "https://music.youtube.com/watch?v=BeyEGebJ1l4",
+      "via": {},
+      "year": "1987"
+    },
+    {
+      "album_id": "MPREb_dcYZhAh5urI",
+      "album_title": "Whenever You Need Somebody",
+      "artist_ids": [
+        "UCwZEU0wAwIyZb4x5G_KJp2w"
+      ],
+      "artist_names": [
+        "Rick Astley"
+      ],
+      "client": [
+        "WEB_REMIX"
+      ],
+      "duration_seconds": 206,
+      "duration_text": "3:26",
+      "fetched_at": "",
+      "id": "yPYZpwSpKmA",
+      "kind": "track",
+      "missed": [],
+      "music_video_type": "OMV",
+      "plays_text": "265M plays",
+      "position": 3,
+      "sources": [
+        "https://music.youtube.com/browse/MPREb_dcYZhAh5urI"
+      ],
+      "surfaces": [
+        "s10"
+      ],
+      "tier": 0,
+      "title": "Together Forever",
+      "url": "https://music.youtube.com/watch?v=yPYZpwSpKmA",
+      "via": {},
+      "year": "1987"
+    },
+    {
+      "album_id": "MPREb_dcYZhAh5urI",
+      "album_title": "Whenever You Need Somebody",
+      "artist_ids": [
+        "UCwZEU0wAwIyZb4x5G_KJp2w"
+      ],
+      "artist_names": [
+        "Rick Astley"
+      ],
+      "client": [
+        "WEB_REMIX"
+      ],
+      "duration_seconds": 221,
+      "duration_text": "3:41",
+      "fetched_at": "",
+      "id": "VBssFzSx6sI",
+      "kind": "track",
+      "missed": [],
+      "music_video_type": "OMV",
+      "plays_text": "7.7M plays",
+      "position": 4,
+      "sources": [
+        "https://music.youtube.com/browse/MPREb_dcYZhAh5urI"
+      ],
+      "surfaces": [
+        "s10"
+      ],
+      "tier": 0,
+      "title": "It Would Take a Strong Strong Man",
+      "url": "https://music.youtube.com/watch?v=VBssFzSx6sI",
+      "via": {},
+      "year": "1987"
+    },
+    {
+      "album_id": "MPREb_dcYZhAh5urI",
+      "album_title": "Whenever You Need Somebody",
+      "artist_ids": [
+        "UCwZEU0wAwIyZb4x5G_KJp2w"
+      ],
+      "artist_names": [
+        "Rick Astley"
+      ],
+      "client": [
+        "WEB_REMIX"
+      ],
+      "duration_seconds": 261,
+      "duration_text": "4:21",
+      "fetched_at": "",
+      "id": "V8AvyCpCVJI",
+      "kind": "track",
+      "missed": [],
+      "music_video_type": "OMV",
+      "plays_text": "1.2M plays",
+      "position": 5,
+      "sources": [
+        "https://music.youtube.com/browse/MPREb_dcYZhAh5urI"
+      ],
+      "surfaces": [
+        "s10"
+      ],
+      "tier": 0,
+      "title": "The Love Has Gone",
+      "url": "https://music.youtube.com/watch?v=V8AvyCpCVJI",
+      "via": {},
+      "year": "1987"
+    },
+    {
+      "album_id": "MPREb_dcYZhAh5urI",
+      "album_title": "Whenever You Need Somebody",
+      "artist_ids": [
+        "UCwZEU0wAwIyZb4x5G_KJp2w"
+      ],
+      "artist_names": [
+        "Rick Astley"
+      ],
+      "client": [
+        "WEB_REMIX"
+      ],
+      "duration_seconds": 250,
+      "duration_text": "4:10",
+      "fetched_at": "",
+      "id": "X6uzlX51kbo",
+      "kind": "track",
+      "missed": [],
+      "music_video_type": "OMV",
+      "plays_text": "4M plays",
+      "position": 6,
+      "sources": [
+        "https://music.youtube.com/browse/MPREb_dcYZhAh5urI"
+      ],
+      "surfaces": [
+        "s10"
+      ],
+      "tier": 0,
+      "title": "Don't Say Goodbye",
+      "url": "https://music.youtube.com/watch?v=X6uzlX51kbo",
+      "via": {},
+      "year": "1987"
+    },
+    {
+      "album_id": "MPREb_dcYZhAh5urI",
+      "album_title": "Whenever You Need Somebody",
+      "artist_ids": [
+        "UCwZEU0wAwIyZb4x5G_KJp2w"
+      ],
+      "artist_names": [
+        "Rick Astley"
+      ],
+      "client": [
+        "WEB_REMIX"
+      ],
+      "duration_seconds": 233,
+      "duration_text": "3:53",
+      "fetched_at": "",
+      "id": "czDxG-7SFsc",
+      "kind": "track",
+      "missed": [],
+      "music_video_type": "OMV",
+      "plays_text": "658K plays",
+      "position": 7,
+      "sources": [
+        "https://music.youtube.com/browse/MPREb_dcYZhAh5urI"
+      ],
+      "surfaces": [
+        "s10"
+      ],
+      "tier": 0,
+      "title": "Slipping Away",
+      "url": "https://music.youtube.com/watch?v=czDxG-7SFsc",
+      "via": {},
+      "year": "1987"
+    },
+    {
+      "album_id": "MPREb_dcYZhAh5urI",
+      "album_title": "Whenever You Need Somebody",
+      "artist_ids": [
+        "UCwZEU0wAwIyZb4x5G_KJp2w"
+      ],
+      "artist_names": [
+        "Rick Astley"
+      ],
+      "client": [
+        "WEB_REMIX"
+      ],
+      "duration_seconds": 193,
+      "duration_text": "3:13",
+      "fetched_at": "",
+      "id": "tbmKG-vJank",
+      "kind": "track",
+      "missed": [],
+      "music_video_type": "OMV",
+      "plays_text": "573K plays",
+      "position": 8,
+      "sources": [
+        "https://music.youtube.com/browse/MPREb_dcYZhAh5urI"
+      ],
+      "surfaces": [
+        "s10"
+      ],
+      "tier": 0,
+      "title": "No More Looking for Love",
+      "url": "https://music.youtube.com/watch?v=tbmKG-vJank",
+      "via": {},
+      "year": "1987"
+    },
+    {
+      "album_id": "MPREb_dcYZhAh5urI",
+      "album_title": "Whenever You Need Somebody",
+      "artist_ids": [
+        "UCwZEU0wAwIyZb4x5G_KJp2w"
+      ],
+      "artist_names": [
+        "Rick Astley"
+      ],
+      "client": [
+        "WEB_REMIX"
+      ],
+      "duration_seconds": 223,
+      "duration_text": "3:43",
+      "fetched_at": "",
+      "id": "RXNFzrZTQy4",
+      "kind": "track",
+      "missed": [],
+      "music_video_type": "OMV",
+      "plays_text": "970K plays",
+      "position": 9,
+      "sources": [
+        "https://music.youtube.com/browse/MPREb_dcYZhAh5urI"
+      ],
+      "surfaces": [
+        "s10"
+      ],
+      "tier": 0,
+      "title": "You Move Me",
+      "url": "https://music.youtube.com/watch?v=RXNFzrZTQy4",
+      "via": {},
+      "year": "1987"
+    },
+    {
+      "album_id": "MPREb_dcYZhAh5urI",
+      "album_title": "Whenever You Need Somebody",
+      "artist_ids": [
+        "UCwZEU0wAwIyZb4x5G_KJp2w"
+      ],
+      "artist_names": [
+        "Rick Astley"
+      ],
+      "client": [
+        "WEB_REMIX"
+      ],
+      "duration_seconds": 184,
+      "duration_text": "3:04",
+      "fetched_at": "",
+      "id": "rF1NHU_0NQE",
+      "kind": "track",
+      "missed": [],
+      "music_video_type": "OMV",
+      "plays_text": "3M plays",
+      "position": 10,
+      "sources": [
+        "https://music.youtube.com/browse/MPREb_dcYZhAh5urI"
+      ],
+      "surfaces": [
+        "s10"
+      ],
+      "tier": 0,
+      "title": "When I Fall in Love",
+      "url": "https://music.youtube.com/watch?v=rF1NHU_0NQE",
+      "via": {},
+      "year": "1987"
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+[
+  {
+    "channel_id": "UCwZEU0wAwIyZb4x5G_KJp2w",
+    "client": [
+      "WEB_REMIX"
+    ],
+    "fetched_at": "",
+    "id": "UCwZEU0wAwIyZb4x5G_KJp2w",
+    "kind": "artist",
+    "metadata_parts": [
+      "15.6M monthly audience"
+    ],
+    "missed": [
+      "a search row is a lockup, so the discography and the top songs are on the artist page"
+    ],
+    "name": "Rick Astley",
+    "sources": [
+      "golden"
+    ],
+    "surfaces": [
+      "s10"
+    ],
+    "thumbnails": [
+      {
+        "height": 60,
+        "source": "payload",
+        "url": "https://yt3.googleusercontent.com/MOWpaiGJdgN4aKMI-NGQLL4jMVP3aDORlQpOBWooi0GSE2TGt4_9ncyepk1pCh-yWQ795AhPbw=w60-h60-l90-rj",
+        "width": 60
+      }
+    ],
+    "tier": 0,
+    "url": "https://music.youtube.com/channel/UCwZEU0wAwIyZb4x5G_KJp2w",
+    "via": {}
+  },
+  {
+    "album_id": "MPREb_dcYZhAh5urI",
+    "artist_ids": [
+      "UCwZEU0wAwIyZb4x5G_KJp2w"
+    ],
+    "client": [
+      "WEB_REMIX"
+    ],
+    "duration_seconds": 214,
+    "duration_text": "3:34",
+    "fetched_at": "",
+    "id": "lYBUbBu4W08",
+    "kind": "track",
+    "missed": [],
+    "music_video_type": "ATV",
+    "plays_text": "2B plays",
+    "sources": [
+      "golden"
+    ],
+    "surfaces": [
+      "s10"
+    ],
+    "thumbnails": [
+      {
+        "height": 60,
+        "source": "payload",
+        "url": "https://yt3.googleusercontent.com/eC9DfRcYSk4FE-fvDCJSu_4xsKdVMKxwmFTYFZwP8OqB7R4TKxAjKoR-Kp1lXeRi2WddPFYulSte4eW-=w60-h60-l90-rj",
+        "width": 60
+      }
+    ],
+    "tier": 0,
+    "title": "Never Gonna Give You Up",
+    "url": "https://music.youtube.com/watch?v=lYBUbBu4W08",
+    "via": {}
+  },
+  {
+    "album_id": "MPREb_dcYZhAh5urI",
+    "artist_ids": [
+      "UCwZEU0wAwIyZb4x5G_KJp2w"
+    ],
+    "client": [
+      "WEB_REMIX"
+    ],
+    "duration_seconds": 206,
+    "duration_text": "3:26",
+    "fetched_at": "",
+    "id": "i_Q88T1HI_w",
+    "kind": "track",
+    "missed": [],
+    "music_video_type": "ATV",
+    "plays_text": "265M plays",
+    "sources": [
+      "golden"
+    ],
+    "surfaces": [
+      "s10"
+    ],
+    "thumbnails": [
+      {
+        "height": 60,
+        "source": "payload",
+        "url": "https://yt3.googleusercontent.com/eC9DfRcYSk4FE-fvDCJSu_4xsKdVMKxwmFTYFZwP8OqB7R4TKxAjKoR-Kp1lXeRi2WddPFYulSte4eW-=w60-h60-l90-rj",
+        "width": 60
+      }
+    ],
+    "tier": 0,
+    "title": "Together Forever",
+    "url": "https://music.youtube.com/watch?v=i_Q88T1HI_w",
+    "via": {}
+  }
+]
