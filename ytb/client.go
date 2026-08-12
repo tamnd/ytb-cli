@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/tamnd/any-cli/kit/errs"
 	"github.com/tamnd/ytb-cli/pkg/ytid"
 )
 
@@ -261,6 +262,7 @@ func (c *Client) Fetch(ctx context.Context, url string) ([]byte, int, error) {
 	}
 
 	var lastErr error
+	var lastStatus int
 	attempts := c.retries + 1
 	if attempts < 1 {
 		attempts = 1
@@ -312,6 +314,7 @@ func (c *Client) Fetch(ctx context.Context, url string) ([]byte, int, error) {
 		c.noteRead(read)
 		if resp.StatusCode == 429 || resp.StatusCode >= 500 {
 			lastErr = fmt.Errorf("GET %s: HTTP %d", url, resp.StatusCode)
+			lastStatus = resp.StatusCode
 			continue
 		}
 		if resp.StatusCode == 200 {
@@ -319,7 +322,28 @@ func (c *Client) Fetch(ctx context.Context, url string) ([]byte, int, error) {
 		}
 		return body, resp.StatusCode, nil
 	}
-	return nil, 0, lastErr
+	return nil, 0, exhausted(lastErr, lastStatus)
+}
+
+// exhausted classifies the failure that survived every retry, so the exit code
+// says which one it was. Without it a run that YouTube rate limited into the
+// ground and a run with no network both exit 1, and a script that wants to back
+// off and come back later has nothing to branch on.
+//
+// A 5xx is left generic on purpose. It is not the transport failing and it is
+// not a rate limit, and giving it one of those codes would be a tidier table
+// that says something untrue.
+func exhausted(err error, status int) error {
+	switch {
+	case err == nil:
+		return nil
+	case status == 429:
+		return errs.Wrap(errs.KindRateLimited, err, "still rate limited after the retries, raise --rate")
+	case status >= 500:
+		return err
+	default:
+		return errs.Wrap(errs.KindNetwork, err, "request failed")
+	}
 }
 
 // FetchHTML fetches and parses an HTML document.

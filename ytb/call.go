@@ -101,6 +101,7 @@ func (c *Client) doInnerTube(ctx context.Context, spec ClientSpec, url string, b
 		attempts = 1
 	}
 	var lastErr error
+	var lastStatus int
 	for attempt := 0; attempt < attempts; attempt++ {
 		if attempt > 0 {
 			select {
@@ -152,6 +153,7 @@ func (c *Client) doInnerTube(ctx context.Context, spec ClientSpec, url string, b
 		c.noteRead(read)
 		if resp.StatusCode == 429 || resp.StatusCode >= 500 {
 			lastErr = fmt.Errorf("POST %s as %s: HTTP %d", url, spec.Name, resp.StatusCode)
+			lastStatus = resp.StatusCode
 			continue
 		}
 		if resp.StatusCode != 200 {
@@ -167,7 +169,7 @@ func (c *Client) doInnerTube(ctx context.Context, spec ClientSpec, url string, b
 		c.cache.Put(key, resp.StatusCode, data)
 		return data, nil
 	}
-	return nil, lastErr
+	return nil, exhausted(lastErr, lastStatus)
 }
 
 // statusError carries the HTTP status alongside the message, for the caller that
