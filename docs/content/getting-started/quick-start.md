@@ -39,7 +39,7 @@ ytb follows the continuation tokens for you, so this keeps going until your limi
 ytb uploads @RickAstleyYT -n 20
 ```
 
-Add `--kind shorts` or `--kind streams` for those, `ytb playlists` for the channel's playlists, and `ytb channel` on its own for the channel record.
+Add `--kind shorts` or `--kind streams` for those, `ytb playlists` for the channel's playlists (and `--kind releases`, `podcasts` or `courses` for the other three tabs), and `ytb channel` on its own for the channel record.
 
 ## 3. Search with filters
 

@@ -118,6 +118,22 @@ ytb uploads @MrBeast --fields title,views,published
 ytb playlists @MrBeast
 ```
 
+A channel can list its playlists on four different tabs and `--kind` picks one:
+
+```sh
+ytb playlists @RickAstleyYT --kind releases
+ytb playlists @TED --kind podcasts
+ytb playlists @TED --kind courses
+```
+
+`releases` is albums and singles, `podcasts` is shows, `courses` is course playlists.
+Most channels have only the plain `playlists` tab, and asking for one a channel does not have exits 3 and tells you which tabs it does have.
+The channel record carries the tab strip, so you can check first rather than guess:
+
+```sh
+ytb channel @TED | jq -r '.tabs[].slug'
+```
+
 `playlist` takes a playlist id or URL and prints its header, and `items` streams the videos in it, each with its position:
 
 ```sh

@@ -63,7 +63,7 @@ A cache hit never prints, because the trace sits in the HTTP transport and a cac
 | `about` | A channel's about panel on its own |
 | `uploads` | Stream a channel's uploads |
 | `feed` | A channel's Atom feed: the newest fifteen, with exact times |
-| `playlists` | List a channel's playlists |
+| `playlists` | List a channel's playlists, from any of its four playlist tabs |
 | `playlist` | Playlist header |
 | `items` | Stream a playlist's videos |
 | `search` | Search with the full filter grid |
@@ -199,7 +199,19 @@ This is the only surface outside the player that says whether a video is a short
 ## playlists
 
 `ytb playlists <id|@handle|url> [--flags]`.
-Lists the playlists a channel has published, from its Playlists tab.
+Lists the playlists a channel has published.
+
+| Flag | What it does |
+| --- | --- |
+| `--kind` | Which tab to read: `playlists`, `releases`, `podcasts` or `courses`. Default `playlists` |
+| `--max-pages` | Max continuation pages, 0 for unlimited |
+
+Four tabs, one shape.
+`releases` is albums and singles, `podcasts` is shows, `courses` is course playlists, and each one is a page of playlist rows read by the same code.
+Most channels have only `playlists`, so asking for one a channel does not have exits 3 and names the tabs it does have.
+That check matters here more than elsewhere: YouTube answers a request for a missing tab with the channel's home page and a 200, so without it a courses read would return the channel's videos and look like it worked.
+
+A releases row carries its release date, which no field on a playlist holds, so it is kept verbatim in `metadata_parts`.
 
 ## playlist
 
