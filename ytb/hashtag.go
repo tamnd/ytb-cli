@@ -21,7 +21,14 @@ func (c *Client) StreamHashtag(ctx context.Context, tag string, opt PageOptions,
 // most callers want the videos, and the header is one object at the top of the
 // first page that a continuation never repeats.
 func (c *Client) StreamHashtagWithHeader(ctx context.Context, tag string, opt PageOptions, emit func(Video) error) (*HashtagRecord, error) {
-	emit = stampEmit(c, emit)
+	// The feed page is where these rows were read, and a row that named no source
+	// was the one kind in the tool you could not trace back to a URL.
+	source := BaseURL + "/hashtag/" + strings.ToLower(strings.TrimPrefix(tag, "#"))
+	inner := stampEmit(c, emit)
+	emit = func(v Video) error {
+		v.addSource(source)
+		return inner(v)
+	}
 	it := NewInnerTube(c)
 
 	browseID, params, err := it.ResolveHashtag(ctx, tag)

@@ -19,6 +19,7 @@ import (
 // Returning ErrStop from emit halts iteration cleanly.
 func (c *Client) Search(ctx context.Context, query string, f SearchFilters, opt PageOptions, emit func(any) error) error {
 	emit = c.stampEmitAny(emit)
+	source := searchResultsURL(query, f)
 	it := NewInnerTube(c)
 	resp, err := it.Search(ctx, query, f, "")
 	if err != nil {
@@ -54,7 +55,7 @@ func (c *Client) Search(ctx context.Context, query string, f SearchFilters, opt 
 			if opt.Max > 0 && total >= opt.Max {
 				return nil
 			}
-			if err := emit(searchWithClient(item)); err != nil {
+			if err := emit(searchWithClient(item, source)); err != nil {
 				if err == ErrStop {
 					return nil
 				}
@@ -88,21 +89,41 @@ func (c *Client) Search(ctx context.Context, query string, f SearchFilters, opt 
 	}
 }
 
-// searchWithClient stamps the client that answered onto a row, which the parsers
-// cannot do because they do not know which client was asked.
-func searchWithClient(item any) any {
+// searchWithClient stamps the client that answered and the page the row came
+// off onto a row, neither of which the parsers can do because they see only the
+// renderer and not the request behind it.
+//
+// Every other listing names its source and a search row used to name none, so a
+// row that came back from a search was the one record in the tool you could not
+// trace to a URL you could open.
+func searchWithClient(item any, source string) any {
 	switch v := item.(type) {
 	case Video:
 		v.addClient("WEB")
+		v.addSource(source)
 		return v
 	case Channel:
 		v.addClient("WEB")
+		v.addSource(source)
 		return v
 	case Playlist:
 		v.addClient("WEB")
+		v.addSource(source)
 		return v
 	}
 	return item
+}
+
+// searchResultsURL is the page a person would open to see the same rows. The
+// read itself went to the InnerTube search endpoint, which is one URL for every
+// search ever run and so says nothing about which one this was; the results URL
+// carries the query and the filter blob and reproduces the read.
+func searchResultsURL(query string, f SearchFilters) string {
+	u := BaseURL + "/results?search_query=" + url.QueryEscape(query)
+	if sp := f.Encode(); sp != "" {
+		u += "&sp=" + url.QueryEscape(sp)
+	}
+	return u
 }
 
 // searchKey identifies a row for the duplicate check. The kind is part of it
@@ -124,17 +145,19 @@ func searchKey(item any) string {
 // category may be "music", "gaming", "news", "movies", or "" for general trending.
 // Returning ErrStop from emit halts iteration cleanly.
 func (c *Client) Trending(ctx context.Context, category string, opt PageOptions, emit func(Video) error) error {
-	emit = stampEmit(c, emit)
 	query := trendingQuery(category)
 	filters := SearchFilters{
 		Sort:       "views",
 		Type:       "video",
 		UploadDate: "today",
 	}
-	sp := filters.Encode()
-	searchURL := BaseURL + "/results?search_query=" + url.QueryEscape(query)
-	if sp != "" {
-		searchURL += "&sp=" + url.QueryEscape(sp)
+	searchURL := searchResultsURL(query, filters)
+	// Trending is a search with the filters pinned, so its rows get the results
+	// URL for the same reason a search row does: it is the page that shows them.
+	inner := stampEmit(c, emit)
+	emit = func(v Video) error {
+		v.addSource(searchURL)
+		return inner(v)
 	}
 
 	data, _, err := c.FetchPageData(ctx, searchURL)

@@ -467,7 +467,12 @@ func listRelated(ctx context.Context, in playlistRef, emit func(Video) error) er
 	if res == nil {
 		return errs.NotFound("video %q not found", in.Ref)
 	}
+	// The related shelf is part of the seed video's watch page, so that page is
+	// where each of these rows was read. Without it a related row named no source
+	// at all and there was no way back from the row to the read.
+	source := NormalizeVideoURL(res.Video.VideoID)
 	for _, r := range res.Related {
+		r.addSource(source)
 		if err := emit(r); err != nil {
 			return err
 		}
