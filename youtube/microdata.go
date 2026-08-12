@@ -180,11 +180,12 @@ func microdataFromItem(item *microItem) *Microdata {
 			Source: ThumbnailFromMicrodata,
 		}
 	}
-	if author := item.item("author"); author != nil {
+	author := item.item("author")
+	if author != nil {
 		md.AuthorName = author.text("name")
 		md.AuthorURL = httpsScheme(author.text("url"))
-		md.Breadcrumb = breadcrumbNames(author)
 	}
+	md.Breadcrumb = breadcrumbNames(item, author)
 	for _, counter := range item.items("interactionStatistic") {
 		count := int64Value(counter.text("userInteractionCount"))
 		switch {
@@ -197,19 +198,29 @@ func microdataFromItem(item *microItem) *Microdata {
 	return md
 }
 
-// breadcrumbNames reads the names out of a BreadcrumbList nested in an item. The
-// list hangs off the author as an itemscope with no itemprop of its own, so it
-// belongs to nobody by name and is found by its type.
-func breadcrumbNames(item *microItem) []string {
+// breadcrumbNames reads the names out of a BreadcrumbList, which is an itemscope
+// with no itemprop of its own and so belongs to nobody by name.
+//
+// It is looked for in more than one place because the page puts it beside the
+// author rather than inside it. On dQw4w9WgXcQ the Person span closes and the
+// BreadcrumbList opens as its sibling, both children of the VideoObject, and
+// searching only the author returns an empty breadcrumb on every video. Reading
+// the markup made it look nested and it is not.
+func breadcrumbNames(items ...*microItem) []string {
 	var out []string
-	for _, anon := range item.anon {
-		if !strings.HasSuffix(anon.itemType, "BreadcrumbList") {
+	for _, item := range items {
+		if item == nil {
 			continue
 		}
-		for _, entry := range anon.items("itemListElement") {
-			if thing := entry.item("item"); thing != nil {
-				if name := thing.text("name"); name != "" {
-					out = append(out, name)
+		for _, anon := range item.anon {
+			if !strings.HasSuffix(anon.itemType, "BreadcrumbList") {
+				continue
+			}
+			for _, entry := range anon.items("itemListElement") {
+				if thing := entry.item("item"); thing != nil {
+					if name := thing.text("name"); name != "" {
+						out = append(out, name)
+					}
 				}
 			}
 		}
@@ -314,9 +325,9 @@ func collectMicroProps(node *goquery.Selection, into *microItem) {
 		into.add(prop, microValue{item: scrapeMicroItem(node)})
 		return
 	case prop == "" && isScope:
-		// An itemscope with no name. The BreadcrumbList is one: it hangs inside the
+		// An itemscope with no name. The BreadcrumbList is one: it sits beside the
 		// author with no itemprop, so it is kept as an anonymous child rather than
-		// having its list items stolen by the author.
+		// having its list items read as the VideoObject's own.
 		into.anon = append(into.anon, scrapeMicroItem(node))
 		return
 	case prop != "":
