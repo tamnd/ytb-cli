@@ -84,6 +84,7 @@ YouTube gates the caption endpoints.
 | `ytb query <sql>` | run SQL over the store, read-only |
 | `ytb export <handle\|id>` | render the store as interlinked Markdown |
 | `ytb db stats\|search\|path\|vacuum\|reset` | work with the local SQLite store |
+| `ytb auth import\|status\|clear` | store your browser's YouTube cookies, or forget them |
 | `ytb config show\|init\|path` | show or reset configuration |
 | `ytb cache path\|info\|clear` | inspect or clear the on-disk cache |
 | `ytb serve` | one HTTP route per read, NDJSON, plus a generated OpenAPI spec |
@@ -147,6 +148,28 @@ ytb search 'go programming' -o url | ytb video -
     --dry-run      print the requests that would be made
 ```
 
+## Signing in, if you want to
+
+Everything above works signed out, and that is the point of the tool.
+A session is optional and it buys five things: comments on a network with Restricted Mode turned on, the community tab of a channel that gates it, age-restricted videos, members-only videos and posts, and your own subscriptions, playlists and history.
+
+```bash
+ytb auth import --cookies ~/Downloads/cookies.txt      # a Netscape cookies.txt from a browser extension
+pbpaste | ytb auth import --cookies -                  # or a Cookie header pasted from the network panel
+ytb auth status                                        # which cookies are stored and what they unlock
+ytb auth clear                                         # forget them
+```
+
+`ytb` never asks for a password, never drives a login form and never touches a consent screen.
+It copies the cookies your browser already has, keeps only the session ones, and writes them 0600 in the data directory.
+They go into a request header to youtube.com and nowhere else: not to the CDN, not into the cache, not into the store, and `ytb archive` writes the header down as removed rather than as itself.
+`ytb auth status` names the cookies and never prints one, so it is safe to run in front of other people.
+
+Records fetched with a session say so.
+Every record carries `"tier": 1` and lists `s11` in its surfaces, so a dataset built signed in is never mistaken for one anybody can reproduce.
+The cache keys split the same way, which is what stops an age-restricted page fetched signed in from being served to a signed-out read.
+Nothing in this binary writes to YouTube, so a session cannot post, like, subscribe or delete.
+
 ## The local store
 
 `ytb crawl` walks the graph from a seed and writes what it saw into a SQLite file
@@ -193,7 +216,7 @@ ytb mcp                                                      # the same set on s
 
 Arguments go in the query as well as on the path, which is the form to use, because a path splits on slashes and half of what you pass ytb is a URL.
 Flags keep the names the command gives them: `--max-pages 3` is `&max-pages=3`.
-Nothing that writes is served, so `download`, `crawl`, `export`, `db` and `config` stay on the command line where they belong.
+Nothing that writes is served, so `download`, `crawl`, `export`, `db`, `config` and `auth` stay on the command line where they belong.
 [Reference](https://ytb-cli.tamnd.com/reference/serve-and-mcp/).
 
 ## Exit codes

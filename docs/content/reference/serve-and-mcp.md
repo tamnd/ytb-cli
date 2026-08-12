@@ -53,6 +53,7 @@ It is the answer to what a route takes, and it cannot go stale, because it is re
 
 What is not there is anything that writes.
 `download` and `extract` write a file, `crawl` and `archive` and `export` write into the local store or a directory, `db` and `query` are about that store, and `config` is about this machine.
+`auth` is left out for a different reason: a route that took your cookies as a query parameter is a route that writes them into an access log.
 A GET that streams a video to the server's disk for ten minutes is not a read, so it is not a route.
 `--allow-writes` is a kit flag that every binary in the series has, and here it exposes nothing, because there is nothing registered for it to expose.
 

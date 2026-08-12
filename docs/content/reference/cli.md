@@ -433,6 +433,20 @@ Notable subcommand flags:
 | --- | --- | --- |
 | `--channels` | `db search` | Search channels instead of videos |
 
+## auth
+
+`ytb auth [command] [--flags]`. Manage your YouTube session, which is optional and which the [signing in](/guides/signing-in/) guide covers in full.
+
+| Subcommand | What it does |
+| --- | --- |
+| `import` | Store the session cookies out of a browser you are already signed into |
+| `status` | Name the stored cookies, without their values, and say what they unlock |
+| `clear` | Delete the local cookie file (alias `logout`) |
+
+| Flag | Subcommand | Meaning |
+| --- | --- | --- |
+| `--cookies` | `auth import` | A cookies.txt path, a pasted Cookie header, or `-` for stdin |
+
 ## config
 
 `ytb config [command] [--flags]`. View and manage configuration.
