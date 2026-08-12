@@ -87,6 +87,74 @@ func TestHandWrittenCommandsKeepTheirCommandLine(t *testing.T) {
 	}
 }
 
+// TestEveryOpIsARead is the policy half of the op table, and it is about what
+// `ytb serve` and `ytb mcp` expose rather than about help text.
+//
+// kit gates a Write op differently and annotates it on every surface, and an MCP
+// client is entitled to read that annotation and decide a tool is safe to call
+// unattended. Nothing in this tool changes anything on YouTube, so every op is a
+// read and the day one is not, it is a decision somebody makes on purpose here
+// rather than a flag that got copied along with the line above it. Doc 06
+// section 5, and youtube/ops.go registers all of them in the read group.
+func TestEveryOpIsARead(t *testing.T) {
+	for key, m := range opKeys(t) {
+		if m.Write {
+			t.Errorf("op %q is marked Write, and this tool only reads YouTube. "+
+				"If it really writes something, it needs a spec section before it needs a flag.", key)
+		}
+		if m.Group != "read" {
+			t.Errorf("op %q is in group %q, want read. The group is what help, OpenAPI and the MCP "+
+				"tool list sort by, and a second group splits the table for no reason.", key, m.Group)
+		}
+		if m.Summary == "" {
+			t.Errorf("op %q has no summary, so it is a nameless tool in the MCP list", key)
+		}
+	}
+}
+
+// TestRoutesAreUniqueAndAddressable is the routes half of the invariant tests.
+//
+// kit derives three names from one OpMeta: the command path, the HTTP route and
+// the MCP tool name, by joining the parent and the name with a space, a slash and
+// an underscore. Two ops that collide in any of the three do not fail to
+// register, they shadow each other, and which one answers depends on the order
+// they were registered in. That is a bug that shows up as a route returning
+// somebody else's record.
+func TestRoutesAreUniqueAndAddressable(t *testing.T) {
+	routes := map[string]string{}
+	tools := map[string]string{}
+	for key, m := range opKeys(t) {
+		route := m.Name
+		tool := m.Name
+		if m.Parent != "" {
+			route = m.Parent + "/" + m.Name
+			tool = m.Parent + "_" + m.Name
+		}
+		if prev, ok := routes[route]; ok {
+			t.Errorf("ops %q and %q both answer at /%s, and the second one registered wins", prev, key, route)
+		}
+		routes[route] = key
+		if prev, ok := tools[tool]; ok {
+			t.Errorf("ops %q and %q are both the MCP tool %s", prev, key, tool)
+		}
+		tools[tool] = key
+
+		// A route is a URL path segment, so what is legal in it is narrower than
+		// what is legal in a Go string.
+		if strings.ToLower(route) != route || strings.ContainsAny(route, " _") {
+			t.Errorf("op %q routes to /%s, which is not a path segment: lower case and no spaces or underscores", key, route)
+		}
+		for _, arg := range m.Args {
+			if arg.Name == "" || arg.Help == "" {
+				t.Errorf("op %q has an argument with no name or no help, which is a blank field in the OpenAPI schema", key)
+			}
+		}
+	}
+	if len(routes) < 20 {
+		t.Errorf("only %d routes, and the op table is bigger than that; the walk is wrong", len(routes))
+	}
+}
+
 // commandVerbs is every verb the escape hatches add, with a group's children
 // spelled out the way the op table keys them: "music album", not "music".
 func commandVerbs() []string {
