@@ -1,4 +1,4 @@
-# Build into bin/ (gitignored) so the binary never collides with the youtube/
+# Build into bin/ (gitignored) so the binary never collides with the ytb/
 # source package at the repo root.
 BINARY  := bin/ytb
 PKG     := ./cmd/ytb

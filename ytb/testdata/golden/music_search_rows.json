@@ -1,0 +1,332 @@
+[
+  {
+    "album_id": "MPREb_dcYZhAh5urI",
+    "artist_ids": [
+      "UCwZEU0wAwIyZb4x5G_KJp2w"
+    ],
+    "client": [
+      "WEB_REMIX"
+    ],
+    "duration_seconds": 214,
+    "duration_text": "3:34",
+    "fetched_at": "",
+    "id": "lYBUbBu4W08",
+    "kind": "track",
+    "missed": [],
+    "music_video_type": "ATV",
+    "plays_text": "2B plays",
+    "sources": [
+      "golden"
+    ],
+    "surfaces": [
+      "s10"
+    ],
+    "thumbnails": [
+      {
+        "height": 60,
+        "source": "payload",
+        "url": "https://yt3.googleusercontent.com/eC9DfRcYSk4FE-fvDCJSu_4xsKdVMKxwmFTYFZwP8OqB7R4TKxAjKoR-Kp1lXeRi2WddPFYulSte4eW-=w60-h60-l90-rj",
+        "width": 60
+      }
+    ],
+    "tier": 0,
+    "title": "Never Gonna Give You Up",
+    "url": "https://music.youtube.com/watch?v=lYBUbBu4W08",
+    "via": {}
+  },
+  {
+    "artist_ids": [
+      "UCwZEU0wAwIyZb4x5G_KJp2w"
+    ],
+    "artist_names": [
+      "Rick Astley"
+    ],
+    "client": [
+      "WEB_REMIX"
+    ],
+    "fetched_at": "",
+    "id": "dQw4w9WgXcQ",
+    "kind": "track",
+    "missed": [],
+    "music_video_type": "OMV",
+    "plays_text": "1.8B views",
+    "sources": [
+      "golden"
+    ],
+    "surfaces": [
+      "s10"
+    ],
+    "thumbnails": [
+      {
+        "height": 225,
+        "source": "payload",
+        "url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg?sqp=-oaymwEWCJADEOEBIAQqCggAEOADGC0guwJIWg\u0026rs=AMzJL3lrEQLVd7aUH6RTaLjc4JkVVNINHQ",
+        "width": 400
+      }
+    ],
+    "tier": 0,
+    "title": "Never Gonna Give You Up",
+    "url": "https://music.youtube.com/watch?v=dQw4w9WgXcQ",
+    "via": {}
+  },
+  {
+    "channel_id": "UCPVhZsC2od1xjGhgEc2NEPQ",
+    "channel_title": "Vevo Playlists",
+    "client": [
+      "WEB_REMIX"
+    ],
+    "fetched_at": "",
+    "id": "PLkqz3S84Tw-TRybU2-IwWVueLiPG7QoVd",
+    "is_generated": false,
+    "kind": "playlist",
+    "metadata_parts": [
+      "121 views"
+    ],
+    "missed": [],
+    "sources": [
+      "golden"
+    ],
+    "surfaces": [
+      "s10"
+    ],
+    "thumbnails": [
+      {
+        "height": 192,
+        "source": "payload",
+        "url": "https://yt3.googleusercontent.com/tGej02XJZKLaUAcSBGmjBr2n5DmaFwWqBsD10SlvzzjIXAnh2AYPkpVBHAPOV0GhCCv3D_I4MG0z=s192",
+        "width": 192
+      }
+    ],
+    "tier": 0,
+    "title": "Rick Astley Videos",
+    "url": "https://www.youtube.com/playlist?list=PLkqz3S84Tw-TRybU2-IwWVueLiPG7QoVd",
+    "via": {}
+  },
+  {
+    "client": [
+      "WEB_REMIX"
+    ],
+    "fetched_at": "",
+    "id": "RDCLAK5uy_lMzHW51iFg1Kx0d_2EHpzbOgCrwtu8cgI",
+    "is_generated": true,
+    "kind": "playlist",
+    "metadata_parts": [
+      "116 songs"
+    ],
+    "missed": [
+      "YouTube generated this list rather than a person, so there is no owner channel and no channel_id to read"
+    ],
+    "sources": [
+      "golden"
+    ],
+    "surfaces": [
+      "s10"
+    ],
+    "thumbnails": [
+      {
+        "height": 60,
+        "source": "payload",
+        "url": "https://yt3.googleusercontent.com/VGxWK75H8M5k3r2I89b7Tg9Mi1JPNkCtc9IOkAfpznmJu4N7toBj_PB2Fubc_sFHa8CZ1MqSb6AqVTE=w60-h60-l90-rj",
+        "width": 60
+      }
+    ],
+    "tier": 0,
+    "title": "The Hits: '80s",
+    "url": "https://www.youtube.com/playlist?list=RDCLAK5uy_lMzHW51iFg1Kx0d_2EHpzbOgCrwtu8cgI",
+    "via": {}
+  },
+  {
+    "album_type": "Album",
+    "artist_ids": [
+      "UCwZEU0wAwIyZb4x5G_KJp2w"
+    ],
+    "artist_names": [
+      "Rick Astley"
+    ],
+    "client": [
+      "WEB_REMIX"
+    ],
+    "fetched_at": "",
+    "id": "MPREb_ewByopgML4F",
+    "kind": "album",
+    "missed": [],
+    "playlist_id": "OLAK5uy_kKzgbumGI8XJFtMr9MZyCAq-oW7G1GOuY",
+    "sources": [
+      "golden"
+    ],
+    "surfaces": [
+      "s10"
+    ],
+    "thumbnails": [
+      {
+        "height": 60,
+        "source": "payload",
+        "url": "https://yt3.googleusercontent.com/hXzzwvU-FOx-3tO2gNxkbblEYdzgr8fLoHS78zCPAe1MFpP2XpYur6kDswBBDmZdFvPb2s5ro5donWo5=w60-h60-l90-rj",
+        "width": 60
+      }
+    ],
+    "tier": 0,
+    "title": "The Best of Me",
+    "url": "https://music.youtube.com/browse/MPREb_ewByopgML4F",
+    "via": {},
+    "year": "2019"
+  },
+  {
+    "channel_id": "UCSyCovCbUAnejYPJhvaP7sg",
+    "client": [
+      "WEB_REMIX"
+    ],
+    "fetched_at": "",
+    "id": "UCSyCovCbUAnejYPJhvaP7sg",
+    "kind": "artist",
+    "metadata_parts": [
+      "38.2M monthly audience"
+    ],
+    "missed": [
+      "a search row is a lockup, so the discography and the top songs are on the artist page"
+    ],
+    "name": "Kylie Minogue",
+    "sources": [
+      "golden"
+    ],
+    "surfaces": [
+      "s10"
+    ],
+    "thumbnails": [
+      {
+        "height": 60,
+        "source": "payload",
+        "url": "https://lh3.googleusercontent.com/FoFkt5lcJrokZm5wddBpfrKxtgTmjCbWhn1-QubNyw7XoeD66N7uFMKOyVGycc1zakkcM1wQ3FXp0dPK=w60-h60-p-l90-rj",
+        "width": 60
+      }
+    ],
+    "tier": 0,
+    "url": "https://music.youtube.com/channel/UCSyCovCbUAnejYPJhvaP7sg",
+    "via": {}
+  },
+  {
+    "channel_id": "UCLDdWcoADpxYYssGlUWLT8w",
+    "client": [
+      "WEB_REMIX"
+    ],
+    "fetched_at": "",
+    "id": "UCLDdWcoADpxYYssGlUWLT8w",
+    "kind": "artist",
+    "metadata_parts": [
+      "1.29K subscribers"
+    ],
+    "missed": [
+      "a search row is a lockup, so the discography and the top songs are on the artist page"
+    ],
+    "name": "Stock Aitken Waterman",
+    "sources": [
+      "golden"
+    ],
+    "surfaces": [
+      "s10"
+    ],
+    "thumbnails": [
+      {
+        "height": 60,
+        "source": "payload",
+        "url": "https://yt3.googleusercontent.com/-NS8JCKUluaQMuuD5jj60mw7eIU3ClauDn8ZOfSdzY6oA1TRupdFhGOQGqp8XjARYY6x3O2FN7-ebQcErA=w60-h60-l90-rj",
+        "width": 60
+      }
+    ],
+    "tier": 0,
+    "url": "https://music.youtube.com/channel/UCLDdWcoADpxYYssGlUWLT8w",
+    "via": {}
+  },
+  {
+    "channel_id": "UCXrZi6TaRpKJnnxltD1iKiw",
+    "client": [
+      "WEB_REMIX"
+    ],
+    "fetched_at": "",
+    "handle": "@rickhardt2237",
+    "id": "UCXrZi6TaRpKJnnxltD1iKiw",
+    "kind": "artist",
+    "missed": [
+      "a search row is a lockup, so the discography and the top songs are on the artist page"
+    ],
+    "name": "Rick Hardt",
+    "sources": [
+      "golden"
+    ],
+    "surfaces": [
+      "s10"
+    ],
+    "thumbnails": [
+      {
+        "height": 60,
+        "source": "payload",
+        "url": "https://yt3.googleusercontent.com/Luo9rlTsSvccS9zFJPQwj8u8YwxZXM3pEuZ8Vy7EEJHsFowCMVw_Rb_aU2_zuAczGZAWtnsoe8k=w60-c-h60-k-c0x00ffffff-no-l90-rj",
+        "width": 60
+      }
+    ],
+    "tier": 0,
+    "url": "https://music.youtube.com/channel/UCXrZi6TaRpKJnnxltD1iKiw",
+    "via": {}
+  },
+  {
+    "client": [
+      "WEB_REMIX"
+    ],
+    "fetched_at": "",
+    "id": "i5KARwGiBRs",
+    "kind": "track",
+    "metadata_parts": [
+      "Aug 26, 2022"
+    ],
+    "missed": [],
+    "music_video_type": "PODCAST_EPISODE",
+    "sources": [
+      "golden"
+    ],
+    "surfaces": [
+      "s10"
+    ],
+    "thumbnails": [
+      {
+        "height": 225,
+        "source": "payload",
+        "url": "https://i.ytimg.com/vi/i5KARwGiBRs/hqdefault.jpg?sqp=-oaymwEWCJADEOEBIAQqCggAEOADGC0guwJIWg\u0026rs=AMzJL3mJToT9sepVv2ow19A8l4MMRYM5HQ",
+        "width": 400
+      }
+    ],
+    "tier": 0,
+    "title": "That 80s Show SA - The Podcast - That 80s Show. Rick Astley Insurance is never gonna give you up...",
+    "url": "https://music.youtube.com/watch?v=i5KARwGiBRs",
+    "via": {}
+  },
+  {
+    "channel_id": "UCgvX5m3M5cjbGZiE3sHCQBg",
+    "channel_title": "爵士英文💕戀愛頻道by Deborah",
+    "client": [
+      "WEB_REMIX"
+    ],
+    "fetched_at": "",
+    "id": "PLtQiqTbYDL79aDD07TbjRq798JKkgV_nF",
+    "is_generated": false,
+    "kind": "playlist",
+    "missed": [],
+    "sources": [
+      "golden"
+    ],
+    "surfaces": [
+      "s10"
+    ],
+    "thumbnails": [
+      {
+        "height": 60,
+        "source": "payload",
+        "url": "https://i.ytimg.com/pl_c/PLtQiqTbYDL79aDD07TbjRq798JKkgV_nF/studio_square_thumbnail.jpg?sqp=CJeB09MG-oaymwEICDwQPCAASFqi85f_AwYI1OezzQY\u0026rs=AMzJL3kCc-FUwYgTY6jh3_cWtfO8xwvHPw",
+        "width": 60
+      }
+    ],
+    "tier": 0,
+    "title": "Podcast All",
+    "url": "https://www.youtube.com/playlist?list=PLtQiqTbYDL79aDD07TbjRq798JKkgV_nF",
+    "via": {}
+  }
+]

@@ -1,0 +1,1089 @@
+{
+ "contents": {
+  "twoColumnSearchResultsRenderer": {
+   "primaryContents": {
+    "sectionListRenderer": {
+     "contents": [
+      {
+       "itemSectionRenderer": {
+        "contents": [
+         {
+          "officialCardViewModel": {
+           "header": {
+            "pageHeaderViewModel": {
+             "title": {
+              "dynamicTextViewModel": {
+               "text": {
+                "content": "Rick Astley",
+                "attachmentRuns": [
+                 {
+                  "startIndex": 11,
+                  "length": 0,
+                  "element": {
+                   "type": {
+                    "imageType": {
+                     "image": {
+                      "sources": [
+                       {
+                        "clientResource": {
+                         "imageName": "AUDIO_BADGE"
+                        },
+                        "width": 24,
+                        "height": 24
+                       }
+                      ],
+                      "processor": {
+                       "borderImageProcessor": {
+                        "imageTint": {
+                         "color": 4294963441
+                        }
+                       }
+                      }
+                     }
+                    }
+                   },
+                   "properties": {
+                    "layoutProperties": {
+                     "height": {
+                      "value": 24,
+                      "unit": "DIMENSION_UNIT_POINT"
+                     },
+                     "width": {
+                      "value": 24,
+                      "unit": "DIMENSION_UNIT_POINT"
+                     },
+                     "margin": {
+                      "left": {
+                       "value": 8,
+                       "unit": "DIMENSION_UNIT_POINT"
+                      }
+                     }
+                    }
+                   }
+                  },
+                  "alignment": "ALIGNMENT_VERTICAL_CENTER"
+                 }
+                ]
+               },
+               "rendererContext": {
+                "commandContext": {
+                 "onTap": {
+                  "innertubeCommand": {
+                   "commandMetadata": {
+                    "webCommandMetadata": {
+                     "url": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+                     "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                     "rootVe": 3611,
+                     "apiUrl": "/youtubei/v1/browse"
+                    }
+                   },
+                   "browseEndpoint": {
+                    "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw"
+                   }
+                  }
+                 }
+                }
+               }
+              }
+             },
+             "image": {
+              "contentPreviewImageViewModel": {
+               "image": {
+                "sources": [
+                 {
+                  "url": "https://yt3.googleusercontent.com/MOWpaiGJdgN4aKMI-NGQLL4jMVP3aDORlQpOBWooi0GSE2TGt4_9ncyepk1pCh-yWQ795AhPbw=s176-c-k-c0x00ffffff-no-rj-mo",
+                  "width": 176,
+                  "height": 176
+                 }
+                ]
+               },
+               "style": "CONTENT_PREVIEW_IMAGE_STYLE_CIRCLE",
+               "layoutMode": "CONTENT_PREVIEW_IMAGE_LAYOUT_MODE_UNKNOWN",
+               "rendererContext": {
+                "accessibilityContext": {
+                 "label": "Rick Astley"
+                },
+                "commandContext": {
+                 "onTap": {
+                  "innertubeCommand": {
+                   "commandMetadata": {
+                    "webCommandMetadata": {
+                     "url": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+                     "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                     "rootVe": 3611,
+                     "apiUrl": "/youtubei/v1/browse"
+                    }
+                   },
+                   "browseEndpoint": {
+                    "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw"
+                   }
+                  }
+                 }
+                }
+               }
+              }
+             },
+             "metadata": {
+              "contentMetadataViewModel": {
+               "metadataRows": [
+                {
+                 "metadataParts": [
+                  {
+                   "text": {
+                    "content": "@RickAstleyYT"
+                   }
+                  }
+                 ]
+                },
+                {
+                 "metadataParts": [
+                  {
+                   "text": {
+                    "content": "4.52M subscribers"
+                   }
+                  },
+                  {
+                   "text": {
+                    "content": "433 videos"
+                   }
+                  }
+                 ]
+                }
+               ],
+               "delimiter": "\u2022",
+               "rendererContext": {
+                "commandContext": {
+                 "onTap": {
+                  "innertubeCommand": {
+                   "commandMetadata": {
+                    "webCommandMetadata": {
+                     "url": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+                     "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                     "rootVe": 3611,
+                     "apiUrl": "/youtubei/v1/browse"
+                    }
+                   },
+                   "browseEndpoint": {
+                    "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw"
+                   }
+                  }
+                 }
+                }
+               }
+              }
+             },
+             "description": {
+              "descriptionPreviewViewModel": {
+               "description": {
+                "content": "Richard Paul Astley is an English singer, songwriter, radio DJ and podcaster."
+               },
+               "maxLines": 2,
+               "rendererContext": {
+                "accessibilityContext": {
+                 "label": "Description. Richard Paul Astley is an English singer, songwriter, radio ...tap for more."
+                },
+                "commandContext": {
+                 "onTap": {
+                  "innertubeCommand": {
+                   "commandMetadata": {
+                    "webCommandMetadata": {
+                     "url": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+                     "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                     "rootVe": 3611,
+                     "apiUrl": "/youtubei/v1/browse"
+                    }
+                   },
+                   "browseEndpoint": {
+                    "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw"
+                   }
+                  }
+                 }
+                }
+               }
+              }
+             },
+             "background": {
+              "cinematicContainerViewModel": {
+               "backgroundImageConfig": {
+                "image": {
+                 "sources": [
+                  {
+                   "url": "https://yt3.googleusercontent.com/MOWpaiGJdgN4aKMI-NGQLL4jMVP3aDORlQpOBWooi0GSE2TGt4_9ncyepk1pCh-yWQ795AhPbw=w600-h176-dcKRae7REL",
+                   "width": 600,
+                   "height": 176
+                  }
+                 ]
+                }
+               },
+               "presentationStyle": "CINEMATIC_CONTAINER_PRESENTATION_STYLE_GRADUAL_BLURRED",
+               "gradualBlurConfig": {
+                "startPercentage": 0.25,
+                "stopPercentage": 0.8,
+                "blurRadius": 10
+               },
+               "fadeToThemeConfig": {
+                "lightThemeStartColor": 15637412,
+                "darkThemeStartColor": 7345182,
+                "midMarkerPosition": 0.55,
+                "midMarkerOpacity": 0.67,
+                "imageOpacity": 0,
+                "lightThemeEndColor": 4293827492,
+                "darkThemeEndColor": 4285535262
+               }
+              }
+             },
+             "layoutPreset": "PAGE_HEADER_LAYOUT_PRESET_RESPONSIVE_TWO_COLUMN",
+             "rendererContext": {
+              "commandContext": {
+               "onTap": {
+                "innertubeCommand": {
+                 "commandMetadata": {
+                  "webCommandMetadata": {
+                   "url": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+                   "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                   "rootVe": 3611,
+                   "apiUrl": "/youtubei/v1/browse"
+                  }
+                 },
+                 "browseEndpoint": {
+                  "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw"
+                 }
+                }
+               }
+              }
+             }
+            }
+           },
+           "forceDarkTheme": true
+          }
+         },
+         {
+          "videoRenderer": {
+           "videoId": "dQw4w9WgXcQ",
+           "thumbnail": {
+            "thumbnails": [
+             {
+              "url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hq720.jpg?sqp=-oaymwEjCOgCEMoBSFryq4qpAxUIARUAAAAAGAElAADIQj0AgKJDeAE=&rs=AOn4CLA6t_8gXhVJaexTSRAZ4rQm4iSlKQ",
+              "width": 360,
+              "height": 202
+             },
+             {
+              "url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hq720.jpg?sqp=-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLDX3LgTmArIBIk6uvvz4y5p95MOcg",
+              "width": 720,
+              "height": 404
+             }
+            ]
+           },
+           "title": {
+            "runs": [
+             {
+              "text": "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)"
+             }
+            ],
+            "accessibility": {
+             "accessibilityData": {
+              "label": "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster) 3 minutes, 34 seconds"
+             }
+            }
+           },
+           "longBylineText": {
+            "runs": [
+             {
+              "text": "Rick Astley",
+              "navigationEndpoint": {
+               "commandMetadata": {
+                "webCommandMetadata": {
+                 "url": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+                 "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                 "rootVe": 3611,
+                 "apiUrl": "/youtubei/v1/browse"
+                }
+               },
+               "browseEndpoint": {
+                "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+                "canonicalBaseUrl": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw"
+               }
+              }
+             }
+            ]
+           },
+           "publishedTimeText": {
+            "simpleText": "16 years ago"
+           },
+           "lengthText": {
+            "accessibility": {
+             "accessibilityData": {
+              "label": "3 minutes, 34 seconds"
+             }
+            },
+            "simpleText": "3:34"
+           },
+           "viewCountText": {
+            "simpleText": "1,799,092,538 views"
+           },
+           "navigationEndpoint": {
+            "commandMetadata": {
+             "webCommandMetadata": {
+              "url": "/watch?v=dQw4w9WgXcQ&list=RDdQw4w9WgXcQ&start_radio=1&pp=ygULcmljayBhc3RsZXmgBwE%3D",
+              "webPageType": "WEB_PAGE_TYPE_WATCH",
+              "rootVe": 3832
+             }
+            },
+            "watchEndpoint": {
+             "videoId": "dQw4w9WgXcQ",
+             "playlistId": "RDdQw4w9WgXcQ",
+             "params": "OAHAAQGqAwtyaWNrIGFzdGxleboDHBIaUkRFTXQ2TVVTUUkwdF9UczJFRFVEV0dSaFG6AwsI4NSkpfC0hvvIAboDCwj9pc7k2Out474BugMLCIPP9d6Cg8iH1wG6AwoIjqavw7WCkrZcugMKCOSliIqhwIOQNroDCgijobeuhoDlxXm6AwoIn-bJzZzf1-sTugMKCLGEi9Hmn_GdWLoDCgjrkYuK87W83gy6AwsIrrDxsKL8gI7IAboDCgjY29yV04-UmmO6AwoI2JCUxr3elNMOugMKCKqT09X60pe2C7oDCwjQq521v_H-_owBugMLCIKUopiwgOCr8gG6AwoI-eeJ6Zu_o-B8ugMLCPnGzMOorozw8gG6AwoIsNiGwJe2x6BZ8gMFDTA1jz24BQE%3D",
+             "playerParams": "ygULcmljayBhc3RsZXmgBwE%3D",
+             "watchEndpointSupportedOnesieConfig": {
+              "html5PlaybackOnesieConfig": {
+               "commonConfig": {
+                "url": "https://rr11---sn-8qj-i5ozd.googlevideo.com/initplayback?source=youtube&oeis=1&c=WEB&oad=3200&ovd=3200&oaad=11000&oavd=11000&ocs=700&oewis=1&oputc=1&olis=1&ofpcc=1&msp=1&odepv=1&id=750c38c3d5a05dc4&ip=14.177.111.100&vip=216.239.38.119&initcwndbps=2298750&mt=1785576797&oweuc="
+               }
+              }
+             }
+            }
+           },
+           "ownerText": {
+            "runs": [
+             {
+              "text": "Rick Astley",
+              "navigationEndpoint": {
+               "commandMetadata": {
+                "webCommandMetadata": {
+                 "url": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+                 "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                 "rootVe": 3611,
+                 "apiUrl": "/youtubei/v1/browse"
+                }
+               },
+               "browseEndpoint": {
+                "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+                "canonicalBaseUrl": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw"
+               }
+              }
+             }
+            ]
+           },
+           "shortBylineText": {
+            "runs": [
+             {
+              "text": "Rick Astley",
+              "navigationEndpoint": {
+               "commandMetadata": {
+                "webCommandMetadata": {
+                 "url": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+                 "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                 "rootVe": 3611,
+                 "apiUrl": "/youtubei/v1/browse"
+                }
+               },
+               "browseEndpoint": {
+                "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+                "canonicalBaseUrl": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw"
+               }
+              }
+             }
+            ]
+           },
+           "showActionMenu": false,
+           "shortViewCountText": {
+            "accessibility": {
+             "accessibilityData": {
+              "label": "1.7 billion views"
+             }
+            },
+            "simpleText": "1.7B views"
+           },
+           "channelThumbnailSupportedRenderers": {
+            "channelThumbnailWithLinkRenderer": {
+             "thumbnail": {
+              "thumbnails": [
+               {
+                "url": "https://yt3.ggpht.com/MOWpaiGJdgN4aKMI-NGQLL4jMVP3aDORlQpOBWooi0GSE2TGt4_9ncyepk1pCh-yWQ795AhPbw=s88-c-k-c0x00ffffff-no-rj",
+                "width": 68,
+                "height": 68
+               }
+              ]
+             },
+             "navigationEndpoint": {
+              "commandMetadata": {
+               "webCommandMetadata": {
+                "url": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+                "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                "rootVe": 3611,
+                "apiUrl": "/youtubei/v1/browse"
+               }
+              },
+              "browseEndpoint": {
+               "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw"
+              }
+             },
+             "accessibility": {
+              "accessibilityData": {
+               "label": "Go to channel Rick Astley"
+              }
+             }
+            }
+           },
+           "inlinePlaybackEndpoint": {
+            "commandMetadata": {
+             "webCommandMetadata": {
+              "url": "/watch?v=dQw4w9WgXcQ&pp=YAHIAQGiBhUBrf4zj84gyDfZ9Q2-cjUhOw0S_ZM%3D",
+              "webPageType": "WEB_PAGE_TYPE_WATCH",
+              "rootVe": 3832
+             }
+            },
+            "watchEndpoint": {
+             "videoId": "dQw4w9WgXcQ",
+             "params": "qgMLcmljayBhc3RsZXm6AxwSGlJERU10Nk1VU1FJMHRfVHMyRURVRFdHUmhRugMLCODUpKXwtIb7yAG6AwsI_aXO5NjrreO-AboDCwiDz_XegoPIh9cBugMKCI6mr8O1gpK2XLoDCgjkpYiKocCDkDa6AwoIo6G3roaA5cV5ugMKCJ_myc2c39frE7oDCgixhIvR5p_xnVi6AwoI65GLivO1vN4MugMLCK6w8bCi_ICOyAG6AwoI2NvcldOPlJpjugMKCNiQlMa93pTTDroDCgiqk9PV-tKXtgu6AwsI0Kudtb_x_v6MAboDCwiClKKYsIDgq_IBugMKCPnniembv6PgfLoDCwj5xszDqK6M8PIBugMKCLDYhsCXtsegWfIDBQ0wNY89",
+             "playerParams": "YAHIAQGiBhUBrf4zj84gyDfZ9Q2-cjUhOw0S_ZM%3D",
+             "playerExtraUrlParams": [
+              {
+               "key": "inline",
+               "value": "1"
+              }
+             ],
+             "watchEndpointSupportedOnesieConfig": {
+              "html5PlaybackOnesieConfig": {
+               "commonConfig": {
+                "url": "https://rr11---sn-8qj-i5ozd.googlevideo.com/initplayback?source=youtube&oeis=1&c=WEB&oad=3200&ovd=3200&oaad=11000&oavd=11000&ocs=700&oewis=1&oputc=1&olis=1&ofpcc=1&msp=1&odepv=1&id=750c38c3d5a05dc4&ip=14.177.111.100&vip=216.239.38.119&initcwndbps=2298750&mt=1785576797&oweuc="
+               }
+              }
+             }
+            }
+           }
+          }
+         },
+         {
+          "shelfRenderer": {
+           "title": {
+            "simpleText": "Latest from Rick Astley"
+           },
+           "content": {
+            "verticalListRenderer": {
+             "items": [
+              {
+               "videoRenderer": {
+                "videoId": "PXC_PYeB6F8",
+                "thumbnail": {
+                 "thumbnails": [
+                  {
+                   "url": "https://i.ytimg.com/vi/PXC_PYeB6F8/hq720.jpg?sqp=-oaymwEjCOgCEMoBSFryq4qpAxUIARUAAAAAGAElAADIQj0AgKJDeAE=&rs=AOn4CLA4E8Ahy50TBOygTKofGKW2FKeGsA",
+                   "width": 360,
+                   "height": 202
+                  },
+                  {
+                   "url": "https://i.ytimg.com/vi/PXC_PYeB6F8/hq720.jpg?sqp=-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLBOI71Q4oZb8VzwQPbYVw-YBs7niA",
+                   "width": 720,
+                   "height": 404
+                  }
+                 ]
+                },
+                "title": {
+                 "runs": [
+                  {
+                   "text": "Rick Astley - Angels On My Side (Live at The O2, London, April 2026)"
+                  }
+                 ],
+                 "accessibility": {
+                  "accessibilityData": {
+                   "label": "Rick Astley - Angels On My Side (Live at The O2, London, April 2026) 3 minutes, 51 seconds"
+                  }
+                 }
+                },
+                "longBylineText": {
+                 "runs": [
+                  {
+                   "text": "Rick Astley",
+                   "navigationEndpoint": {
+                    "commandMetadata": {
+                     "webCommandMetadata": {
+                      "url": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+                      "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                      "rootVe": 3611,
+                      "apiUrl": "/youtubei/v1/browse"
+                     }
+                    },
+                    "browseEndpoint": {
+                     "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+                     "canonicalBaseUrl": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw"
+                    }
+                   }
+                  }
+                 ]
+                },
+                "publishedTimeText": {
+                 "simpleText": "1 month ago"
+                },
+                "lengthText": {
+                 "accessibility": {
+                  "accessibilityData": {
+                   "label": "3 minutes, 51 seconds"
+                  }
+                 },
+                 "simpleText": "3:51"
+                },
+                "viewCountText": {
+                 "simpleText": "39,402 views"
+                },
+                "navigationEndpoint": {
+                 "commandMetadata": {
+                  "webCommandMetadata": {
+                   "url": "/watch?v=PXC_PYeB6F8&list=RDPXC_PYeB6F8&start_radio=1&pp=ygULcmljayBhc3RsZXmgBwE%3D",
+                   "webPageType": "WEB_PAGE_TYPE_WATCH",
+                   "rootVe": 3832
+                  }
+                 },
+                 "watchEndpoint": {
+                  "videoId": "PXC_PYeB6F8",
+                  "playlistId": "RDPXC_PYeB6F8",
+                  "params": "OAHAAQHyAwUNMDWPPbgFAQ%3D%3D",
+                  "playerParams": "ygULcmljayBhc3RsZXmgBwE%3D",
+                  "watchEndpointSupportedOnesieConfig": {
+                   "html5PlaybackOnesieConfig": {
+                    "commonConfig": {
+                     "url": "https://rr5---sn-8qj-i5ozr.googlevideo.com/initplayback?source=youtube&oeis=1&c=WEB&oad=3200&ovd=3200&oaad=11000&oavd=11000&ocs=700&oewis=1&oputc=1&olis=1&ofpcc=1&msp=1&odepv=1&id=3d70bf3d8781e85f&ip=14.177.111.100&vip=216.239.38.119&initcwndbps=2455000&mt=1785576797&oweuc="
+                    }
+                   }
+                  }
+                 }
+                },
+                "ownerText": {
+                 "runs": [
+                  {
+                   "text": "Rick Astley",
+                   "navigationEndpoint": {
+                    "commandMetadata": {
+                     "webCommandMetadata": {
+                      "url": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+                      "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                      "rootVe": 3611,
+                      "apiUrl": "/youtubei/v1/browse"
+                     }
+                    },
+                    "browseEndpoint": {
+                     "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+                     "canonicalBaseUrl": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw"
+                    }
+                   }
+                  }
+                 ]
+                },
+                "shortBylineText": {
+                 "runs": [
+                  {
+                   "text": "Rick Astley",
+                   "navigationEndpoint": {
+                    "commandMetadata": {
+                     "webCommandMetadata": {
+                      "url": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+                      "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                      "rootVe": 3611,
+                      "apiUrl": "/youtubei/v1/browse"
+                     }
+                    },
+                    "browseEndpoint": {
+                     "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+                     "canonicalBaseUrl": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw"
+                    }
+                   }
+                  }
+                 ]
+                },
+                "showActionMenu": false,
+                "shortViewCountText": {
+                 "accessibility": {
+                  "accessibilityData": {
+                   "label": "39 thousand views"
+                  }
+                 },
+                 "simpleText": "39K views"
+                },
+                "channelThumbnailSupportedRenderers": {
+                 "channelThumbnailWithLinkRenderer": {
+                  "thumbnail": {
+                   "thumbnails": [
+                    {
+                     "url": "https://yt3.ggpht.com/MOWpaiGJdgN4aKMI-NGQLL4jMVP3aDORlQpOBWooi0GSE2TGt4_9ncyepk1pCh-yWQ795AhPbw=s88-c-k-c0x00ffffff-no-rj",
+                     "width": 68,
+                     "height": 68
+                    }
+                   ]
+                  },
+                  "navigationEndpoint": {
+                   "commandMetadata": {
+                    "webCommandMetadata": {
+                     "url": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+                     "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                     "rootVe": 3611,
+                     "apiUrl": "/youtubei/v1/browse"
+                    }
+                   },
+                   "browseEndpoint": {
+                    "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw"
+                   }
+                  },
+                  "accessibility": {
+                   "accessibilityData": {
+                    "label": "Go to channel Rick Astley"
+                   }
+                  }
+                 }
+                },
+                "inlinePlaybackEndpoint": {
+                 "commandMetadata": {
+                  "webCommandMetadata": {
+                   "url": "/watch?v=PXC_PYeB6F8&pp=YAHIAQGiBhUBrf4zjxodgqC729_Z4ZU50zoK_ds%3D",
+                   "webPageType": "WEB_PAGE_TYPE_WATCH",
+                   "rootVe": 3832
+                  }
+                 },
+                 "watchEndpoint": {
+                  "videoId": "PXC_PYeB6F8",
+                  "params": "8gMFDTA1jz0%3D",
+                  "playerParams": "YAHIAQGiBhUBrf4zjxodgqC729_Z4ZU50zoK_ds%3D",
+                  "playerExtraUrlParams": [
+                   {
+                    "key": "inline",
+                    "value": "1"
+                   }
+                  ],
+                  "watchEndpointSupportedOnesieConfig": {
+                   "html5PlaybackOnesieConfig": {
+                    "commonConfig": {
+                     "url": "https://rr5---sn-8qj-i5ozr.googlevideo.com/initplayback?source=youtube&oeis=1&c=WEB&oad=3200&ovd=3200&oaad=11000&oavd=11000&ocs=700&oewis=1&oputc=1&olis=1&ofpcc=1&msp=1&odepv=1&id=3d70bf3d8781e85f&ip=14.177.111.100&vip=216.239.38.119&initcwndbps=2455000&mt=1785576797&oweuc="
+                    }
+                   }
+                  }
+                 }
+                }
+               }
+              }
+             ],
+             "collapsedItemCount": 2,
+             "collapsedStateButtonText": {
+              "runs": [
+               {
+                "text": "+"
+               },
+               {
+                "text": "4"
+               },
+               {
+                "text": " more"
+               }
+              ],
+              "accessibility": {
+               "accessibilityData": {
+                "label": "+4 more"
+               }
+              }
+             }
+            }
+           }
+          }
+         },
+         {
+          "gridShelfViewModel": {
+           "contents": [
+            {
+             "shortsLockupViewModel": {
+              "entityId": "shorts-shelf-item-GdbjNGtWPe4",
+              "accessibilityText": "39 years of Never Gonna Give You Up!\ud83d\udd7aNext year it\u2019s the big 4-0\u2026 how should we celebrate? Team Rick, 22 thousand views - play Short",
+              "onTap": {
+               "innertubeCommand": {
+                "commandMetadata": {
+                 "webCommandMetadata": {
+                  "url": "/shorts/GdbjNGtWPe4",
+                  "webPageType": "WEB_PAGE_TYPE_SHORTS",
+                  "rootVe": 37414
+                 }
+                },
+                "reelWatchEndpoint": {
+                 "videoId": "GdbjNGtWPe4",
+                 "playerParams": "8AEBoAMIyAMyuAQUogYVAa3-M48m-jSL2HRwXi5Bsb4lyO0RkAcC",
+                 "thumbnail": {
+                  "thumbnails": [
+                   {
+                    "url": "https://i.ytimg.com/vi/GdbjNGtWPe4/frame0.jpg",
+                    "width": 1080,
+                    "height": 1920
+                   }
+                  ],
+                  "isOriginalAspectRatio": true
+                 },
+                 "overlay": {
+                  "reelPlayerOverlayRenderer": {
+                   "style": "REEL_PLAYER_OVERLAY_STYLE_SHORTS",
+                   "reelPlayerNavigationModel": "REEL_PLAYER_NAVIGATION_MODEL_UNSPECIFIED"
+                  }
+                 },
+                 "params": "CBQwAkocCg0iC3JpY2sgYXN0bGV5EgtyaWNrIGFzdGxleboBGFVDdUFYRmtnc3cxTDd4YUNmbmQ1SkpPdw%3D%3D",
+                 "sequenceProvider": "REEL_WATCH_SEQUENCE_PROVIDER_RPC",
+                 "sequenceParams": "CgtHZGJqTkd0V1BlNCrcBAoNCgtHZGJqTkd0V1BlNAoNCgtZSmk1dUg4WUhHOAoNCgtXbVhFN0lmcVhROAoNCgtTMDY5UFZtS1haNAoNCgtqYkh0dU1TLTdtMAoNCgtxQjZ1LW5xUTY3dwoNCgtKdG56OEdzbVdDSQoNCgt0SkJTUlN4YmZzVQoNCgt6aHA1MUJidllRawoNCgstMEZWRXhBZ21wcwoNCgtHVS00bWE0MzltOAoNCgt3clZnMWVERklDYwoNCgtVaWJUYUY4WFN3cwoNCgtSNFBXNU1KbGRxRQoNCgs1VndsZWo5V1pQawoNCgs5RWJZWXNncWpEcwoNCgtfT1pMWHZ4eHYyMAoNCgstdWZyYXBfX2dVYwoNCgszUmJ5TVVua3NnNAoNCgtRWVFUWTVpNm9ibwoNCgt1Rl93N2VnMGx0YwoNCgs0elpNa2RrUkpNNAoNCgszaWZCX3FWaUlIZwoNCgthUHpvT0d6N2g1RQoNCgtUTFBHdWZiMDhuUQoNCgtJNEZRaGpWQ2xGSQoNCgtBa0toWDl3b2J3MAoNCgstU0w4S0RGMHh3awoNCgtiZjE0RWtuQURuWQoNCgtubG1ZNzJWMHF4OAoNCgtKVDlPZ1Y5Sm8xcwoNCgtELW04OE5faS01UQoNCgttb3J3MDZRNldhQQoNCgtaZzhTQ0d6RGI1VQoNCgtsdHd6ZVd4cS1yMAoNCgt3ZzVZTkNaM016awoNCgs2WDBJTFFyTGZfQQoNCgs5RDFZWTc3cm1CcxAAGBQiHAoNIgtyaWNrIGFzdGxleRILcmljayBhc3RsZXloAXD___________8BqgEGCCYaAhgB2gG0CAoLcmljayBhc3RsZXkSBWVuLVVTGo0ECoAEAADBvAAApL0AAMo8AAArPQAAxT0AANy9AAC8vAAAbT0AAG28AAAlPgAAiL0AAPU9AADUPAAAVbwAAHo9AAB6PQAA3j0AAE6-AADbvQAAHz4AAPa9AAB2vQAAA74AANq8AACqPQAAIr0AAJ-7AAC-vQAA57wAACc9AACUvQAA070AAJO8AABLvQAAqL0AANy8AAAWvQAAoz0AAEE-AADIvQAAaT0AAGM9AACuPQAAdj0AAAm9AACdPQAA1r0AAEi9AAASPgAASbwAANi8AAABPgAADj0AAA26AACnvQAAsb0AAPw8AACnPQAAo70AAAk-AACjvQAAKTwAACU9AAAavgAAAL4AAA-9AAA1vgAAEb0AABW8AAC1vAAA4bwAAL87AAAkvQAAOb0AAJc9AAChPQAAw70AAGS9AADpPAAA8b0AAMY8AABPvQAAgLwAAMU8AAAwvQAACL0AAB2-AAAuPQAA9zsAAIw8AACKvQAAJD0AAKi9AAC6vQAA-7wAAEO8AAAlvgAA_b0AAB48AACnvgAAGr4AAKw9AABSvAAAHTwAAAY9AAA4PgAAFb4AALQ9AADkPQAATzwAAOg9AAADvgAA4b0AAMG9AADnuQAABj0AAOy7AABvvQAA7LwAAM09AAAIPgAAiT0AAIO9AACaPAAATbwAAEa-AADePAAAmj0YNyACQgQIABABKo0ECoAEAACcvQAATj4AAAS9AAC1vAAAob4AACa-AADFvAAAlDwAAGC-AAChvgAASz0AAAy8AADauwAAc7wAAC29AACDPAAA7TwAAJS8AADgPQAAfD0AAHs8AADbvAAAe70AAB0-AAB_PQAAFjwAAAM9AAC8PAAAiTwAAB--AAC0PQAA4zwAAIQ8AAC-vAAAPD0AADU9AAApPgAAYb0AAJI9AABCPQAAhz0AANI9AAB4PQAAW70AAIY9AAAPuAAAODsAAIE8AADIuwAAy70AACm9AAAMPQAA6r0AAJG8AADIvQAAMz0AAOk8AACjPAAAs7wAAFS9AAC-PAAA4T0AAFo9AADXPQAApT0AAD67AACAPgAAYL0AALW9AACDvQAAo7oAAJG8AACUPQAApj0AAIQ9AACyvAAAzL0AABi8AABmvQAAPTwAALu9AACvvQAAY7wAAAm9AAAMvgAAAz0AAAs9AACTvQAAeD0AAJS9AAD2vAAA3TwAAGE9AAAAPAAAEb0AAJ09AAC5PAAAGz0AANs8AADhvQAA_rwAAI-9AADtPQAAQj0AAHM9AACbPAAAEL0AAK28AABSPQAAhr4AAMw9AADtvAAAOz0AAEa9AACJPAAAnr0AAFi-AAB-PQAAmL0AAGY8AACmvQAAOj4AAKY9AABLPQAA570AAMI9AACkPAAA3T0YNiACQgQIABAB",
+                 "ustreamerConfig": "CAw="
+                }
+               }
+              },
+              "badge": {
+               "badgeViewModel": {
+                "badgeText": "New",
+                "badgeStyle": "BADGE_OVERLAY_WHITE",
+                "accessibilityLabel": "New"
+               }
+              },
+              "indexInCollection": 0,
+              "menuOnTapA11yLabel": "More actions",
+              "overlayMetadata": {
+               "primaryText": {
+                "content": "39 years of Never Gonna Give You Up!\ud83d\udd7aNext year it\u2019s the big 4-0\u2026 how should we celebrate? Team Rick"
+               },
+               "secondaryText": {
+                "content": "22K views"
+               }
+              },
+              "thumbnailViewModel": {
+               "thumbnailViewModel": {
+                "image": {
+                 "sources": [
+                  {
+                   "url": "https://i.ytimg.com/vi/GdbjNGtWPe4/oar2.jpg?sqp=-oaymwEkCJUDENAFSFqQAgHyq4qpAxMIARUAAAAAJQAAyEI9AICiQ3gB&rs=AOn4CLDMLx_pWh8lVDq_ZtiMdiyQ7D4-MA&usqp=CCk",
+                   "width": 405,
+                   "height": 720
+                  },
+                  {
+                   "url": "https://i.ytimg.com/vi/GdbjNGtWPe4/oar2.jpg?sqp=-oaymwEnCJUDEOAESFqQAgHyq4qpAxYIARUAAAAAJQAAyEI9AICiQ3gByAEB&rs=AOn4CLCziw4N0lS9Y5YvPb2V-KANhV8dLg&usqp=CCk",
+                   "width": 405,
+                   "height": 608
+                  }
+                 ]
+                }
+               }
+              },
+              "titleTruncationStyle": "SHORTS_LOCKUP_TITLE_TRUNCATION_STYLE_UNKNOWN"
+             }
+            },
+            {
+             "shortsLockupViewModel": {
+              "entityId": "shorts-shelf-item-YJi5uH8YHG8",
+              "accessibilityText": "Copenhagen, you were amazing. Tak \ud83c\udde9\ud83c\uddf0\u2665\ufe0f #rickastley #tivoligardens, 13 thousand views - play Short",
+              "onTap": {
+               "innertubeCommand": {
+                "commandMetadata": {
+                 "webCommandMetadata": {
+                  "url": "/shorts/YJi5uH8YHG8",
+                  "webPageType": "WEB_PAGE_TYPE_SHORTS",
+                  "rootVe": 37414
+                 }
+                },
+                "reelWatchEndpoint": {
+                 "videoId": "YJi5uH8YHG8",
+                 "playerParams": "8AEBoAMIyAMyuAQUogYVAa3-M4-L5xkpUkg4Fat1-xkfF85fkAcC",
+                 "thumbnail": {
+                  "thumbnails": [
+                   {
+                    "url": "https://i.ytimg.com/vi/YJi5uH8YHG8/frame0.jpg",
+                    "width": 1080,
+                    "height": 1920
+                   }
+                  ],
+                  "isOriginalAspectRatio": true
+                 },
+                 "overlay": {
+                  "reelPlayerOverlayRenderer": {
+                   "style": "REEL_PLAYER_OVERLAY_STYLE_SHORTS",
+                   "reelPlayerNavigationModel": "REEL_PLAYER_NAVIGATION_MODEL_UNSPECIFIED"
+                  }
+                 },
+                 "params": "CBQwAkocCg0iC3JpY2sgYXN0bGV5EgtyaWNrIGFzdGxleboBGFVDdUFYRmtnc3cxTDd4YUNmbmQ1SkpPdw%3D%3D",
+                 "sequenceProvider": "REEL_WATCH_SEQUENCE_PROVIDER_RPC",
+                 "sequenceParams": "CgtZSmk1dUg4WUhHOCrcBAoNCgtHZGJqTkd0V1BlNAoNCgtZSmk1dUg4WUhHOAoNCgtXbVhFN0lmcVhROAoNCgtTMDY5UFZtS1haNAoNCgtqYkh0dU1TLTdtMAoNCgtxQjZ1LW5xUTY3dwoNCgtKdG56OEdzbVdDSQoNCgt0SkJTUlN4YmZzVQoNCgt6aHA1MUJidllRawoNCgstMEZWRXhBZ21wcwoNCgtHVS00bWE0MzltOAoNCgt3clZnMWVERklDYwoNCgtVaWJUYUY4WFN3cwoNCgtSNFBXNU1KbGRxRQoNCgs1VndsZWo5V1pQawoNCgs5RWJZWXNncWpEcwoNCgtfT1pMWHZ4eHYyMAoNCgstdWZyYXBfX2dVYwoNCgszUmJ5TVVua3NnNAoNCgtRWVFUWTVpNm9ibwoNCgt1Rl93N2VnMGx0YwoNCgs0elpNa2RrUkpNNAoNCgszaWZCX3FWaUlIZwoNCgthUHpvT0d6N2g1RQoNCgtUTFBHdWZiMDhuUQoNCgtJNEZRaGpWQ2xGSQoNCgtBa0toWDl3b2J3MAoNCgstU0w4S0RGMHh3awoNCgtiZjE0RWtuQURuWQoNCgtubG1ZNzJWMHF4OAoNCgtKVDlPZ1Y5Sm8xcwoNCgtELW04OE5faS01UQoNCgttb3J3MDZRNldhQQoNCgtaZzhTQ0d6RGI1VQoNCgtsdHd6ZVd4cS1yMAoNCgt3ZzVZTkNaM016awoNCgs2WDBJTFFyTGZfQQoNCgs5RDFZWTc3cm1CcxABGBQiHAoNIgtyaWNrIGFzdGxleRILcmljayBhc3RsZXloAXD___________8BqgEGCCUaAhgB2gG0CAoLcmljayBhc3RsZXkSBWVuLVVTGo0ECoAEAADBvAAApL0AAMo8AAArPQAAxT0AANy9AAC8vAAAbT0AAG28AAAlPgAAiL0AAPU9AADUPAAAVbwAAHo9AAB6PQAA3j0AAE6-AADbvQAAHz4AAPa9AAB2vQAAA74AANq8AACqPQAAIr0AAJ-7AAC-vQAA57wAACc9AACUvQAA070AAJO8AABLvQAAqL0AANy8AAAWvQAAoz0AAEE-AADIvQAAaT0AAGM9AACuPQAAdj0AAAm9AACdPQAA1r0AAEi9AAASPgAASbwAANi8AAABPgAADj0AAA26AACnvQAAsb0AAPw8AACnPQAAo70AAAk-AACjvQAAKTwAACU9AAAavgAAAL4AAA-9AAA1vgAAEb0AABW8AAC1vAAA4bwAAL87AAAkvQAAOb0AAJc9AAChPQAAw70AAGS9AADpPAAA8b0AAMY8AABPvQAAgLwAAMU8AAAwvQAACL0AAB2-AAAuPQAA9zsAAIw8AACKvQAAJD0AAKi9AAC6vQAA-7wAAEO8AAAlvgAA_b0AAB48AACnvgAAGr4AAKw9AABSvAAAHTwAAAY9AAA4PgAAFb4AALQ9AADkPQAATzwAAOg9AAADvgAA4b0AAMG9AADnuQAABj0AAOy7AABvvQAA7LwAAM09AAAIPgAAiT0AAIO9AACaPAAATbwAAEa-AADePAAAmj0YNyACQgQIABABKo0ECoAEAACcvQAATj4AAAS9AAC1vAAAob4AACa-AADFvAAAlDwAAGC-AAChvgAASz0AAAy8AADauwAAc7wAAC29AACDPAAA7TwAAJS8AADgPQAAfD0AAHs8AADbvAAAe70AAB0-AAB_PQAAFjwAAAM9AAC8PAAAiTwAAB--AAC0PQAA4zwAAIQ8AAC-vAAAPD0AADU9AAApPgAAYb0AAJI9AABCPQAAhz0AANI9AAB4PQAAW70AAIY9AAAPuAAAODsAAIE8AADIuwAAy70AACm9AAAMPQAA6r0AAJG8AADIvQAAMz0AAOk8AACjPAAAs7wAAFS9AAC-PAAA4T0AAFo9AADXPQAApT0AAD67AACAPgAAYL0AALW9AACDvQAAo7oAAJG8AACUPQAApj0AAIQ9AACyvAAAzL0AABi8AABmvQAAPTwAALu9AACvvQAAY7wAAAm9AAAMvgAAAz0AAAs9AACTvQAAeD0AAJS9AAD2vAAA3TwAAGE9AAAAPAAAEb0AAJ09AAC5PAAAGz0AANs8AADhvQAA_rwAAI-9AADtPQAAQj0AAHM9AACbPAAAEL0AAK28AABSPQAAhr4AAMw9AADtvAAAOz0AAEa9AACJPAAAnr0AAFi-AAB-PQAAmL0AAGY8AACmvQAAOj4AAKY9AABLPQAA570AAMI9AACkPAAA3T0YNiACQgQIABAB",
+                 "ustreamerConfig": "CAw="
+                }
+               }
+              },
+              "badge": {
+               "badgeViewModel": {
+                "badgeText": "New",
+                "badgeStyle": "BADGE_OVERLAY_WHITE",
+                "accessibilityLabel": "New"
+               }
+              },
+              "indexInCollection": 0,
+              "menuOnTapA11yLabel": "More actions",
+              "overlayMetadata": {
+               "primaryText": {
+                "content": "Copenhagen, you were amazing. Tak \ud83c\udde9\ud83c\uddf0\u2665\ufe0f #rickastley #tivoligardens"
+               },
+               "secondaryText": {
+                "content": "13K views"
+               }
+              },
+              "thumbnailViewModel": {
+               "thumbnailViewModel": {
+                "image": {
+                 "sources": [
+                  {
+                   "url": "https://i.ytimg.com/vi/YJi5uH8YHG8/oar2.jpg?sqp=-oaymwEkCJUDENAFSFqQAgHyq4qpAxMIARUAAAAAJQAAyEI9AICiQ3gB&rs=AOn4CLDZ9pXZjac4KPf0Rqd8wClhucJ1fg&usqp=CCk",
+                   "width": 405,
+                   "height": 720
+                  },
+                  {
+                   "url": "https://i.ytimg.com/vi/YJi5uH8YHG8/oar2.jpg?sqp=-oaymwEnCJUDEOAESFqQAgHyq4qpAxYIARUAAAAAJQAAyEI9AICiQ3gByAEB&rs=AOn4CLA09tTV65D_DOfUk_DxH0CwQ4IVZA&usqp=CCk",
+                   "width": 405,
+                   "height": 608
+                  }
+                 ]
+                }
+               }
+              },
+              "titleTruncationStyle": "SHORTS_LOCKUP_TITLE_TRUNCATION_STYLE_UNKNOWN"
+             }
+            }
+           ],
+           "header": {
+            "sectionHeaderViewModel": {
+             "headline": {
+              "content": "Latest Shorts from Rick Astley"
+             },
+             "leadingAccessory": {
+              "image": {
+               "sources": [
+                {
+                 "clientResource": {
+                  "imageName": "YOUTUBE_SHORTS_BRAND_24"
+                 }
+                }
+               ]
+              }
+             }
+            }
+           },
+           "contentAspectRatio": "GRID_SHELF_CONTENT_ASPECT_RATIO_TWO_BY_THREE",
+           "enableVerticalExpansion": true,
+           "minCollapsedItemCount": 3
+          }
+         },
+         {
+          "videoRenderer": {
+           "videoId": "yPYZpwSpKmA",
+           "thumbnail": {
+            "thumbnails": [
+             {
+              "url": "https://i.ytimg.com/vi/yPYZpwSpKmA/hq720.jpg?sqp=-oaymwEjCOgCEMoBSFryq4qpAxUIARUAAAAAGAElAADIQj0AgKJDeAE=&rs=AOn4CLDKKHbNIBZRD3kL5gEsJCw9e2gx6A",
+              "width": 360,
+              "height": 202
+             },
+             {
+              "url": "https://i.ytimg.com/vi/yPYZpwSpKmA/hq720.jpg?sqp=-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLCWdwu8ZJrNYsFMJHCVBb14ZVWgRg",
+              "width": 720,
+              "height": 404
+             }
+            ]
+           },
+           "title": {
+            "runs": [
+             {
+              "text": "Rick Astley - Together Forever (Official Video) [4K Remaster]"
+             }
+            ],
+            "accessibility": {
+             "accessibilityData": {
+              "label": "Rick Astley - Together Forever (Official Video) [4K Remaster] 3 minutes, 24 seconds"
+             }
+            }
+           },
+           "longBylineText": {
+            "runs": [
+             {
+              "text": "Rick Astley",
+              "navigationEndpoint": {
+               "commandMetadata": {
+                "webCommandMetadata": {
+                 "url": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+                 "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                 "rootVe": 3611,
+                 "apiUrl": "/youtubei/v1/browse"
+                }
+               },
+               "browseEndpoint": {
+                "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+                "canonicalBaseUrl": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw"
+               }
+              }
+             }
+            ]
+           },
+           "publishedTimeText": {
+            "simpleText": "16 years ago"
+           },
+           "lengthText": {
+            "accessibility": {
+             "accessibilityData": {
+              "label": "3 minutes, 24 seconds"
+             }
+            },
+            "simpleText": "3:24"
+           },
+           "viewCountText": {
+            "simpleText": "204,040,315 views"
+           },
+           "navigationEndpoint": {
+            "commandMetadata": {
+             "webCommandMetadata": {
+              "url": "/watch?v=yPYZpwSpKmA&list=RDyPYZpwSpKmA&start_radio=1&pp=ygULcmljayBhc3RsZXmgBwHSBwkJowsBhyohjO8%3D",
+              "webPageType": "WEB_PAGE_TYPE_WATCH",
+              "rootVe": 3832
+             }
+            },
+            "watchEndpoint": {
+             "videoId": "yPYZpwSpKmA",
+             "playlistId": "RDyPYZpwSpKmA",
+             "params": "OAHAAQGqAwtyaWNrIGFzdGxleboDHBIaUkRFTXQ2TVVTUUkwdF9UczJFRFVEV0dSaFG6AwoIxLuBrb2YjoZ1ugMLCP2lzuTY663jvgG6AwsIg8_13oKDyIfXAboDCgiOpq_DtYKStly6AwoI5KWIiqHAg5A2ugMKCKOht66GgOXFeboDCgif5snNnN_X6xO6AwoIsYSL0eaf8Z1YugMKCOuRi4rztbzeDLoDCwiusPGwovyAjsgBugMKCNjb3JXTj5SaY7oDCgjYkJTGvd6U0w66AwoIqpPT1frSl7YLugMLCNCrnbW_8f7-jAG6AwsIgpSimLCA4KvyAboDCgj554npm7-j4Hy6AwsI-cbMw6iujPDyAboDCgiw2IbAl7bHoFnyAwUNMDWPPbgFAQ%3D%3D",
+             "playerParams": "ygULcmljayBhc3RsZXmgBwHSBwkJowsBhyohjO8%3D",
+             "watchEndpointSupportedOnesieConfig": {
+              "html5PlaybackOnesieConfig": {
+               "commonConfig": {
+                "url": "https://rr1---sn-8qj-i5okl.googlevideo.com/initplayback?source=youtube&oeis=1&c=WEB&oad=3200&ovd=3200&oaad=11000&oavd=11000&ocs=700&oewis=1&oputc=1&olis=1&ofpcc=1&msp=1&odepv=1&id=c8f619a704a92a60&ip=14.177.111.100&vip=216.239.38.119&initcwndbps=3026250&mt=1785576797&oweuc="
+               }
+              }
+             }
+            }
+           },
+           "ownerText": {
+            "runs": [
+             {
+              "text": "Rick Astley",
+              "navigationEndpoint": {
+               "commandMetadata": {
+                "webCommandMetadata": {
+                 "url": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+                 "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                 "rootVe": 3611,
+                 "apiUrl": "/youtubei/v1/browse"
+                }
+               },
+               "browseEndpoint": {
+                "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+                "canonicalBaseUrl": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw"
+               }
+              }
+             }
+            ]
+           },
+           "shortBylineText": {
+            "runs": [
+             {
+              "text": "Rick Astley",
+              "navigationEndpoint": {
+               "commandMetadata": {
+                "webCommandMetadata": {
+                 "url": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+                 "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                 "rootVe": 3611,
+                 "apiUrl": "/youtubei/v1/browse"
+                }
+               },
+               "browseEndpoint": {
+                "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+                "canonicalBaseUrl": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw"
+               }
+              }
+             }
+            ]
+           },
+           "showActionMenu": false,
+           "shortViewCountText": {
+            "accessibility": {
+             "accessibilityData": {
+              "label": "204 million views"
+             }
+            },
+            "simpleText": "204M views"
+           },
+           "channelThumbnailSupportedRenderers": {
+            "channelThumbnailWithLinkRenderer": {
+             "thumbnail": {
+              "thumbnails": [
+               {
+                "url": "https://yt3.ggpht.com/MOWpaiGJdgN4aKMI-NGQLL4jMVP3aDORlQpOBWooi0GSE2TGt4_9ncyepk1pCh-yWQ795AhPbw=s88-c-k-c0x00ffffff-no-rj",
+                "width": 68,
+                "height": 68
+               }
+              ]
+             },
+             "navigationEndpoint": {
+              "commandMetadata": {
+               "webCommandMetadata": {
+                "url": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+                "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                "rootVe": 3611,
+                "apiUrl": "/youtubei/v1/browse"
+               }
+              },
+              "browseEndpoint": {
+               "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw"
+              }
+             },
+             "accessibility": {
+              "accessibilityData": {
+               "label": "Go to channel Rick Astley"
+              }
+             }
+            }
+           },
+           "inlinePlaybackEndpoint": {
+            "commandMetadata": {
+             "webCommandMetadata": {
+              "url": "/watch?v=yPYZpwSpKmA&pp=YAHIAQGiBhUBrf4zj9J0EAEuAImhTr9YXjSe-CA%3D",
+              "webPageType": "WEB_PAGE_TYPE_WATCH",
+              "rootVe": 3832
+             }
+            },
+            "watchEndpoint": {
+             "videoId": "yPYZpwSpKmA",
+             "params": "qgMLcmljayBhc3RsZXm6AxwSGlJERU10Nk1VU1FJMHRfVHMyRURVRFdHUmhRugMKCMS7ga29mI6GdboDCwj9pc7k2Out474BugMLCIPP9d6Cg8iH1wG6AwoIjqavw7WCkrZcugMKCOSliIqhwIOQNroDCgijobeuhoDlxXm6AwoIn-bJzZzf1-sTugMKCLGEi9Hmn_GdWLoDCgjrkYuK87W83gy6AwsIrrDxsKL8gI7IAboDCgjY29yV04-UmmO6AwoI2JCUxr3elNMOugMKCKqT09X60pe2C7oDCwjQq521v_H-_owBugMLCIKUopiwgOCr8gG6AwoI-eeJ6Zu_o-B8ugMLCPnGzMOorozw8gG6AwoIsNiGwJe2x6BZ8gMFDTA1jz0%3D",
+             "playerParams": "YAHIAQGiBhUBrf4zj9J0EAEuAImhTr9YXjSe-CA%3D",
+             "playerExtraUrlParams": [
+              {
+               "key": "inline",
+               "value": "1"
+              }
+             ],
+             "watchEndpointSupportedOnesieConfig": {
+              "html5PlaybackOnesieConfig": {
+               "commonConfig": {
+                "url": "https://rr1---sn-8qj-i5okl.googlevideo.com/initplayback?source=youtube&oeis=1&c=WEB&oad=3200&ovd=3200&oaad=11000&oavd=11000&ocs=700&oewis=1&oputc=1&olis=1&ofpcc=1&msp=1&odepv=1&id=c8f619a704a92a60&ip=14.177.111.100&vip=216.239.38.119&initcwndbps=3026250&mt=1785576797&oweuc="
+               }
+              }
+             }
+            }
+           }
+          }
+         }
+        ]
+       }
+      },
+      {
+       "continuationItemRenderer": {
+        "trigger": "CONTINUATION_TRIGGER_ON_ITEM_SHOWN",
+        "continuationEndpoint": {
+         "commandMetadata": {
+          "webCommandMetadata": {
+           "sendPost": true,
+           "apiUrl": "/youtubei/v1/search"
+          }
+         },
+         "continuationCommand": {
+          "token": "ErgDEgtyaWNrIGFzdGxleRqoA1NCU0NBUnBTUkVWTmREWk5WVk5SU1RCMFgxUnpNa1ZFVlVSWFIxSm9VWUlCQzJSUmR6UjNPVmRuV0dOUmdnRUxlVkJaV25CM1UzQkxiVUdDQVF0MmMyRXpXRmw1Vkd0Mk1JSUJDekYzT0dkSFEzWmtXalJOZ2dFTFdFZDRTVVV4YUhJd2R6U0NBUXRPYVVGUFFXaEdRMFYxVVlJQkMyVlpkVlZCUjFoT01FdE5nZ0VMUlRsa1pTMWpiWGxqZURpQ0FRdFhSSFpGWDIxdmFYZHFSWUlCQzBSTWVuaHlla1pEZVU5emdnRUxlVUozUkRScFdXTlhRelNDQVF0WmVsSlJabFJMTTB4a1o0SUJDMFJ4V2xNNE9XcEdRMFpuZ2dFTFF6SjRaV3cyY1RCNVlXLUNBUXRxVURNM2FWOWhibFprUVlJQkN6aHNaVUZCZDAxSmFXZEpnZ0VMWmsxRFRpMWlNR2xqWDJ1Q0FRczRkVUY0WTI5b2Vra3phNElCQzFkVlJXUnpXR2RDY2tSQnNnRUdDZ1FJR0JBQzZnRUVDQUlRR0ElM0QlM0QYgeDoGCILc2VhcmNoLWZlZWQ%3D",
+          "request": "CONTINUATION_REQUEST_TYPE_SEARCH"
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  }
+ }
+}

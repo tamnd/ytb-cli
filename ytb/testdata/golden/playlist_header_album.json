@@ -1,0 +1,49 @@
+{
+  "channel_title": "Oasis",
+  "client": [],
+  "fetched_at": "",
+  "id": "OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y",
+  "is_generated": true,
+  "kind": "playlist",
+  "missed": [
+    "this playlist states its owner as text only, so there is no channel_id for \"Oasis\"",
+    "YouTube said: 3 unavailable videos are hidden"
+  ],
+  "sources": [],
+  "surfaces": [
+    "s2"
+  ],
+  "thumbnails": [
+    {
+      "height": 180,
+      "source": "payload",
+      "url": "https://i9.ytimg.com/s_p/OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y/mqdefault.jpg?sqp=CMT7ttMGir7X7AMICMnuyL0GEAE=\u0026rs=AOn4CLCXy46JKS33u9Q56wZX9rs0da7y_w\u0026v=1739732809",
+      "width": 180
+    },
+    {
+      "height": 640,
+      "source": "payload",
+      "url": "https://i9.ytimg.com/s_p/OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y/sddefault.jpg?sqp=CMT7ttMGir7X7AMICMnuyL0GEAE=\u0026rs=AOn4CLD82hLC83C5KCC3ZI6ZCDNo8mJJAg\u0026v=1739732809",
+      "width": 640
+    },
+    {
+      "height": 1200,
+      "source": "payload",
+      "url": "https://i9.ytimg.com/s_p/OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y/maxresdefault.jpg?sqp=CMT7ttMGir7X7AMICMnuyL0GEAE=\u0026rs=AOn4CLDQf80-dUyhk_fLH-gYLj01Gn_BEg\u0026v=1739732809",
+      "width": 1200
+    }
+  ],
+  "tier": 0,
+  "title": "Album - (What's The Story) Morning Glory? (Remastered)",
+  "updated_text": "Last updated on Jul 20, 2026",
+  "url": "https://www.youtube.com/playlist?list=OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y",
+  "via": {
+    "channel_title": "s2 header.subtitle, which names the artist but does not link it",
+    "header": "s2 header.playlistHeaderRenderer, the named shape"
+  },
+  "video_count": 40,
+  "video_count_text": "40 videos",
+  "view_count": 4176065,
+  "view_count_text": "4,176,065 views",
+  "visibility": "unlisted"
+}

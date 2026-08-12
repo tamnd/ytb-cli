@@ -8,7 +8,7 @@ package cli
 
 import (
 	"github.com/tamnd/any-cli/kit"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 // Build metadata, set via -ldflags at release time.
@@ -18,12 +18,12 @@ var (
 	Date    = "unknown"
 )
 
-// builder holds the youtube-specific globals and defaults while a kit.App is
+// builder holds the YouTube-specific globals and defaults while a kit.App is
 // assembled. The globals hook binds the flags to it; the finalize hook reads
 // them back onto the resolved Config so the client factory and escape hatches
 // see them.
 type builder struct {
-	def      youtube.Config
+	def      ytb.Config
 	workers  int
 	maxPages int
 	hl       string
@@ -31,13 +31,14 @@ type builder struct {
 	yes      bool
 	ytDlpBin string
 	ffmpeg   string
+	cacheTTL string
 }
 
 // NewApp builds the kit application: identity, the youtube global flags, the
 // record operations and client factory (installed by the domain, the same as an
 // ant host gets), and the escape-hatch commands.
 func NewApp() *kit.App {
-	b := &builder{def: youtube.DefaultConfig()}
+	b := &builder{def: ytb.DefaultConfig()}
 
 	app := kit.New(kit.Identity{
 		Binary:  "ytb",
@@ -65,7 +66,7 @@ Quick start:
 
 	// The domain installs the client factory and every record operation, exactly
 	// as it does inside an ant host. The escape hatches are the binary's own.
-	(youtube.Domain{}).Register(app)
+	(ytb.Domain{}).Register(app)
 	registerEscapeHatches(app)
 	return app
 }
@@ -90,6 +91,9 @@ func (b *builder) globals(f *kit.FlagSet) {
 	f.BoolVarP(&b.yes, "yes", "y", false, "assume yes to prompts")
 	f.StringVar(&b.ytDlpBin, "yt-dlp-bin", "", "path to the yt-dlp binary (download --use-yt-dlp, transcript fallback)")
 	f.StringVar(&b.ffmpeg, "ffmpeg-bin", "", "path to ffmpeg (used to merge and convert when present)")
+	// --no-cache is a kit global already, and it lands on Config.NoCache. Only
+	// the ttl is ours.
+	f.StringVar(&b.cacheTTL, "cache-ttl", "15m", "how long a cached response is served before it is refetched")
 }
 
 // finalize folds the youtube globals onto the resolved Config: the worker count
@@ -107,6 +111,7 @@ func (b *builder) finalize(c *kit.Config) {
 	c.Extra["max-pages"] = itoa(b.maxPages)
 	c.Extra["yt-dlp-bin"] = b.ytDlpBin
 	c.Extra["ffmpeg-bin"] = b.ffmpeg
+	c.Extra["cache-ttl"] = b.cacheTTL
 	if b.yes {
 		c.Extra["yes"] = "true"
 	}

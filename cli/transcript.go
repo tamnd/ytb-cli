@@ -1,284 +1,129 @@
 package cli
 
 import (
-	"bufio"
 	"context"
 	"os"
-	"os/exec"
-	"path/filepath"
-	"strconv"
-	"strings"
 
 	"github.com/tamnd/any-cli/kit"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/pkg/srv3"
+	"github.com/tamnd/ytb-cli/ytb"
 )
+
+// transcript.go is the text read. Doc 05 section 4.
+//
+// This used to shell out to yt-dlp, which shelled out to Deno, for text that
+// arrives in one request. The reason it did is worth keeping written down: the
+// watch page lists caption tracks whose baseUrl answers HTTP 200 with zero
+// bytes, forever, so the read looked gated when it was only pointed at the wrong
+// client. A baseUrl off the ANDROID player returns the file. There is no
+// external process here now and no PATH lookup.
 
 func newTranscriptCmd() kit.Command {
 	var (
-		lang       string
-		list       bool
-		timestamps bool
-		subFormat  string
-		out        string
+		lang      string
+		auto      bool
+		translate string
+		format    string
+		out       string
 	)
 	return kit.Command{
 		Use:   "transcript <video-id|url>",
-		Short: "Captions as text",
-		Long: `List caption tracks (--list), or fetch the chosen track's timed text and print
-joined text (or --timestamps for {start, dur, text} segments). --lang picks the
-language; auto-generated tracks are marked.
+		Short: "A video's captions as text, srt, vtt or json",
+		Long: `Fetch one caption track and write it out.
 
-YouTube now gates the raw caption endpoints behind a proof-of-origin token, so
-direct text fetches often come back empty. When that happens and yt-dlp is on
-PATH, the transcript is recovered through it automatically.`,
+--format picks the serialization: text (the default), srt, vtt, or json. All
+four come off one parse, so the timings in the srt and the json are the same
+timings.
+
+--lang picks the track by language code, and "en" will match "en-GB" when there
+is no plain "en". With no --lang the human track wins over the auto-generated
+one, because a person's punctuation is worth more than a machine's word list.
+--auto asks for the auto track even when a human one exists; it is the only one
+that carries per-word timings, which json keeps.
+
+--translate asks YouTube to machine-translate the chosen track into a language
+code. The translation is the site's own.
+
+Use "ytb captions" to see what a video has.`,
 		Args: kit.ExactArgs(1),
 		Flags: func(f *kit.FlagSet) {
-			f.StringVar(&lang, "lang", "", "preferred caption language")
-			f.BoolVar(&list, "list", false, "list available caption tracks")
-			f.BoolVar(&timestamps, "timestamps", false, "emit timed segments instead of joined text")
-			f.StringVar(&subFormat, "format", "", "render as subtitles: srt|vtt|txt")
-			f.StringVar(&out, "out", "", "write the transcript/subtitles to this file")
+			f.StringVar(&lang, "lang", "", "caption language code")
+			f.BoolVar(&auto, "auto", false, "take the auto-generated track")
+			f.StringVar(&translate, "translate", "", "machine-translate into this language code")
+			f.StringVar(&format, "format", "text", "text|srt|vtt|json")
+			f.StringVar(&out, "out", "", "write to this file instead of stdout")
 		},
 		Run: func(ctx context.Context, args []string) error {
 			app := appFromCtx(ctx)
-			if list {
-				tracks, err := app.Client.Captions(ctx, args[0])
-				if err != nil {
-					return err
-				}
-				if len(tracks) == 0 {
-					return noResults("no caption tracks")
-				}
-				for _, t := range tracks {
-					if err := app.Out.Emit(captionRow(t)); err != nil {
-						return err
-					}
-				}
-				return app.Out.Flush()
+			// Checked before the fetch, so a typo costs no request and exits 2 rather
+			// than arriving as a plain error after the transcript is already in hand.
+			if !srv3.Format(format).Valid() {
+				return usageErr("unknown --format " + format + ": want text, srt, vtt or json")
 			}
-
-			text, segments, err := app.Client.Transcript(ctx, args[0], lang)
+			// A transcript is a document, not a stream of records, so -o has nothing
+			// to render here and every other command in the tool honours it. Silently
+			// printing text when someone asked for -o csv is the worst of the three
+			// answers, so json is taken as the --format of the same name and the rest
+			// say what to reach for instead.
+			switch f := app.st.Output.Format; f {
+			case "", "auto", "raw", "text":
+			case "json":
+				if format == "text" {
+					format = "json"
+				}
+			default:
+				return usageErr("a transcript is one document rather than a stream of records, so -o " + f +
+					" has nothing to lay out: pick the serialization with --format text|srt|vtt|json")
+			}
+			doc, _, err := app.Client.Transcript(ctx, args[0], ytb.TranscriptOptions{
+				Lang: lang, Auto: auto, TranslateTo: translate,
+			})
+			if err != nil {
+				// This command holds the client itself, so nothing has classified the
+				// error yet. Without this a video with no captions exits 1.
+				return ytb.ExitError(err)
+			}
+			if len(doc.Cues) == 0 {
+				return noResults("the track parsed to no lines")
+			}
+			rendered, err := doc.Render(srv3.Format(format))
 			if err != nil {
 				return err
 			}
-			if text == "" && len(segments) == 0 {
-				// The direct endpoint was gated (empty body). Recover via yt-dlp.
-				segments, err = app.transcriptViaYtDlp(ctx, args[0], lang)
-				if err != nil {
-					return err
-				}
-				text = joinSegmentText(segments)
-			}
-			if text == "" && len(segments) == 0 {
-				return noResults("no transcript available")
-			}
-			if subFormat != "" {
-				rendered := youtube.RenderSubtitles(segments, youtube.SubtitleFormat(subFormat))
-				if out != "" {
-					if err := os.WriteFile(out, []byte(rendered), 0o644); err != nil {
-						return err
-					}
-					_, _ = cmdErr.Write([]byte("saved " + out + "\n"))
-					return nil
-				}
-				return app.Line(rendered)
-			}
-			if timestamps {
-				for _, s := range segments {
-					if err := app.Out.Emit(segmentRow(s)); err != nil {
-						return err
-					}
-				}
-				return app.Out.Flush()
-			}
 			if out != "" {
-				if err := os.WriteFile(out, []byte(text), 0o644); err != nil {
+				if err := os.WriteFile(out, []byte(rendered), 0o644); err != nil {
 					return err
 				}
 				_, _ = cmdErr.Write([]byte("saved " + out + "\n"))
 				return nil
 			}
-			return app.Line(text)
+			return app.Line(rendered)
 		},
 	}
 }
 
-// transcriptViaYtDlp recovers a transcript through yt-dlp's subtitle writer,
-// which negotiates the proof-of-origin token the bare endpoints now require.
-func (a *App) transcriptViaYtDlp(ctx context.Context, target, lang string) ([]youtube.TranscriptSegment, error) {
-	bin, err := a.resolveYtDlp()
-	if err != nil {
-		return nil, missingTool("transcript endpoint is gated and yt-dlp is not on PATH; install yt-dlp or pass --yt-dlp-bin to recover captions")
-	}
-	dir, err := os.MkdirTemp("", "youtube-transcript-")
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = os.RemoveAll(dir) }()
+func newCaptionsCmd() kit.Command {
+	return kit.Command{
+		Use:   "captions <video-id|url>",
+		Short: "List a video's caption tracks",
+		Long: `List the caption tracks a video has, one record each.
 
-	subLangs := lang
-	if subLangs == "" {
-		subLangs = "en.*,en"
-	}
-	ytArgs := []string{
-		"--skip-download",
-		"--write-subs", "--write-auto-subs",
-		"--sub-format", "vtt",
-		"--sub-langs", subLangs,
-		"-o", filepath.Join(dir, "%(id)s.%(ext)s"),
-		target,
-	}
-	if a.dryRun {
-		a.logf("would run: %s %v", bin, ytArgs)
-		return nil, nil
-	}
-	c := exec.CommandContext(ctx, bin, ytArgs...)
-	c.Stdout, c.Stderr = cmdErr, cmdErr // yt-dlp progress goes to stderr, never stdout
-	// yt-dlp exits non-zero when any one of the requested language variants
-	// fails, even if the track we want downloaded fine. Treat the presence of a
-	// usable .vtt as success and only surface the error when nothing landed.
-	runErr := c.Run()
+The tracks come off the ANDROID player. The watch page lists the same tracks
+with URLs that answer HTTP 200 and an empty body, so they are not listed here.
 
-	matches, _ := filepath.Glob(filepath.Join(dir, "*.vtt"))
-	vtt := pickVTT(matches, lang)
-	if vtt == "" {
-		if runErr != nil {
-			return nil, runErr
-		}
-		return nil, nil
-	}
-	f, err := os.Open(vtt)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = f.Close() }()
-	return parseVTT(f), nil
-}
-
-// pickVTT chooses the subtitle file best matching lang. With no lang, it
-// prefers the plainest track (shortest language tag, e.g. "en" over the
-// auto-translated "en-de-DE") so the result is the original captions.
-func pickVTT(paths []string, lang string) string {
-	if len(paths) == 0 {
-		return ""
-	}
-	if lang != "" {
-		for _, p := range paths {
-			if strings.Contains(filepath.Base(p), "."+lang) {
-				return p
+vss_id is the track's own name for itself: ".en" is the human English track and
+"a.en" is the machine one, which is what tells two same-language tracks apart.`,
+		Args: kit.ExactArgs(1),
+		Run: func(ctx context.Context, args []string) error {
+			app := appFromCtx(ctx)
+			tracks, err := app.Client.Captions(ctx, args[0])
+			if err != nil {
+				return ytb.ExitError(err)
 			}
-		}
+			if len(tracks) == 0 {
+				return noResults("this video has no caption track")
+			}
+			return EmitAll(app, tracks, captionRow)
+		},
 	}
-	best := paths[0]
-	for _, p := range paths[1:] {
-		if len(vttLangTag(p)) < len(vttLangTag(best)) {
-			best = p
-		}
-	}
-	return best
-}
-
-// vttLangTag returns the language segment of a "<id>.<lang>.vtt" filename.
-func vttLangTag(path string) string {
-	base := strings.TrimSuffix(filepath.Base(path), ".vtt")
-	if i := strings.LastIndex(base, "."); i >= 0 {
-		return base[i+1:]
-	}
-	return base
-}
-
-// parseVTT turns a WebVTT cue stream into timed segments, dropping the styling
-// tags and consecutive duplicate lines that auto-captions emit for rollup.
-func parseVTT(r interface{ Read([]byte) (int, error) }) []youtube.TranscriptSegment {
-	var segs []youtube.TranscriptSegment
-	sc := bufio.NewScanner(r)
-	sc.Buffer(make([]byte, 0, 64*1024), 1024*1024)
-	var start, dur float64
-	var inCue bool
-	var text []string
-	var lastText string
-	flush := func() {
-		if !inCue {
-			return
-		}
-		joined := vttClean(strings.Join(text, " "))
-		if joined != "" && joined != lastText {
-			segs = append(segs, youtube.TranscriptSegment{StartSeconds: start, DurSeconds: dur, Text: joined})
-			lastText = joined
-		}
-		inCue = false
-		text = text[:0]
-	}
-	for sc.Scan() {
-		line := strings.TrimRight(sc.Text(), "\r")
-		if strings.Contains(line, "-->") {
-			flush()
-			s, e := parseVTTTimes(line)
-			start, dur = s, e-s
-			inCue = true
-			continue
-		}
-		if line == "" {
-			flush()
-			continue
-		}
-		if inCue {
-			text = append(text, line)
-		}
-	}
-	flush()
-	return segs
-}
-
-func parseVTTTimes(line string) (start, end float64) {
-	parts := strings.SplitN(line, "-->", 2)
-	if len(parts) != 2 {
-		return 0, 0
-	}
-	start = vttStamp(strings.TrimSpace(parts[0]))
-	rhs := strings.Fields(strings.TrimSpace(parts[1]))
-	if len(rhs) > 0 {
-		end = vttStamp(rhs[0])
-	}
-	return start, end
-}
-
-// vttStamp parses HH:MM:SS.mmm or MM:SS.mmm into seconds.
-func vttStamp(s string) float64 {
-	s = strings.TrimSpace(s)
-	parts := strings.Split(s, ":")
-	var secs float64
-	for _, p := range parts {
-		v, _ := strconv.ParseFloat(p, 64)
-		secs = secs*60 + v
-	}
-	return secs
-}
-
-// vttClean strips inline VTT tags (<00:00:00.000>, <c>, &nbsp;) and collapses space.
-func vttClean(s string) string {
-	var b strings.Builder
-	depth := 0
-	for _, r := range s {
-		switch {
-		case r == '<':
-			depth++
-		case r == '>' && depth > 0:
-			depth--
-		case depth == 0:
-			b.WriteRune(r)
-		}
-	}
-	out := strings.ReplaceAll(b.String(), " ", " ")
-	return strings.Join(strings.Fields(out), " ")
-}
-
-func joinSegmentText(segs []youtube.TranscriptSegment) string {
-	var lines []string
-	for _, s := range segs {
-		if t := strings.TrimSpace(s.Text); t != "" {
-			lines = append(lines, t)
-		}
-	}
-	return strings.Join(lines, "\n")
 }

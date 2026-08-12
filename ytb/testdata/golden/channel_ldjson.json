@@ -1,0 +1,37 @@
+{
+  "@context": "https://schema.org",
+  "@type": "ProfilePage",
+  "description": "New single ‘Raindrops’ out now. \nhttps://rickastley.lnk.to/Raindrops\n\nTickets for summer shows 2026 on sale now.\nhttps://rickastley.co.uk/\n",
+  "mainEntity": {
+    "@type": "Person",
+    "alternateName": "@RickAstleyYT",
+    "description": "New single ‘Raindrops’ out now. \nhttps://rickastley.lnk.to/Raindrops\n\nTickets for summer shows 2026 on sale now.\nhttps://rickastley.co.uk/\n",
+    "image": "https://yt3.googleusercontent.com/MOWpaiGJdgN4aKMI-NGQLL4jMVP3aDORlQpOBWooi0GSE2TGt4_9ncyepk1pCh-yWQ795AhPbw=s88-c-k-c0x00ffffff-no-rj",
+    "interactionStatistic": [
+      {
+        "@type": "InteractionCounter",
+        "interactionType": {
+          "@type": "FollowAction"
+        },
+        "userInteractionCount": "4520000"
+      }
+    ],
+    "name": "Rick Astley",
+    "sameAs": [
+      "https://rickastley.lnk.to/Raindrops",
+      "https://www.rickastley.co.uk/",
+      "https://linktr.ee/rickastleynever",
+      "https://www.instagram.com/officialrickastley/",
+      "https://www.tiktok.com/@rickastleyofficial",
+      "https://www.facebook.com/RickAstley/",
+      "https://open.spotify.com/user/rickastleyprofile/playlist/32O0SSXDNWDrMievPkV0Im?si=4kTEsf71RSWznX9X4CLxSw",
+      "https://itunes.apple.com/gb/artist/rick-astley/669771",
+      "https://music.youtube.com/channel/UCwZEU0wAwIyZb4x5G_KJp2w",
+      "https://www.deezer.com/pt/artist/6160"
+    ],
+    "url": "https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw"
+  },
+  "name": "Rick Astley - YouTube",
+  "type": "ProfilePage",
+  "url": "https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw"
+}

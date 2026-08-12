@@ -1,0 +1,170 @@
+{
+ "contents": {
+  "twoColumnBrowseResultsRenderer": {
+   "tabs": [
+    {
+     "tabRenderer": {
+      "title": "Home",
+      "endpoint": {
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@RickAstleyYT/featured",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+        "params": "EghmZWF0dXJlZPIGBAoCMgA%3D",
+        "canonicalBaseUrl": "/@RickAstleyYT"
+       }
+      },
+      "selected": true
+     }
+    },
+    {
+     "tabRenderer": {
+      "title": "Videos",
+      "endpoint": {
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@RickAstleyYT/videos",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+        "params": "EgZ2aWRlb3PyBgQKAjoA",
+        "canonicalBaseUrl": "/@RickAstleyYT"
+       }
+      }
+     }
+    },
+    {
+     "tabRenderer": {
+      "title": "Shorts",
+      "endpoint": {
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@RickAstleyYT/shorts",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+        "params": "EgZzaG9ydHPyBgUKA5oBAA%3D%3D",
+        "canonicalBaseUrl": "/@RickAstleyYT"
+       }
+      }
+     }
+    },
+    {
+     "tabRenderer": {
+      "title": "Live",
+      "endpoint": {
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@RickAstleyYT/streams",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+        "params": "EgdzdHJlYW1z8gYECgJ6AA%3D%3D",
+        "canonicalBaseUrl": "/@RickAstleyYT"
+       }
+      }
+     }
+    },
+    {
+     "tabRenderer": {
+      "title": "Releases",
+      "endpoint": {
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@RickAstleyYT/releases",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+        "params": "EghyZWxlYXNlc_IGBQoDsgEA",
+        "canonicalBaseUrl": "/@RickAstleyYT"
+       }
+      }
+     }
+    },
+    {
+     "tabRenderer": {
+      "title": "Playlists",
+      "endpoint": {
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@RickAstleyYT/playlists",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+        "params": "EglwbGF5bGlzdHPyBgQKAkIA",
+        "canonicalBaseUrl": "/@RickAstleyYT"
+       }
+      }
+     }
+    },
+    {
+     "tabRenderer": {
+      "title": "Posts",
+      "endpoint": {
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@RickAstleyYT/posts",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+        "params": "EgVwb3N0c_IGBAoCSgA%3D",
+        "canonicalBaseUrl": "/@RickAstleyYT"
+       }
+      }
+     }
+    },
+    {
+     "expandableTabRenderer": {
+      "title": "Search",
+      "endpoint": {
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@RickAstleyYT/search",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+        "params": "EgZzZWFyY2jyBgQKAloA",
+        "canonicalBaseUrl": "/@RickAstleyYT"
+       }
+      },
+      "selected": false
+     }
+    }
+   ]
+  }
+ }
+}

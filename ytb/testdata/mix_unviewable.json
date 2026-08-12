@@ -1,0 +1,118 @@
+{
+ "responseContext": {
+  "visitorData": "(removed from the fixture: it names the session that captured it)",
+  "serviceTrackingParams": [
+   {
+    "service": "GFEEDBACK",
+    "params": [
+     {
+      "key": "browse_id",
+      "value": "VLRDdQw4w9WgXcQ"
+     },
+     {
+      "key": "browse_id_prefix",
+      "value": ""
+     },
+     {
+      "key": "logged_in",
+      "value": "0"
+     },
+     {
+      "key": "visitor_data",
+      "value": "CgtraDdNRnpJX1JtRSjxuO_TBjIKCgJWThIEGgAgGQ%3D%3D"
+     }
+    ]
+   },
+   {
+    "service": "GOOGLE_HELP",
+    "params": [
+     {
+      "key": "browse_id",
+      "value": "VLRDdQw4w9WgXcQ"
+     },
+     {
+      "key": "browse_id_prefix",
+      "value": ""
+     }
+    ]
+   },
+   {
+    "service": "CSI",
+    "params": [
+     {
+      "key": "c",
+      "value": "WEB"
+     },
+     {
+      "key": "cver",
+      "value": "2.20260731.00.00"
+     },
+     {
+      "key": "yt_li",
+      "value": "0"
+     },
+     {
+      "key": "GetPlaylist_rid",
+      "value": "0xfbe372484e6ee857"
+     }
+    ]
+   },
+   {
+    "service": "GUIDED_HELP",
+    "params": [
+     {
+      "key": "logged_in",
+      "value": "0"
+     }
+    ]
+   },
+   {
+    "service": "ECATCHER",
+    "params": [
+     {
+      "key": "client.version",
+      "value": "2.20260731"
+     },
+     {
+      "key": "client.name",
+      "value": "WEB"
+     }
+    ]
+   }
+  ],
+  "mainAppWebResponseContext": {
+   "loggedOut": true,
+   "trackingParam": "k5_fmPxhoXZReN1XL8G7TUnknUrk2_jAbdJc2w_MRyVgG2TU8id4jJ1I_wRMkusEmIBwOcCw59TLtslLKPQGSS"
+  },
+  "responseId": "IhMImZ3jw4ealgMVmLC5BR1QxBlB",
+  "webResponseContextExtensionData": {
+   "webResponseContextPreloadData": {
+    "preloadMessageNames": [
+     "alertRenderer",
+     "microformatDataRenderer"
+    ]
+   },
+   "hasDecorated": true
+  }
+ },
+ "alerts": [
+  {
+   "alertRenderer": {
+    "type": "ERROR",
+    "text": {
+     "runs": [
+      {
+       "text": "This playlist type is unviewable."
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "trackingParams": "CAAQhGciEwiZnePDh5qWAxWYsLkFHVDEGUHKAQS2jZ56",
+ "microformat": {
+  "microformatDataRenderer": {
+   "noindex": true
+  }
+ }
+}

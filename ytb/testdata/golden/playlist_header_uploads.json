@@ -1,0 +1,42 @@
+{
+  "channel_id": "UCuAXFkgsw1L7xaCfnd5JJOw",
+  "channel_title": "Rick Astley",
+  "client": [],
+  "fetched_at": "",
+  "id": "UUuAXFkgsw1L7xaCfnd5JJOw",
+  "is_generated": true,
+  "kind": "playlist",
+  "missed": [
+    "YouTube said: Unavailable videos are hidden"
+  ],
+  "sources": [],
+  "surfaces": [
+    "s2"
+  ],
+  "thumbnails": [
+    {
+      "height": 720,
+      "source": "payload",
+      "url": "https://i.ytimg.com/vi/GdbjNGtWPe4/oar2.jpg?sqp=-oaymwEYCJUDENAFSFqQAgHyq4qpAwcIARUAAIhC\u0026rs=AOn4CLBMNB0kjYF9gZwTHIYlMaRhCrevcw\u0026usqp=CCk",
+      "width": 405
+    },
+    {
+      "height": 608,
+      "source": "payload",
+      "url": "https://i.ytimg.com/vi/GdbjNGtWPe4/oar2.jpg?sqp=-oaymwEbCJUDEOAESFqQAgHyq4qpAwoIARUAAIhCyAEB\u0026rs=AOn4CLA9xKG0RoySA07fGH2HkKTqp19Qdg\u0026usqp=CCk",
+      "width": 405
+    }
+  ],
+  "tier": 0,
+  "title": "Uploads from Rick Astley",
+  "updated_text": "Updated 4 days ago",
+  "url": "https://www.youtube.com/playlist?list=UUuAXFkgsw1L7xaCfnd5JJOw",
+  "via": {
+    "header": "s2 header.playlistHeaderRenderer, the named shape"
+  },
+  "video_count": 435,
+  "video_count_text": "435 videos",
+  "view_count": 281893,
+  "view_count_text": "281,893 views",
+  "visibility": "public"
+}

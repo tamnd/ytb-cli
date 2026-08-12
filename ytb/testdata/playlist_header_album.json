@@ -1,0 +1,240 @@
+{
+ "header": {
+  "playlistHeaderRenderer": {
+   "playlistId": "OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y",
+   "title": {
+    "simpleText": "Album - (What's The Story) Morning Glory? (Remastered)"
+   },
+   "numVideosText": {
+    "runs": [
+     {
+      "text": "40"
+     },
+     {
+      "text": " videos"
+     }
+    ]
+   },
+   "viewCountText": {
+    "simpleText": "4,176,065 views"
+   },
+   "isEditable": false,
+   "stats": [
+    {
+     "runs": [
+      {
+       "text": "40"
+      },
+      {
+       "text": " videos"
+      }
+     ]
+    },
+    {
+     "simpleText": "4,176,065 views"
+    }
+   ],
+   "briefStats": [
+    {
+     "runs": [
+      {
+       "text": "40"
+      },
+      {
+       "text": " videos"
+      }
+     ]
+    }
+   ],
+   "playlistHeaderBanner": {
+    "heroPlaylistThumbnailRenderer": {
+     "thumbnail": {
+      "thumbnails": [
+       {
+        "url": "https://i9.ytimg.com/s_p/OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y/mqdefault.jpg?sqp=CMT7ttMGir7X7AMICMnuyL0GEAE=&rs=AOn4CLCXy46JKS33u9Q56wZX9rs0da7y_w&v=1739732809",
+        "width": 180,
+        "height": 180
+       },
+       {
+        "url": "https://i9.ytimg.com/s_p/OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y/sddefault.jpg?sqp=CMT7ttMGir7X7AMICMnuyL0GEAE=&rs=AOn4CLD82hLC83C5KCC3ZI6ZCDNo8mJJAg&v=1739732809",
+        "width": 640,
+        "height": 640
+       },
+       {
+        "url": "https://i9.ytimg.com/s_p/OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y/maxresdefault.jpg?sqp=CMT7ttMGir7X7AMICMnuyL0GEAE=&rs=AOn4CLDQf80-dUyhk_fLH-gYLj01Gn_BEg&v=1739732809",
+        "width": 1200,
+        "height": 1200
+       }
+      ],
+      "sampledThumbnailColor": {
+       "red": 89,
+       "green": 74,
+       "blue": 71
+      },
+      "darkColorPalette": {
+       "section2Color": 3353128,
+       "iconInactiveColor": 9665142,
+       "iconDisabledColor": 5851719
+      },
+      "vibrantColorPalette": {
+       "iconInactiveColor": 10059642
+      }
+     },
+     "maxRatio": 0.5625,
+     "onTap": {
+      "commandMetadata": {
+       "webCommandMetadata": {
+        "url": "/watch?v=AzLjrfCqrio&list=OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y&pp=8AUB0gcJCbECa94AFGB0",
+        "webPageType": "WEB_PAGE_TYPE_WATCH",
+        "rootVe": 3832
+       }
+      },
+      "watchEndpoint": {
+       "videoId": "AzLjrfCqrio",
+       "playlistId": "OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y",
+       "playerParams": "8AUB0gcJCbECa94AFGB0",
+       "watchEndpointSupportedOnesieConfig": {
+        "html5PlaybackOnesieConfig": {
+         "commonConfig": {
+          "url": "https://rr1---sn-8qj-i5ozd.googlevideo.com/initplayback?source=youtube&oeis=1&c=WEB&oad=3200&ovd=3200&oaad=11000&oavd=11000&ocs=700&oewis=1&oputc=1&olis=1&ofpcc=1&msp=1&odepv=1&id=0332e3adf0aaae2a&ip=14.177.111.100&vip=216.239.38.119&initcwndbps=2242500&mt=1785576574&oweuc="
+         }
+        }
+       }
+      }
+     }
+    }
+   },
+   "subtitle": {
+    "simpleText": "Oasis \u2022 Album"
+   },
+   "byline": [
+    {
+     "playlistBylineRenderer": {
+      "text": {
+       "runs": [
+        {
+         "text": "40"
+        },
+        {
+         "text": " videos"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "playlistBylineRenderer": {
+      "text": {
+       "simpleText": "4,176,065 views"
+      }
+     }
+    },
+    {
+     "playlistBylineRenderer": {
+      "text": {
+       "runs": [
+        {
+         "text": "Last updated on "
+        },
+        {
+         "text": "Jul 20, 2026"
+        }
+       ]
+      }
+     }
+    }
+   ]
+  }
+ },
+ "microformat": {
+  "microformatDataRenderer": {
+   "urlCanonical": "http://www.youtube.com/playlist?list=OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y",
+   "title": "Album - (What's The Story) Morning Glory? (Remastered)",
+   "description": "",
+   "thumbnail": {
+    "thumbnails": [
+     {
+      "url": "https://i9.ytimg.com/s_p/OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y/mqdefault.jpg?sqp=CMT7ttMGir7X7AMICMnuyL0GEAE=&rs=AOn4CLCXy46JKS33u9Q56wZX9rs0da7y_w&v=1739732809&days_since_epoch=20666",
+      "width": 180,
+      "height": 180
+     },
+     {
+      "url": "https://i9.ytimg.com/s_p/OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y/sddefault.jpg?sqp=CMT7ttMGir7X7AMICMnuyL0GEAE=&rs=AOn4CLD82hLC83C5KCC3ZI6ZCDNo8mJJAg&v=1739732809&days_since_epoch=20666",
+      "width": 640,
+      "height": 640
+     },
+     {
+      "url": "https://i9.ytimg.com/s_p/OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y/maxresdefault.jpg?sqp=CMT7ttMGir7X7AMICMnuyL0GEAE=&rs=AOn4CLDQf80-dUyhk_fLH-gYLj01Gn_BEg&v=1739732809&days_since_epoch=20666",
+      "width": 1200,
+      "height": 1200
+     }
+    ],
+    "sampledThumbnailColor": {
+     "red": 89,
+     "green": 74,
+     "blue": 71
+    },
+    "darkColorPalette": {
+     "section2Color": 3353128,
+     "iconInactiveColor": 9665142,
+     "iconDisabledColor": 5851719
+    },
+    "vibrantColorPalette": {
+     "iconInactiveColor": 10059642
+    }
+   },
+   "siteName": "YouTube",
+   "appName": "YouTube",
+   "androidPackage": "com.google.android.youtube",
+   "iosAppStoreId": "544007664",
+   "iosAppArguments": "http://www.youtube.com/playlist?list=OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y",
+   "ogType": "website",
+   "urlApplinksWeb": "http://www.youtube.com/playlist?list=OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y&feature=applinks",
+   "urlApplinksIos": "http://www.youtube.com/playlist?list=OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y&feature=applinks",
+   "urlApplinksAndroid": "http://www.youtube.com/playlist?list=OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y&feature=applinks",
+   "urlTwitterIos": "http://www.youtube.com/playlist?list=OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y&feature=twitter-deep-link",
+   "urlTwitterAndroid": "http://www.youtube.com/playlist?list=OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y&feature=twitter-deep-link",
+   "twitterCardType": "summary",
+   "twitterSiteHandle": "@YouTube",
+   "schemaDotOrgType": "http://schema.org/WebPage",
+   "noindex": true,
+   "unlisted": true,
+   "linkAlternates": [
+    {
+     "hrefUrl": "http://www.youtube.com/playlist?list=OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y"
+    },
+    {
+     "hrefUrl": "android-app://com.google.android.youtube/http/youtube.comhttp://www.youtube.com/playlist?list=OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y"
+    },
+    {
+     "hrefUrl": "ios-app://544007664/http/youtube.comhttp://www.youtube.com/playlist?list=OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y"
+    }
+   ]
+  }
+ },
+ "alerts": [
+  {
+   "alertWithButtonRenderer": {
+    "type": "INFO",
+    "text": {
+     "simpleText": "3 unavailable videos are hidden"
+    },
+    "dismissButton": {
+     "buttonRenderer": {
+      "style": "STYLE_DEFAULT",
+      "size": "SIZE_DEFAULT",
+      "isDisabled": false,
+      "icon": {
+       "iconType": "CLOSE"
+      },
+      "accessibilityData": {
+       "accessibilityData": {
+        "label": "Dismiss"
+       }
+      }
+     }
+    }
+   }
+  }
+ ]
+}

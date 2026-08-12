@@ -1,0 +1,748 @@
+[
+  {
+    "approx_duration_ms": 213061,
+    "audio_channels": 2,
+    "audio_quality": "AUDIO_QUALITY_LOW",
+    "audio_sample_rate": 48000,
+    "average_bitrate": 46234,
+    "bitrate": 49496,
+    "codec": "opus",
+    "container": "webm",
+    "content_length": 1231355,
+    "index_range": {
+      "end": 628,
+      "start": 259
+    },
+    "init_range": {
+      "end": 258,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 249,
+    "last_modified": "2025-12-29T04:04:43.595299+07:00",
+    "media_kind": "audio",
+    "mime_type": "audio/webm; codecs=\"opus\"",
+    "quality": "tiny",
+    "video_id": "dQw4w9WgXcQ"
+  },
+  {
+    "approx_duration_ms": 213061,
+    "audio_channels": 2,
+    "audio_quality": "AUDIO_QUALITY_LOW",
+    "audio_sample_rate": 48000,
+    "average_bitrate": 61149,
+    "bitrate": 65508,
+    "codec": "opus",
+    "container": "webm",
+    "content_length": 1628559,
+    "index_range": {
+      "end": 629,
+      "start": 259
+    },
+    "init_range": {
+      "end": 258,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 250,
+    "last_modified": "2025-12-29T04:04:44.018742+07:00",
+    "media_kind": "audio",
+    "mime_type": "audio/webm; codecs=\"opus\"",
+    "quality": "tiny",
+    "video_id": "dQw4w9WgXcQ"
+  },
+  {
+    "approx_duration_ms": 213089,
+    "audio_channels": 2,
+    "audio_quality": "AUDIO_QUALITY_MEDIUM",
+    "audio_sample_rate": 44100,
+    "average_bitrate": 129502,
+    "bitrate": 130677,
+    "codec": "mp4a.40.2",
+    "container": "mp4",
+    "content_length": 3449447,
+    "index_range": {
+      "end": 1018,
+      "start": 723
+    },
+    "init_range": {
+      "end": 722,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 140,
+    "last_modified": "2025-12-29T04:05:25.572207+07:00",
+    "media_kind": "audio",
+    "mime_type": "audio/mp4; codecs=\"mp4a.40.2\"",
+    "quality": "tiny",
+    "video_id": "dQw4w9WgXcQ"
+  },
+  {
+    "approx_duration_ms": 213061,
+    "audio_channels": 2,
+    "audio_quality": "AUDIO_QUALITY_MEDIUM",
+    "audio_sample_rate": 48000,
+    "average_bitrate": 128930,
+    "bitrate": 136544,
+    "codec": "opus",
+    "container": "webm",
+    "content_length": 3433755,
+    "index_range": {
+      "end": 629,
+      "start": 259
+    },
+    "init_range": {
+      "end": 258,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 251,
+    "last_modified": "2025-12-29T04:04:43.81909+07:00",
+    "media_kind": "audio",
+    "mime_type": "audio/webm; codecs=\"opus\"",
+    "quality": "tiny",
+    "video_id": "dQw4w9WgXcQ"
+  },
+  {
+    "approx_duration_ms": 213040,
+    "average_bitrate": 57861,
+    "bitrate": 68500,
+    "codec": "vp9",
+    "container": "webm",
+    "content_length": 1540844,
+    "fps": 25,
+    "height": 144,
+    "index_range": {
+      "end": 854,
+      "start": 218
+    },
+    "init_range": {
+      "end": 217,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 278,
+    "last_modified": "2025-12-29T05:56:38.503008+07:00",
+    "media_kind": "video",
+    "mime_type": "video/webm; codecs=\"vp9\"",
+    "quality": "tiny",
+    "quality_label": "144p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 256
+  },
+  {
+    "approx_duration_ms": 213040,
+    "average_bitrate": 56534,
+    "bitrate": 83289,
+    "codec": "av01.0.00M.08",
+    "container": "mp4",
+    "content_length": 1505504,
+    "fps": 25,
+    "height": 144,
+    "index_range": {
+      "end": 1187,
+      "start": 700
+    },
+    "init_range": {
+      "end": 699,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 394,
+    "last_modified": "2025-12-29T05:41:29.433204+07:00",
+    "media_kind": "video",
+    "mime_type": "video/mp4; codecs=\"av01.0.00M.08\"",
+    "quality": "tiny",
+    "quality_label": "144p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 256
+  },
+  {
+    "approx_duration_ms": 213040,
+    "average_bitrate": 77286,
+    "bitrate": 109973,
+    "codec": "avc1.4d400c",
+    "container": "mp4",
+    "content_length": 2058142,
+    "fps": 25,
+    "height": 144,
+    "index_range": {
+      "end": 1226,
+      "start": 739
+    },
+    "init_range": {
+      "end": 738,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 160,
+    "last_modified": "2025-12-29T05:32:42.303498+07:00",
+    "media_kind": "video",
+    "mime_type": "video/mp4; codecs=\"avc1.4d400c\"",
+    "quality": "tiny",
+    "quality_label": "144p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 256
+  },
+  {
+    "approx_duration_ms": 213040,
+    "average_bitrate": 101649,
+    "bitrate": 131647,
+    "codec": "vp9",
+    "container": "webm",
+    "content_length": 2706929,
+    "fps": 25,
+    "height": 240,
+    "index_range": {
+      "end": 856,
+      "start": 219
+    },
+    "init_range": {
+      "end": 218,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 242,
+    "last_modified": "2025-12-29T06:16:12.564266+07:00",
+    "media_kind": "video",
+    "mime_type": "video/webm; codecs=\"vp9\"",
+    "quality": "small",
+    "quality_label": "240p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 426
+  },
+  {
+    "approx_duration_ms": 213040,
+    "average_bitrate": 116239,
+    "bitrate": 159709,
+    "codec": "av01.0.00M.08",
+    "container": "mp4",
+    "content_length": 3095447,
+    "fps": 25,
+    "height": 240,
+    "index_range": {
+      "end": 1187,
+      "start": 700
+    },
+    "init_range": {
+      "end": 699,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 395,
+    "last_modified": "2025-12-29T05:28:47.930211+07:00",
+    "media_kind": "video",
+    "mime_type": "video/mp4; codecs=\"av01.0.00M.08\"",
+    "quality": "small",
+    "quality_label": "240p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 426
+  },
+  {
+    "approx_duration_ms": 213040,
+    "average_bitrate": 161852,
+    "bitrate": 236224,
+    "codec": "avc1.4d4015",
+    "container": "mp4",
+    "content_length": 4310122,
+    "fps": 25,
+    "height": 240,
+    "index_range": {
+      "end": 1227,
+      "start": 740
+    },
+    "init_range": {
+      "end": 739,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 133,
+    "last_modified": "2025-12-29T05:31:05.074107+07:00",
+    "media_kind": "video",
+    "mime_type": "video/mp4; codecs=\"avc1.4d4015\"",
+    "quality": "small",
+    "quality_label": "240p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 426
+  },
+  {
+    "approx_duration_ms": 213040,
+    "average_bitrate": 225864,
+    "bitrate": 288453,
+    "codec": "vp9",
+    "container": "webm",
+    "content_length": 6014765,
+    "fps": 25,
+    "height": 360,
+    "index_range": {
+      "end": 857,
+      "start": 220
+    },
+    "init_range": {
+      "end": 219,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 243,
+    "last_modified": "2025-12-29T05:56:37.390784+07:00",
+    "media_kind": "video",
+    "mime_type": "video/webm; codecs=\"vp9\"",
+    "quality": "medium",
+    "quality_label": "360p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 640
+  },
+  {
+    "approx_duration_ms": 213040,
+    "average_bitrate": 213502,
+    "bitrate": 304466,
+    "codec": "av01.0.01M.08",
+    "container": "mp4",
+    "content_length": 5685561,
+    "fps": 25,
+    "height": 360,
+    "index_range": {
+      "end": 1187,
+      "start": 700
+    },
+    "init_range": {
+      "end": 699,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 396,
+    "last_modified": "2025-12-29T04:55:35.473272+07:00",
+    "media_kind": "video",
+    "mime_type": "video/mp4; codecs=\"av01.0.01M.08\"",
+    "quality": "medium",
+    "quality_label": "360p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 640
+  },
+  {
+    "approx_duration_ms": 213040,
+    "average_bitrate": 315092,
+    "bitrate": 450863,
+    "codec": "avc1.4d401e",
+    "container": "mp4",
+    "content_length": 8390921,
+    "fps": 25,
+    "height": 360,
+    "index_range": {
+      "end": 1228,
+      "start": 741
+    },
+    "init_range": {
+      "end": 740,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 134,
+    "last_modified": "2025-12-29T05:26:11.651324+07:00",
+    "media_kind": "video",
+    "mime_type": "video/mp4; codecs=\"avc1.4d401e\"",
+    "quality": "medium",
+    "quality_label": "360p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 640
+  },
+  {
+    "approx_duration_ms": 213040,
+    "average_bitrate": 352289,
+    "bitrate": 466632,
+    "codec": "vp9",
+    "container": "webm",
+    "content_length": 9381481,
+    "fps": 25,
+    "height": 480,
+    "index_range": {
+      "end": 857,
+      "start": 220
+    },
+    "init_range": {
+      "end": 219,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 244,
+    "last_modified": "2025-12-29T05:43:01.254744+07:00",
+    "media_kind": "video",
+    "mime_type": "video/webm; codecs=\"vp9\"",
+    "quality": "large",
+    "quality_label": "480p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 854
+  },
+  {
+    "approx_duration_ms": 213040,
+    "average_bitrate": 370815,
+    "bitrate": 525728,
+    "codec": "av01.0.04M.08",
+    "container": "mp4",
+    "content_length": 9874826,
+    "fps": 25,
+    "height": 480,
+    "index_range": {
+      "end": 1187,
+      "start": 700
+    },
+    "init_range": {
+      "end": 699,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 397,
+    "last_modified": "2025-12-29T05:30:26.797508+07:00",
+    "media_kind": "video",
+    "mime_type": "video/mp4; codecs=\"av01.0.04M.08\"",
+    "quality": "large",
+    "quality_label": "480p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 854
+  },
+  {
+    "approx_duration_ms": 213040,
+    "average_bitrate": 529610,
+    "bitrate": 690764,
+    "codec": "avc1.4d401e",
+    "container": "mp4",
+    "content_length": 14103519,
+    "fps": 25,
+    "height": 480,
+    "index_range": {
+      "end": 1228,
+      "start": 741
+    },
+    "init_range": {
+      "end": 740,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 135,
+    "last_modified": "2025-12-29T04:43:32.394312+07:00",
+    "media_kind": "video",
+    "mime_type": "video/mp4; codecs=\"avc1.4d401e\"",
+    "quality": "large",
+    "quality_label": "480p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 854
+  },
+  {
+    "approx_duration_ms": 213040,
+    "average_bitrate": 664165,
+    "bitrate": 867871,
+    "codec": "vp9",
+    "container": "webm",
+    "content_length": 17686717,
+    "fps": 25,
+    "height": 720,
+    "index_range": {
+      "end": 860,
+      "start": 220
+    },
+    "init_range": {
+      "end": 219,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 247,
+    "last_modified": "2025-12-29T05:51:12.8137+07:00",
+    "media_kind": "video",
+    "mime_type": "video/webm; codecs=\"vp9\"",
+    "quality": "hd720",
+    "quality_label": "720p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 1280
+  },
+  {
+    "approx_duration_ms": 213040,
+    "average_bitrate": 660648,
+    "bitrate": 1012348,
+    "codec": "av01.0.05M.08",
+    "container": "mp4",
+    "content_length": 17593076,
+    "fps": 25,
+    "height": 720,
+    "index_range": {
+      "end": 1187,
+      "start": 700
+    },
+    "init_range": {
+      "end": 699,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 398,
+    "last_modified": "2025-12-29T05:28:48.964543+07:00",
+    "media_kind": "video",
+    "mime_type": "video/mp4; codecs=\"av01.0.05M.08\"",
+    "quality": "hd720",
+    "quality_label": "720p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 1280
+  },
+  {
+    "approx_duration_ms": 213040,
+    "average_bitrate": 993461,
+    "bitrate": 1058310,
+    "codec": "avc1.4d401f",
+    "container": "mp4",
+    "content_length": 26455880,
+    "fps": 25,
+    "height": 720,
+    "index_range": {
+      "end": 1227,
+      "start": 740
+    },
+    "init_range": {
+      "end": 739,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 136,
+    "last_modified": "2025-12-29T04:43:24.1355+07:00",
+    "media_kind": "video",
+    "mime_type": "video/mp4; codecs=\"avc1.4d401f\"",
+    "quality": "hd720",
+    "quality_label": "720p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 1280
+  },
+  {
+    "approx_duration_ms": 213040,
+    "average_bitrate": 1158339,
+    "bitrate": 1549172,
+    "codec": "vp9",
+    "container": "webm",
+    "content_length": 30846580,
+    "fps": 25,
+    "height": 1080,
+    "index_range": {
+      "end": 874,
+      "start": 220
+    },
+    "init_range": {
+      "end": 219,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 248,
+    "last_modified": "2025-12-29T06:11:34.258902+07:00",
+    "media_kind": "video",
+    "mime_type": "video/webm; codecs=\"vp9\"",
+    "quality": "hd1080",
+    "quality_label": "1080p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 1920
+  },
+  {
+    "approx_duration_ms": 213040,
+    "average_bitrate": 1142170,
+    "bitrate": 1594543,
+    "codec": "av01.0.08M.08",
+    "container": "mp4",
+    "content_length": 30415996,
+    "fps": 25,
+    "height": 1080,
+    "index_range": {
+      "end": 1187,
+      "start": 700
+    },
+    "init_range": {
+      "end": 699,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 399,
+    "last_modified": "2025-12-29T08:15:05.427393+07:00",
+    "media_kind": "video",
+    "mime_type": "video/mp4; codecs=\"av01.0.08M.08\"",
+    "quality": "hd1080",
+    "quality_label": "1080p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 1920
+  },
+  {
+    "approx_duration_ms": 213040,
+    "average_bitrate": 3038377,
+    "bitrate": 4334157,
+    "codec": "avc1.640028",
+    "container": "mp4",
+    "content_length": 80911999,
+    "fps": 25,
+    "height": 1080,
+    "index_range": {
+      "end": 1229,
+      "start": 742
+    },
+    "init_range": {
+      "end": 741,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 137,
+    "last_modified": "2025-12-29T04:38:46.17425+07:00",
+    "media_kind": "video",
+    "mime_type": "video/mp4; codecs=\"avc1.640028\"",
+    "quality": "hd1080",
+    "quality_label": "1080p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 1920
+  },
+  {
+    "approx_duration_ms": 213040,
+    "average_bitrate": 4587618,
+    "bitrate": 7755221,
+    "codec": "av01.0.12M.08",
+    "container": "mp4",
+    "content_length": 122168277,
+    "fps": 25,
+    "height": 1440,
+    "index_range": {
+      "end": 1188,
+      "start": 701
+    },
+    "init_range": {
+      "end": 700,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 400,
+    "last_modified": "2025-12-29T05:34:06.255689+07:00",
+    "media_kind": "video",
+    "mime_type": "video/mp4; codecs=\"av01.0.12M.08\"",
+    "quality": "hd1440",
+    "quality_label": "1440p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 2560
+  },
+  {
+    "approx_duration_ms": 213040,
+    "average_bitrate": 5674177,
+    "bitrate": 8978328,
+    "codec": "vp9",
+    "container": "webm",
+    "content_length": 151103346,
+    "fps": 25,
+    "height": 1440,
+    "index_range": {
+      "end": 889,
+      "start": 220
+    },
+    "init_range": {
+      "end": 219,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 271,
+    "last_modified": "2025-12-29T05:59:16.705951+07:00",
+    "media_kind": "video",
+    "mime_type": "video/webm; codecs=\"vp9\"",
+    "quality": "hd1440",
+    "quality_label": "1440p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 2560
+  },
+  {
+    "approx_duration_ms": 213040,
+    "average_bitrate": 9024958,
+    "bitrate": 17400774,
+    "codec": "av01.0.12M.08",
+    "container": "mp4",
+    "content_length": 240334643,
+    "fps": 25,
+    "height": 2160,
+    "index_range": {
+      "end": 1188,
+      "start": 701
+    },
+    "init_range": {
+      "end": 700,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 401,
+    "last_modified": "2025-12-29T05:33:46.342025+07:00",
+    "media_kind": "video",
+    "mime_type": "video/mp4; codecs=\"av01.0.12M.08\"",
+    "quality": "hd2160",
+    "quality_label": "2160p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 3840
+  },
+  {
+    "approx_duration_ms": 213040,
+    "average_bitrate": 13466333,
+    "bitrate": 18076636,
+    "codec": "vp9",
+    "container": "webm",
+    "content_length": 358608461,
+    "fps": 25,
+    "height": 2160,
+    "index_range": {
+      "end": 893,
+      "start": 221
+    },
+    "init_range": {
+      "end": 220,
+      "start": 0
+    },
+    "is_adaptive": true,
+    "is_throttled_unranged": true,
+    "itag": 313,
+    "last_modified": "2025-12-29T06:11:32.248817+07:00",
+    "media_kind": "video",
+    "mime_type": "video/webm; codecs=\"vp9\"",
+    "quality": "hd2160",
+    "quality_label": "2160p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 3840
+  },
+  {
+    "approx_duration_ms": 213089,
+    "audio_channels": 2,
+    "audio_quality": "AUDIO_QUALITY_LOW",
+    "audio_sample_rate": 44100,
+    "bitrate": 444226,
+    "codec": "avc1.42001E+mp4a.40.2",
+    "container": "mp4",
+    "fps": 25,
+    "height": 360,
+    "is_adaptive": false,
+    "is_throttled_unranged": true,
+    "itag": 18,
+    "last_modified": "2025-12-29T05:29:13.317159+07:00",
+    "media_kind": "muxed",
+    "mime_type": "video/mp4; codecs=\"avc1.42001E, mp4a.40.2\"",
+    "note": "size unknown",
+    "quality": "medium",
+    "quality_label": "360p",
+    "video_id": "dQw4w9WgXcQ",
+    "width": 640
+  }
+]

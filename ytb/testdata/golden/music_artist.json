@@ -1,0 +1,335 @@
+{
+  "albums": [
+    {
+      "id": "MPREb_DBJN4xdH4Cn",
+      "kind": "album",
+      "playlist_id": "OLAK5uy_kRKqWyp7z794YYSrt2vQFixvd2lQqcT3w",
+      "shelf": "Albums",
+      "subtitle": "2026",
+      "thumbnails": [
+        {
+          "height": 226,
+          "source": "payload",
+          "url": "https://yt3.googleusercontent.com/sIJfodhnztqNNX6WGiITN6In2ELjIL4aMO73-89tXtI4Je-k7VwrNeRQIUak6F8d1lAHO2LpizuMEW4A=w226-h226-l90-rj",
+          "width": 226
+        }
+      ],
+      "title": "50 (10th Anniversary Deluxe Edition)",
+      "url": "https://music.youtube.com/browse/MPREb_DBJN4xdH4Cn",
+      "year": "2026"
+    },
+    {
+      "id": "MPREb_Me5NUhDIBWQ",
+      "kind": "album",
+      "playlist_id": "OLAK5uy_kKuGqoUQo37hejjtZXF1ALYGh1gSXjcUQ",
+      "shelf": "Albums",
+      "subtitle": "2023",
+      "thumbnails": [
+        {
+          "height": 226,
+          "source": "payload",
+          "url": "https://yt3.googleusercontent.com/pdBUJVrn_g0acQ-YnRi_EH-iNCNwYZZeePdzkT2KQ50RjhACWLD8P7cpAOpN-tVMvMpy3RIjv7jp7eFi_A=w226-h226-l90-rj",
+          "width": 226
+        }
+      ],
+      "title": "Are We There Yet?",
+      "url": "https://music.youtube.com/browse/MPREb_Me5NUhDIBWQ",
+      "year": "2023"
+    }
+  ],
+  "client": null,
+  "description": "Richard Paul Astley is an English singer, songwriter, radio DJ and podcaster. He gained fame through his association with the production trio Stock Aitken Waterman, releasing the 1987 album Whenever You Need Somebody, which sold 15 million copies worldwide and was certified platinum by both the BPI and the RIAA. His debut single \"Never Gonna Give You Up\" was a No. 1 hit in more than 25 countries, winning the 1988 Brit Award for Best British Single. The song also stayed at the top of the UK chart for five weeks in 1987 and was the best-selling single of that year. His 1988 single \"Together Forever\" also topped the US Billboard Hot 100 and was one of his eight songs to reach the UK Singles Chart top 10. In 1988, Astley followed up his debut album with Hold Me in Your Arms which achieved platinum and gold certifications internationally. The lead single \"She Wants to Dance with Me\" became a worldwide top 10 hit. In 1991, he left Stock Aitken Waterman and moved his musical direction towards soul, which he explored on his other albums. His 1991 single \"Cry for Help\" was his last single to reach the top 10 in either the US or UK. From Wikipedia (https://en.wikipedia.org/wiki/Rick_As...) under Creative Commons Attribution CC-BY-SA 3.0 (http://creativecommons.org/licenses/b...)",
+  "fetched_at": "",
+  "id": "",
+  "kind": "",
+  "missed": null,
+  "monthly_listeners_text": "15.6M monthly audience",
+  "name": "Rick Astley",
+  "playlists": [
+    {
+      "album_type": "Playlist",
+      "id": "RDCLAK5uy_lEJSMz3ixa8UNloLg1geQT_DsB0C9a02g",
+      "kind": "playlist",
+      "shelf": "Featured on",
+      "subtitle": "Playlist •",
+      "thumbnails": [
+        {
+          "height": 226,
+          "source": "payload",
+          "url": "https://yt3.googleusercontent.com/DNRG-r9BahKEXevtRECcdD5i0h8INS2LjTBj2uNTL1-RHHZyQkaRiNdOOGqMV9iEA-k0A3EP3FaOFm-I=w226-h226-l90-rj",
+          "width": 226
+        }
+      ],
+      "title": "80s Pop Party",
+      "url": "https://music.youtube.com/playlist?list=RDCLAK5uy_lEJSMz3ixa8UNloLg1geQT_DsB0C9a02g"
+    },
+    {
+      "album_type": "Playlist",
+      "id": "RDCLAK5uy_mxr2HLaCNT9Q9Q4tfatCjfr8mPtgFTLvI",
+      "kind": "playlist",
+      "shelf": "Featured on",
+      "subtitle": "Playlist •",
+      "thumbnails": [
+        {
+          "height": 226,
+          "source": "payload",
+          "url": "https://yt3.googleusercontent.com/yhllX3PkAq4kPTt93hxPA6-9duPoTLQEOMiBTFqBafMOWeYzbilGQpmz6DNwxIfNHIpkxdoIwr6YHbo=w226-h226-l90-rj",
+          "width": 226
+        }
+      ],
+      "title": "Prom Dance Classics",
+      "url": "https://music.youtube.com/playlist?list=RDCLAK5uy_mxr2HLaCNT9Q9Q4tfatCjfr8mPtgFTLvI"
+    }
+  ],
+  "singles": [
+    {
+      "album_type": "Single",
+      "id": "MPREb_SslJVn92SLw",
+      "kind": "album",
+      "playlist_id": "OLAK5uy_l2RkobfgMPquFbJKsPAKefrMlOMMpMmPU",
+      "shelf": "Singles \u0026 EPs",
+      "subtitle": "Single •",
+      "thumbnails": [
+        {
+          "height": 226,
+          "source": "payload",
+          "url": "https://yt3.googleusercontent.com/bHQjae3AfkyNZvZst0YfM6YutrhI8cRAlehm7ZmhabKj6gYO2kvc4TZVQNeWgft440w9X7AKpRx_NqSxcg=w226-h226-l90-rj",
+          "width": 226
+        }
+      ],
+      "title": "Raindrops",
+      "url": "https://music.youtube.com/browse/MPREb_SslJVn92SLw"
+    },
+    {
+      "album_type": "Single",
+      "id": "MPREb_1cjGnxYuQzu",
+      "kind": "album",
+      "playlist_id": "OLAK5uy_l0MFR4s8YeugtUJd_aaB3D2KGR4HuZ2EQ",
+      "shelf": "Singles \u0026 EPs",
+      "subtitle": "Single •",
+      "thumbnails": [
+        {
+          "height": 226,
+          "source": "payload",
+          "url": "https://yt3.googleusercontent.com/cG5wWEoGouLLPVfogHeUF-bNW2cQINyizdUOtlZwXdglyh7bi9EDXHiE-nx1ID2o0S5z1J491UyTdiCr=w226-h226-l90-rj",
+          "width": 226
+        }
+      ],
+      "title": "Waiting On You",
+      "url": "https://music.youtube.com/browse/MPREb_1cjGnxYuQzu"
+    }
+  ],
+  "sources": null,
+  "surfaces": null,
+  "thumbnails": [
+    {
+      "height": 225,
+      "source": "payload",
+      "url": "https://yt3.googleusercontent.com/MOWpaiGJdgN4aKMI-NGQLL4jMVP3aDORlQpOBWooi0GSE2TGt4_9ncyepk1pCh-yWQ795AhPbw=w540-h225-l90-rj-dcKRae7REL",
+      "width": 540
+    }
+  ],
+  "tier": 0,
+  "top_tracks": [
+    {
+      "artist_ids": [
+        "UCwZEU0wAwIyZb4x5G_KJp2w"
+      ],
+      "artist_names": [
+        "Rick Astley"
+      ],
+      "client": [
+        "WEB_REMIX"
+      ],
+      "fetched_at": "",
+      "id": "lYBUbBu4W08",
+      "kind": "track",
+      "missed": [],
+      "music_video_type": "ATV",
+      "plays_text": "2B plays",
+      "sources": [
+        "golden"
+      ],
+      "surfaces": [
+        "s10"
+      ],
+      "thumbnails": [
+        {
+          "height": 60,
+          "source": "payload",
+          "url": "https://yt3.googleusercontent.com/eC9DfRcYSk4FE-fvDCJSu_4xsKdVMKxwmFTYFZwP8OqB7R4TKxAjKoR-Kp1lXeRi2WddPFYulSte4eW-=w60-h60-l90-rj",
+          "width": 60
+        }
+      ],
+      "tier": 0,
+      "title": "Never Gonna Give You Up",
+      "url": "https://music.youtube.com/watch?v=lYBUbBu4W08",
+      "via": {}
+    },
+    {
+      "artist_ids": [
+        "UCwZEU0wAwIyZb4x5G_KJp2w"
+      ],
+      "artist_names": [
+        "Rick Astley"
+      ],
+      "client": [
+        "WEB_REMIX"
+      ],
+      "fetched_at": "",
+      "id": "i_Q88T1HI_w",
+      "kind": "track",
+      "missed": [],
+      "music_video_type": "ATV",
+      "plays_text": "265M plays",
+      "sources": [
+        "golden"
+      ],
+      "surfaces": [
+        "s10"
+      ],
+      "thumbnails": [
+        {
+          "height": 60,
+          "source": "payload",
+          "url": "https://yt3.googleusercontent.com/eC9DfRcYSk4FE-fvDCJSu_4xsKdVMKxwmFTYFZwP8OqB7R4TKxAjKoR-Kp1lXeRi2WddPFYulSte4eW-=w60-h60-l90-rj",
+          "width": 60
+        }
+      ],
+      "tier": 0,
+      "title": "Together Forever",
+      "url": "https://music.youtube.com/watch?v=i_Q88T1HI_w",
+      "via": {}
+    },
+    {
+      "artist_ids": [
+        "UCwZEU0wAwIyZb4x5G_KJp2w"
+      ],
+      "artist_names": [
+        "Rick Astley"
+      ],
+      "client": [
+        "WEB_REMIX"
+      ],
+      "fetched_at": "",
+      "id": "3BFTio5296w",
+      "kind": "track",
+      "missed": [],
+      "music_video_type": "ATV",
+      "plays_text": "11M plays",
+      "sources": [
+        "golden"
+      ],
+      "surfaces": [
+        "s10"
+      ],
+      "thumbnails": [
+        {
+          "height": 60,
+          "source": "payload",
+          "url": "https://yt3.googleusercontent.com/SCoMmJu-MRsB4-81EKNgLE-sv9LgLsP6q8aj8TFRE9I8GDPJww-UPzZr-k6C_mCg9q2-V4GzbNtU32pX=w60-h60-l90-rj",
+          "width": 60
+        }
+      ],
+      "tier": 0,
+      "title": "Never Gonna Give You Up (2022 Remaster)",
+      "url": "https://music.youtube.com/watch?v=3BFTio5296w",
+      "via": {}
+    }
+  ],
+  "via": null,
+  "videos": [
+    {
+      "artist_ids": [
+        "UCwZEU0wAwIyZb4x5G_KJp2w"
+      ],
+      "artist_names": [
+        "Rick Astley"
+      ],
+      "id": "dQw4w9WgXcQ",
+      "kind": "track",
+      "music_video_type": "OMV",
+      "shelf": "Videos",
+      "subtitle": "Rick Astley •",
+      "thumbnails": [
+        {
+          "height": 225,
+          "source": "payload",
+          "url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg?sqp=-oaymwEWCJADEOEBIAQqCggAEOADGC0guwJIWg\u0026rs=AMzJL3lrEQLVd7aUH6RTaLjc4JkVVNINHQ",
+          "width": 400
+        }
+      ],
+      "title": "Never Gonna Give You Up",
+      "url": "https://music.youtube.com/watch?v=dQw4w9WgXcQ"
+    },
+    {
+      "artist_ids": [
+        "UCwZEU0wAwIyZb4x5G_KJp2w"
+      ],
+      "artist_names": [
+        "Rick Astley"
+      ],
+      "id": "yPYZpwSpKmA",
+      "kind": "track",
+      "music_video_type": "OMV",
+      "shelf": "Videos",
+      "subtitle": "Rick Astley •",
+      "thumbnails": [
+        {
+          "height": 225,
+          "source": "payload",
+          "url": "https://i.ytimg.com/vi/yPYZpwSpKmA/hqdefault.jpg?sqp=-oaymwEWCJADEOEBIAQqCggAEOADGC0guwJIWg\u0026rs=AMzJL3kXZXeY-1aCjQEWu0o-GXDChKEfOA",
+          "width": 400
+        }
+      ],
+      "title": "Together Forever (2022 Remaster)",
+      "url": "https://music.youtube.com/watch?v=yPYZpwSpKmA"
+    },
+    {
+      "artist_ids": [
+        "UCwZEU0wAwIyZb4x5G_KJp2w"
+      ],
+      "artist_names": [
+        "Rick Astley"
+      ],
+      "id": "PXC_PYeB6F8",
+      "kind": "track",
+      "music_video_type": "OMV",
+      "shelf": "Live performances",
+      "subtitle": "Rick Astley •",
+      "thumbnails": [
+        {
+          "height": 225,
+          "source": "payload",
+          "url": "https://i.ytimg.com/vi/PXC_PYeB6F8/hqdefault.jpg?sqp=-oaymwEWCJADEOEBIAQqCggAEOADGC0guwJIWg\u0026rs=AMzJL3ml2gBPHI6_QUFkBlzHSTSrRAC0gw",
+          "width": 400
+        }
+      ],
+      "title": "Rick Astley - Angels On My Side (Live at The O2, London, April 2026)",
+      "url": "https://music.youtube.com/watch?v=PXC_PYeB6F8"
+    },
+    {
+      "artist_ids": [
+        "UCwZEU0wAwIyZb4x5G_KJp2w"
+      ],
+      "artist_names": [
+        "Rick Astley"
+      ],
+      "id": "wvr7-pDJUOA",
+      "kind": "track",
+      "music_video_type": "OMV",
+      "shelf": "Live performances",
+      "subtitle": "Rick Astley •",
+      "thumbnails": [
+        {
+          "height": 225,
+          "source": "payload",
+          "url": "https://i.ytimg.com/vi/wvr7-pDJUOA/hqdefault.jpg?sqp=-oaymwEWCJADEOEBIAQqCggAEOADGC0guwJIWg\u0026rs=AMzJL3nsVy69e1VG5413-IgK92hKBHM_fA",
+          "width": 400
+        }
+      ],
+      "title": "Keep Singing",
+      "url": "https://music.youtube.com/watch?v=wvr7-pDJUOA"
+    }
+  ]
+}

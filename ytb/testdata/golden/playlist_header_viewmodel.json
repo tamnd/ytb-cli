@@ -1,0 +1,55 @@
+{
+  "channel_id": "UCuAXFkgsw1L7xaCfnd5JJOw",
+  "channel_title": "Rick Astley",
+  "client": [],
+  "description": "New single 'Waiting On You' is out now https://rickastley.lnk.to/WaitingOnYouID",
+  "fetched_at": "",
+  "id": "PLlaN88a7y2_rosKX2WQt2VjFbjyDQXOkR",
+  "is_generated": false,
+  "kind": "playlist",
+  "missed": [
+    "this header shape carries no updated_text; only playlistHeaderRenderer states when a playlist last changed",
+    "YouTube said: 64 unavailable videos are hidden"
+  ],
+  "sources": [],
+  "surfaces": [
+    "s2"
+  ],
+  "thumbnails": [
+    {
+      "height": 94,
+      "source": "payload",
+      "url": "https://i.ytimg.com/vi/zRVjZ2DJ9Cg/hqdefault.jpg?sqp=-oaymwEWCKgBEF5IWvKriqkDCQgBFQAAiEIYAQ==\u0026rs=AOn4CLDvMWvKnU30aEBbIvslujztUdJ-RA",
+      "width": 168
+    },
+    {
+      "height": 110,
+      "source": "payload",
+      "url": "https://i.ytimg.com/vi/zRVjZ2DJ9Cg/hqdefault.jpg?sqp=-oaymwEWCMQBEG5IWvKriqkDCQgBFQAAiEIYAQ==\u0026rs=AOn4CLAZiBk9ZV2irW15ilZmNN7bnmWGcA",
+      "width": 196
+    },
+    {
+      "height": 138,
+      "source": "payload",
+      "url": "https://i.ytimg.com/vi/zRVjZ2DJ9Cg/hqdefault.jpg?sqp=-oaymwEXCPYBEIoBSFryq4qpAwkIARUAAIhCGAE=\u0026rs=AOn4CLA5-dkbq2umnD0-9HoOTpd3AvokTw",
+      "width": 246
+    },
+    {
+      "height": 188,
+      "source": "payload",
+      "url": "https://i.ytimg.com/vi/zRVjZ2DJ9Cg/hqdefault.jpg?sqp=-oaymwEXCNACELwBSFryq4qpAwkIARUAAIhCGAE=\u0026rs=AOn4CLCD0N6BYNaMAPa1vklx6ZzAn4a44A",
+      "width": 336
+    }
+  ],
+  "tier": 0,
+  "title": "Rick Astley: Complete",
+  "url": "https://www.youtube.com/playlist?list=PLlaN88a7y2_rosKX2WQt2VjFbjyDQXOkR",
+  "via": {
+    "header": "s2 header.pageHeaderRenderer, the view model shape"
+  },
+  "video_count": 128,
+  "video_count_text": "128 videos",
+  "view_count": 815463,
+  "view_count_text": "815,463 views",
+  "visibility": "public"
+}

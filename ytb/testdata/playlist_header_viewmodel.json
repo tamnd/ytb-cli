@@ -1,0 +1,439 @@
+{
+ "header": {
+  "pageHeaderRenderer": {
+   "pageTitle": "Rick Astley: Complete",
+   "content": {
+    "pageHeaderViewModel": {
+     "title": {
+      "dynamicTextViewModel": {
+       "text": {
+        "content": "Rick Astley: Complete"
+       },
+       "rendererContext": {}
+      }
+     },
+     "metadata": {
+      "contentMetadataViewModel": {
+       "metadataRows": [
+        {
+         "metadataParts": [
+          {
+           "avatarStack": {
+            "avatarStackViewModel": {
+             "avatars": [
+              {
+               "avatarViewModel": {
+                "image": {
+                 "sources": [
+                  {
+                   "url": "https://yt3.ggpht.com/MOWpaiGJdgN4aKMI-NGQLL4jMVP3aDORlQpOBWooi0GSE2TGt4_9ncyepk1pCh-yWQ795AhPbw=s48-c-k-c0x00ffffff-no-rj",
+                   "width": 48,
+                   "height": 48
+                  }
+                 ],
+                 "processor": {
+                  "borderImageProcessor": {
+                   "circular": true
+                  }
+                 }
+                },
+                "avatarImageSize": "AVATAR_SIZE_XS"
+               }
+              }
+             ],
+             "text": {
+              "content": "Rick Astley",
+              "commandRuns": [
+               {
+                "startIndex": 0,
+                "length": 11,
+                "onTap": {
+                 "innertubeCommand": {
+                  "commandMetadata": {
+                   "webCommandMetadata": {
+                    "url": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+                    "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                    "rootVe": 3611,
+                    "apiUrl": "/youtubei/v1/browse"
+                   }
+                  },
+                  "browseEndpoint": {
+                   "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+                   "canonicalBaseUrl": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw"
+                  }
+                 }
+                }
+               }
+              ]
+             },
+             "rendererContext": {
+              "accessibilityContext": {
+               "label": "Rick Astley"
+              },
+              "commandContext": {
+               "onTap": {
+                "innertubeCommand": {
+                 "commandMetadata": {
+                  "webCommandMetadata": {
+                   "url": "/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+                   "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                   "rootVe": 3611,
+                   "apiUrl": "/youtubei/v1/browse"
+                  }
+                 },
+                 "browseEndpoint": {
+                  "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw"
+                 }
+                }
+               }
+              }
+             }
+            }
+           }
+          }
+         ]
+        },
+        {
+         "metadataParts": [
+          {
+           "text": {
+            "content": "Playlist"
+           }
+          },
+          {
+           "text": {
+            "content": "128 videos"
+           }
+          },
+          {
+           "text": {
+            "content": "815,463 views"
+           }
+          }
+         ]
+        }
+       ],
+       "delimiter": "\u2022",
+       "rendererContext": {}
+      }
+     },
+     "description": {
+      "descriptionPreviewViewModel": {
+       "description": {
+        "content": "New single 'Waiting On You' is out now https://rickastley.lnk.to/WaitingOnYouID"
+       },
+       "truncationText": {
+        "content": "...more"
+       },
+       "rendererContext": {
+        "accessibilityContext": {
+         "label": "Description. New single 'Waiting On You' is out now https://rickastley.ln...tap for more."
+        },
+        "commandContext": {
+         "onTap": {
+          "innertubeCommand": {
+           "showEngagementPanelEndpoint": {
+            "engagementPanel": {
+             "engagementPanelSectionListRenderer": {
+              "header": {
+               "engagementPanelTitleHeaderRenderer": {
+                "title": {
+                 "runs": [
+                  {
+                   "text": "Description"
+                  }
+                 ]
+                },
+                "visibilityButton": {
+                 "buttonRenderer": {
+                  "icon": {
+                   "iconType": "CLOSE"
+                  },
+                  "accessibilityData": {
+                   "accessibilityData": {
+                    "label": "Close"
+                   }
+                  },
+                  "command": {
+                   "changeEngagementPanelVisibilityAction": {
+                    "targetId": "engagement-panel-page-headers-description",
+                    "visibility": "ENGAGEMENT_PANEL_VISIBILITY_HIDDEN"
+                   }
+                  }
+                 }
+                }
+               }
+              },
+              "content": {
+               "sectionListRenderer": {
+                "contents": [
+                 {
+                  "itemSectionRenderer": {
+                   "contents": [
+                    {
+                     "messageRenderer": {
+                      "text": {
+                       "runs": [
+                        {
+                         "text": "New single 'Waiting On You' is out now https://rickastley.lnk.to/WaitingOnYouID"
+                        }
+                       ]
+                      },
+                      "style": {
+                       "value": "RENDER_STYLE_NO_PADDING"
+                      }
+                     }
+                    }
+                   ]
+                  }
+                 }
+                ]
+               }
+              },
+              "targetId": "engagement-panel-page-headers-description",
+              "identifier": {
+               "surface": "ENGAGEMENT_PANEL_SURFACE_BROWSE",
+               "tag": "engagement-panel-page-headers-description"
+              }
+             }
+            },
+            "identifier": {
+             "surface": "ENGAGEMENT_PANEL_SURFACE_BROWSE",
+             "tag": "engagement-panel-page-headers-description"
+            },
+            "engagementPanelPresentationConfigs": {
+             "engagementPanelPopupPresentationConfig": {
+              "popupType": "PANEL_POPUP_TYPE_DIALOG"
+             }
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     },
+     "heroImage": {
+      "contentPreviewImageViewModel": {
+       "image": {
+        "sources": [
+         {
+          "url": "https://i.ytimg.com/vi/zRVjZ2DJ9Cg/hqdefault.jpg?sqp=-oaymwEWCKgBEF5IWvKriqkDCQgBFQAAiEIYAQ==&rs=AOn4CLDvMWvKnU30aEBbIvslujztUdJ-RA",
+          "width": 168,
+          "height": 94
+         },
+         {
+          "url": "https://i.ytimg.com/vi/zRVjZ2DJ9Cg/hqdefault.jpg?sqp=-oaymwEWCMQBEG5IWvKriqkDCQgBFQAAiEIYAQ==&rs=AOn4CLAZiBk9ZV2irW15ilZmNN7bnmWGcA",
+          "width": 196,
+          "height": 110
+         },
+         {
+          "url": "https://i.ytimg.com/vi/zRVjZ2DJ9Cg/hqdefault.jpg?sqp=-oaymwEXCPYBEIoBSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLA5-dkbq2umnD0-9HoOTpd3AvokTw",
+          "width": 246,
+          "height": 138
+         },
+         {
+          "url": "https://i.ytimg.com/vi/zRVjZ2DJ9Cg/hqdefault.jpg?sqp=-oaymwEXCNACELwBSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLCD0N6BYNaMAPa1vklx6ZzAn4a44A",
+          "width": 336,
+          "height": 188
+         }
+        ]
+       },
+       "style": "CONTENT_PREVIEW_IMAGE_STYLE_HORIZONTAL_RECTANGLE_16_BY_9",
+       "layoutMode": "CONTENT_PREVIEW_IMAGE_LAYOUT_MODE_FULL_WIDTH",
+       "overlays": [
+        {
+         "thumbnailHoverOverlayViewModel": {
+          "icon": {
+           "sources": [
+            {
+             "clientResource": {
+              "imageName": "PLAY_ALL"
+             }
+            }
+           ]
+          },
+          "text": {
+           "content": "Play all"
+          },
+          "style": "THUMBNAIL_HOVER_OVERLAY_STYLE_COVER",
+          "rendererContext": {
+           "commandContext": {
+            "onTap": {
+             "innertubeCommand": {
+              "commandMetadata": {
+               "webCommandMetadata": {
+                "url": "/watch?v=zRVjZ2DJ9Cg&list=PLlaN88a7y2_rosKX2WQt2VjFbjyDQXOkR&pp=iAQB8AUB",
+                "webPageType": "WEB_PAGE_TYPE_WATCH",
+                "rootVe": 3832
+               }
+              },
+              "watchEndpoint": {
+               "videoId": "zRVjZ2DJ9Cg",
+               "playlistId": "PLlaN88a7y2_rosKX2WQt2VjFbjyDQXOkR",
+               "playerParams": "iAQB8AUB",
+               "watchEndpointSupportedOnesieConfig": {
+                "html5PlaybackOnesieConfig": {
+                 "commonConfig": {
+                  "url": "https://rr1---sn-8qj-i5orz.googlevideo.com/initplayback?source=youtube&oeis=1&c=WEB&oad=3200&ovd=3200&oaad=11000&oavd=11000&ocs=700&oewis=1&oputc=1&olis=1&ofpcc=1&msp=1&odepv=1&id=cd15636760c9f428&ip=14.177.111.100&vip=216.239.38.119&initcwndbps=2743750&mt=1785576574&oweuc="
+                 }
+                }
+               }
+              }
+             }
+            }
+           }
+          }
+         }
+        }
+       ],
+       "rendererContext": {
+        "accessibilityContext": {
+         "label": "Play all"
+        }
+       }
+      }
+     },
+     "background": {
+      "cinematicContainerViewModel": {
+       "backgroundImageConfig": {
+        "image": {
+         "sources": [
+          {
+           "url": "https://i.ytimg.com/vi/zRVjZ2DJ9Cg/hqdefault.jpg?sqp=-oaymwEWCKgBEF5IWvKriqkDCQgBFQAAiEIYAQ==&rs=AOn4CLDvMWvKnU30aEBbIvslujztUdJ-RA",
+           "width": 168,
+           "height": 94
+          },
+          {
+           "url": "https://i.ytimg.com/vi/zRVjZ2DJ9Cg/hqdefault.jpg?sqp=-oaymwEWCMQBEG5IWvKriqkDCQgBFQAAiEIYAQ==&rs=AOn4CLAZiBk9ZV2irW15ilZmNN7bnmWGcA",
+           "width": 196,
+           "height": 110
+          },
+          {
+           "url": "https://i.ytimg.com/vi/zRVjZ2DJ9Cg/hqdefault.jpg?sqp=-oaymwEXCPYBEIoBSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLA5-dkbq2umnD0-9HoOTpd3AvokTw",
+           "width": 246,
+           "height": 138
+          },
+          {
+           "url": "https://i.ytimg.com/vi/zRVjZ2DJ9Cg/hqdefault.jpg?sqp=-oaymwEXCNACELwBSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLCD0N6BYNaMAPa1vklx6ZzAn4a44A",
+           "width": 336,
+           "height": 188
+          }
+         ]
+        }
+       },
+       "gradientColorConfig": [
+        {
+         "lightThemeColor": 3428407613,
+         "darkThemeColor": 3428407613,
+         "startLocation": 0
+        },
+        {
+         "lightThemeColor": 1280923965,
+         "darkThemeColor": 1280923965,
+         "startLocation": 0.33
+        },
+        {
+         "lightThemeColor": 3428407613,
+         "darkThemeColor": 4279176975,
+         "startLocation": 1
+        }
+       ],
+       "config": {
+        "lightThemeBackgroundColor": 4284045629,
+        "darkThemeBackgroundColor": 4284045629,
+        "colorSourceSizeMultiplier": 2,
+        "applyClientImageBlur": true
+       }
+      }
+     },
+     "hasTopbarAnimation": true,
+     "enableFlexibleActionsButtonsWrapper": false,
+     "rendererContext": {}
+    }
+   },
+   "enableSidebarView": true
+  }
+ },
+ "microformat": {
+  "microformatDataRenderer": {
+   "urlCanonical": "http://www.youtube.com/playlist?list=PLlaN88a7y2_rosKX2WQt2VjFbjyDQXOkR",
+   "title": "Rick Astley: Complete",
+   "description": "New single 'Waiting On You' is out now https://rickastley.lnk.to/WaitingOnYouID",
+   "thumbnail": {
+    "thumbnails": [
+     {
+      "url": "https://i.ytimg.com/vi/zRVjZ2DJ9Cg/hqdefault.jpg?sqp=-oaymwEXCOADEI4CSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLCVAhR2F4mDkRhxxgt2IS8W1JyhbA&days_since_epoch=20666",
+      "width": 480,
+      "height": 270
+     }
+    ],
+    "sampledThumbnailColor": {
+     "red": 89,
+     "green": 89,
+     "blue": 61
+    },
+    "darkColorPalette": {
+     "section2Color": 2631708,
+     "iconInactiveColor": 9210992,
+     "iconDisabledColor": 5855555
+    },
+    "vibrantColorPalette": {
+     "iconInactiveColor": 12566405
+    }
+   },
+   "siteName": "YouTube",
+   "appName": "YouTube",
+   "androidPackage": "com.google.android.youtube",
+   "iosAppStoreId": "544007664",
+   "iosAppArguments": "http://www.youtube.com/playlist?list=PLlaN88a7y2_rosKX2WQt2VjFbjyDQXOkR",
+   "ogType": "website",
+   "urlApplinksWeb": "http://www.youtube.com/playlist?list=PLlaN88a7y2_rosKX2WQt2VjFbjyDQXOkR&feature=applinks",
+   "urlApplinksIos": "http://www.youtube.com/playlist?list=PLlaN88a7y2_rosKX2WQt2VjFbjyDQXOkR&feature=applinks",
+   "urlApplinksAndroid": "http://www.youtube.com/playlist?list=PLlaN88a7y2_rosKX2WQt2VjFbjyDQXOkR&feature=applinks",
+   "urlTwitterIos": "http://www.youtube.com/playlist?list=PLlaN88a7y2_rosKX2WQt2VjFbjyDQXOkR&feature=twitter-deep-link",
+   "urlTwitterAndroid": "http://www.youtube.com/playlist?list=PLlaN88a7y2_rosKX2WQt2VjFbjyDQXOkR&feature=twitter-deep-link",
+   "twitterCardType": "summary",
+   "twitterSiteHandle": "@YouTube",
+   "schemaDotOrgType": "http://schema.org/WebPage",
+   "noindex": false,
+   "unlisted": false,
+   "linkAlternates": [
+    {
+     "hrefUrl": "http://www.youtube.com/playlist?list=PLlaN88a7y2_rosKX2WQt2VjFbjyDQXOkR"
+    },
+    {
+     "hrefUrl": "android-app://com.google.android.youtube/http/youtube.comhttp://www.youtube.com/playlist?list=PLlaN88a7y2_rosKX2WQt2VjFbjyDQXOkR"
+    },
+    {
+     "hrefUrl": "ios-app://544007664/http/youtube.comhttp://www.youtube.com/playlist?list=PLlaN88a7y2_rosKX2WQt2VjFbjyDQXOkR"
+    }
+   ]
+  }
+ },
+ "alerts": [
+  {
+   "alertWithButtonRenderer": {
+    "type": "INFO",
+    "text": {
+     "simpleText": "64 unavailable videos are hidden"
+    },
+    "dismissButton": {
+     "buttonRenderer": {
+      "style": "STYLE_DEFAULT",
+      "size": "SIZE_DEFAULT",
+      "isDisabled": false,
+      "icon": {
+       "iconType": "CLOSE"
+      },
+      "accessibilityData": {
+       "accessibilityData": {
+        "label": "Dismiss"
+       }
+      }
+     }
+    }
+   }
+  }
+ ]
+}

@@ -4,21 +4,20 @@ description: "Search with the full filter grid: type, duration, sort order, and 
 weight: 30
 ---
 
-`search` runs a query against YouTube's public search endpoint and walks the
-result renderers the same way the site does. It exposes the whole filter grid
-you would otherwise set through the search UI: result type, duration buckets,
-sort order, and the feature flags (HD, 4K, captions, live, and so on).
+`search` runs a query against YouTube's public search endpoint and walks the result renderers the same way the site does.
+It exposes the whole filter grid you would otherwise set through the search UI: result type, duration buckets, sort order, and the feature flags (HD, 4K, captions, live, and so on).
 
 ```sh
 ytb search "lofi hip hop"
 ```
 
-Output is automatic: an aligned table on a terminal, JSONL when piped. Override
-it with `-o` (`table`, `json`, `jsonl`, `csv`, `tsv`, `url`, `id`, `raw`).
+Output is automatic: an aligned table on a terminal, JSONL when piped.
+Override it with `-o` (`list`, `table`, `markdown`, `json`, `jsonl`, `csv`, `tsv`, `url`, `raw`).
 
 ## Filters
 
-Combine any of these flags. They map onto YouTube's own search filter chips.
+Combine any of these flags.
+They map onto YouTube's own search filter chips.
 
 | Flag | Values | What it filters |
 | --- | --- | --- |
@@ -53,13 +52,12 @@ ytb search "rust async" --type video --upload-date week --cc --hd
 
 ## Paging
 
-Search returns one page at a time and YouTube hands back an opaque continuation
-token for the next. `search` follows those tokens for you. Two flags bound how
-far it goes:
+Search returns one page at a time and YouTube hands back an opaque continuation token for the next.
+`search` follows those tokens for you.
+Two flags bound how far it goes:
 
 - `-n, --limit` caps the total rows emitted (`0` means unlimited).
-- `--max-pages` caps how many continuation pages are fetched (`0` means
-  unlimited).
+- `--max-pages` caps how many continuation pages are fetched (`0` means unlimited).
 
 ```sh
 ytb search "lofi hip hop" -n 50          # stop after 50 rows
@@ -68,11 +66,10 @@ ytb search "lofi hip hop" --max-pages 3  # fetch at most 3 pages
 
 ## Piping ids into other commands
 
-Use `-o id` to emit just the video id per line, then feed it to `video -`,
-which reads ids from stdin and resolves each to full metadata:
+Use `-o url` to emit just the video URL per line, then feed it to `video -`, which reads ids from stdin and resolves each to full metadata:
 
 ```sh
-ytb search "go programming" -o id | ytb video -
+ytb search "go programming" -o url | ytb video -
 ```
 
 The same works for `--fields` to keep the columns you care about:
@@ -83,20 +80,19 @@ ytb search "rust tutorial" -n 100 --fields title,views
 
 ## Enqueue into the store
 
-With a SQLite store attached (`--db`), `--enqueue` pushes the search results
-into the crawl queue instead of relying on a separate seeding step. A pool of
-workers can then drain the queue later. See [The store](/guides/the-store/) for
-the full crawl workflow.
+To collect what a search finds rather than just read it, pipe the results into a crawl.
+See [the local store](/guides/the-store/) for the full workflow.
 
 ```sh
-ytb search "podcast" -o id --enqueue --db yt.db
+ytb search "podcast" -n 20 -o url | xargs ytb crawl --depth 1 --budget 100
 ```
 
 ## Related discovery commands
 
 ### trending
 
-`trending` lists what is hot right now. `--category` narrows it to one tab.
+`trending` lists what is hot right now.
+`--category` narrows it to one tab.
 
 ```sh
 ytb trending
@@ -124,8 +120,8 @@ ytb hashtag minecraft
 
 ### community
 
-`community` reads a channel's community / posts tab. It accepts a channel id or
-`@handle`.
+`community` reads a channel's community / posts tab.
+It accepts a channel id or `@handle`.
 
 ```sh
 ytb community @MrBeast

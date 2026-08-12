@@ -6,10 +6,12 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/tamnd/any-cli/kit"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/pkg/srv3"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 // resolveYtDlp returns the yt-dlp binary path or a coded error (exit 7) if absent.
@@ -52,11 +54,16 @@ func (a *App) runYtDlp(ctx context.Context, args []string) error {
 // downloadOpts collects the native downloader flags.
 type downloadOpts struct {
 	audio       bool
+	video       bool
+	mux         bool
+	itag        int
 	audioFormat string
 	out         string
 	tmpl        string
 	format      string
 	quality     string
+	chunk       string
+	resume      bool
 	items       string
 	subLangs    string
 	subFormat   string
@@ -75,20 +82,36 @@ func newDownloadCmd() kit.Command {
 		Long: `Download videos with the built-in pure-Go engine.
 
 The native engine fetches streams through the ANDROID_VR client (no API key,
-no token), deciphers signatures and the throttling parameter, and downloads in
-parallel byte ranges. Merging separate video+audio tracks, audio conversion,
-and thumbnail embedding use ffmpeg when it is available; without ffmpeg the
-engine still downloads any single progressive or adaptive stream.
+no token), which answers with plain signed URLs, so there is nothing to
+decipher and no JavaScript to run.
+
+Every request goes out as a byte range, in 1 MiB chunks by default. That is not
+a tuning choice: an un-ranged GET to googlevideo is throttled to about 32 KiB/s
+and never finishes, while the same URL fetched in ranges runs at line speed.
+Because contentLength is known before the first byte, the progress total is
+real and --continue resumes from the size of the part file.
+
+--audio and --video each write one stream and need nothing else installed.
+--mux fetches both and merges them, which needs ffmpeg, as do --audio-format
+and --embed-thumbnail.
 
 Pass --use-yt-dlp to delegate to a yt-dlp binary instead.`,
 		Args: kit.MinimumNArgs(1),
 		Flags: func(f *kit.FlagSet) {
-			f.BoolVarP(&o.audio, "audio", "x", false, "download audio only")
+			f.BoolVarP(&o.audio, "audio", "x", false, "download the audio stream only, no ffmpeg needed")
+			f.BoolVar(&o.video, "video", false, "download the video stream only, no ffmpeg needed")
+			f.BoolVar(&o.mux, "mux", false, "download video and audio and merge them, needs ffmpeg")
+			f.IntVar(&o.itag, "itag", 0, "download this exact itag, as listed by ytb formats")
 			f.StringVar(&o.audioFormat, "audio-format", "", "convert audio to this codec (mp3|m4a|opus|flac), needs ffmpeg")
+			// No -o shorthand here even though doc 05 lists one. kit already owns -o
+			// for --output, the record format, and taking it back would mean this one
+			// command spells "-o json" differently from every other one.
 			f.StringVar(&o.out, "out", ".", "output directory")
 			f.StringVar(&o.tmpl, "output-template", "%(title)s [%(id)s].%(ext)s", "yt-dlp-style output filename template")
 			f.StringVarP(&o.format, "format", "f", "", "format selector (e.g. best, 22, bv*+ba, bv[height<=720]+ba)")
-			f.StringVar(&o.quality, "quality", "", "max video height shorthand (e.g. 1080)")
+			f.StringVar(&o.quality, "quality", "", "max video height (e.g. best, 1080, 1080p)")
+			f.StringVar(&o.chunk, "chunk", "1M", "byte range requested per GET (e.g. 512K, 1M, 4M)")
+			f.BoolVar(&o.resume, "continue", false, "resume into an existing part file instead of starting over")
 			f.StringVar(&o.items, "playlist-items", "", "playlist item selection (e.g. 1,3,5-7,10-)")
 			f.StringVar(&o.subLangs, "sub-langs", "", "subtitle language to write (e.g. en)")
 			f.StringVar(&o.subFormat, "sub-format", "srt", "subtitle format to write (srt|vtt|txt)")
@@ -103,6 +126,26 @@ Pass --use-yt-dlp to delegate to a yt-dlp binary instead.`,
 			if o.useYtDlp {
 				return app.runYtDlpDownload(ctx, o, args)
 			}
+			// Checked here, before anything is fetched, so a contradiction costs no
+			// requests and reads as the usage problem it is.
+			// These read "pick one" and "an itag" rather than leading with the flag,
+			// because fang title-cases the first word of an error before printing it
+			// and "--Audio" is not a flag anyone can type back.
+			if n := countTrue(o.audio, o.video, o.mux); n > 1 {
+				return usageErr("pick one of --audio, --video and --mux: they ask for three different files")
+			}
+			if o.itag > 0 && (o.audio || o.video || o.mux || o.format != "" || o.quality != "") {
+				return usageErr("an itag names one exact format, so --itag cannot be combined with --audio, --video, --mux, --format or --quality")
+			}
+			if _, err := parseByteSize(o.chunk); err != nil {
+				return usageErr(err.Error())
+			}
+			if o.mux && ytb.FFmpeg(app.FFmpegBin) == "" {
+				// Said plainly and said first. --mux is a request for two streams joined
+				// into one file, and nothing in this binary can join them.
+				return missingTool("merging a video stream and an audio stream is what --mux asks for, and that needs ffmpeg, which is not on PATH. " +
+					"Install ffmpeg, or ask for --video or --audio, which each write one stream and need nothing")
+			}
 			return app.runNativeDownload(ctx, o, args)
 		},
 	}
@@ -112,18 +155,18 @@ Pass --use-yt-dlp to delegate to a yt-dlp binary instead.`,
 func (a *App) runNativeDownload(ctx context.Context, o downloadOpts, args []string) error {
 	_, _ = fmt.Fprintln(cmdErr, "note: media download is your responsibility; respect YouTube's Terms of Service and copyright.")
 
-	archive, err := youtube.OpenArchive(o.archivePath)
+	archive, err := ytb.OpenArchive(o.archivePath)
 	if err != nil {
 		return fmt.Errorf("open archive: %w", err)
 	}
-	sel, err := youtube.ParseItemSelector(o.items)
+	sel, err := ytb.ParseItemSelector(o.items)
 	if err != nil {
 		return usageErr(err.Error())
 	}
 
 	var targets []downloadTarget
 	for _, arg := range args {
-		if pid := youtube.ExtractPlaylistID(arg); pid != "" && youtube.ExtractVideoID(arg) == "" {
+		if pid := ytb.ExtractPlaylistID(arg); pid != "" && ytb.ExtractVideoID(arg) == "" {
 			items, err := a.expandPlaylist(ctx, arg, sel)
 			if err != nil {
 				return err
@@ -135,15 +178,27 @@ func (a *App) runNativeDownload(ctx context.Context, o downloadOpts, args []stri
 	}
 
 	var failures int
+	var only error // the failure, when there was exactly one thing to do
 	for _, t := range targets {
-		if vid := youtube.ExtractVideoID(t.idOrURL); vid != "" && archive.Has(vid) {
+		if vid := ytb.ExtractVideoID(t.idOrURL); vid != "" && archive.Has(vid) {
 			a.logf("skip %s: already in archive", vid)
 			continue
 		}
 		if err := a.downloadOne(ctx, o, t, archive); err != nil {
 			failures++
+			only = err
 			_, _ = fmt.Fprintf(cmdErr, "error: %s: %v\n", t.idOrURL, err)
 		}
+	}
+	// One target that failed returns its own error, so the exit code says what
+	// went wrong rather than that something did. Asking for one video that does
+	// not exist should exit 6, and collapsing it into a count made it exit 1.
+	//
+	// A batch keeps the count, because a run where one video was unavailable and
+	// another needed ffmpeg has no single kind, and picking one of them would be
+	// a coin toss dressed up as an answer.
+	if failures == 1 && len(targets) == 1 {
+		return only
 	}
 	if failures > 0 {
 		return partialErr(fmt.Sprintf("%d of %d downloads failed", failures, len(targets)))
@@ -157,7 +212,7 @@ type downloadTarget struct {
 	playlistIndex int
 }
 
-func (a *App) expandPlaylist(ctx context.Context, arg string, sel *youtube.ItemSelector) ([]downloadTarget, error) {
+func (a *App) expandPlaylist(ctx context.Context, arg string, sel *ytb.ItemSelector) ([]downloadTarget, error) {
 	pl, err := a.Client.FetchPlaylist(ctx, arg)
 	if err != nil {
 		return nil, fmt.Errorf("fetch playlist: %w", err)
@@ -165,9 +220,9 @@ func (a *App) expandPlaylist(ctx context.Context, arg string, sel *youtube.ItemS
 	var out []downloadTarget
 	index := 0
 	opt := a.PageOptions(false)
-	err = a.Client.StreamPlaylistItems(ctx, arg, opt, func(pv youtube.PlaylistVideo, _ youtube.Video) error {
+	err = a.Client.StreamPlaylistItems(ctx, arg, opt, func(pv ytb.PlaylistVideo, _ ytb.Video) error {
 		index++
-		if !sel.Selects(index, pl.VideoCount) {
+		if !sel.Selects(index, int(pl.VideoCount)) {
 			return nil
 		}
 		out = append(out, downloadTarget{
@@ -184,7 +239,7 @@ func (a *App) expandPlaylist(ctx context.Context, arg string, sel *youtube.ItemS
 }
 
 // downloadOne resolves, selects, downloads, and post-processes a single video.
-func (a *App) downloadOne(ctx context.Context, o downloadOpts, t downloadTarget, archive *youtube.DownloadArchive) error {
+func (a *App) downloadOne(ctx context.Context, o downloadOpts, t downloadTarget, archive *ytb.DownloadArchive) error {
 	manifest, err := a.Client.StreamManifest(ctx, t.idOrURL)
 	if err != nil {
 		return err
@@ -193,17 +248,17 @@ func (a *App) downloadOne(ctx context.Context, o downloadOpts, t downloadTarget,
 		return noResults("no downloadable streams")
 	}
 
-	ffmpeg := youtube.FFmpeg(a.FFmpegBin)
+	ffmpeg := ytb.FFmpeg(a.FFmpegBin)
 	spec := a.formatSpec(o, ffmpeg != "")
-	selection, err := youtube.SelectFormat(manifest.Streams, spec)
+	selection, err := ytb.SelectFormat(manifest.Streams, spec)
 	if err != nil {
 		return err
 	}
 	if selection.NeedsMerge() && ffmpeg == "" {
-		return missingTool(youtube.ErrFFmpegMissing.Error())
+		return missingTool(ytb.ErrFFmpegMissing.Error())
 	}
 
-	fields := youtube.OutputFields{
+	fields := ytb.OutputFields{
 		ID:            manifest.VideoID,
 		Title:         manifest.Title,
 		Author:        manifest.Author,
@@ -236,7 +291,7 @@ func (a *App) downloadOne(ctx context.Context, o downloadOpts, t downloadTarget,
 			a.logf("subtitles: %v", err)
 		}
 	}
-	if vid := youtube.ExtractVideoID(t.idOrURL); vid != "" {
+	if vid := ytb.ExtractVideoID(t.idOrURL); vid != "" {
 		_ = archive.Add(vid)
 	} else {
 		_ = archive.Add(manifest.VideoID)
@@ -244,30 +299,68 @@ func (a *App) downloadOne(ctx context.Context, o downloadOpts, t downloadTarget,
 	return nil
 }
 
-// formatSpec picks the effective selector, honoring --audio, --quality, an
-// explicit -f, and whether ffmpeg is present to merge adaptive tracks.
+// formatSpec picks the effective selector, honoring --itag, --audio, --video,
+// --mux, --quality, an explicit -f, and whether ffmpeg is present to merge
+// adaptive tracks.
 func (a *App) formatSpec(o downloadOpts, haveFFmpeg bool) string {
 	if o.format != "" {
 		return o.format
 	}
+	// An itag is a specific format the user read off ytb formats, so it is taken
+	// literally with no fallback. Falling back would hand them a different file
+	// than the one they named and say nothing about it.
+	if o.itag > 0 {
+		return fmt.Sprintf("%d", o.itag)
+	}
 	if o.audio {
 		return "bestaudio/best"
 	}
-	if o.quality != "" {
-		if haveFFmpeg {
-			return fmt.Sprintf("bv*[height<=%s]+ba/b[height<=%s]/b", o.quality, o.quality)
+	height := qualityHeight(o.quality)
+	if o.mux {
+		// No "/b" fallback. --mux was asked for on purpose and ffmpeg was already
+		// confirmed, so quietly writing a 720p progressive stream instead would be
+		// answering a question nobody asked.
+		if height != "" {
+			return fmt.Sprintf("bv*[height<=%s]+ba", height)
 		}
-		return fmt.Sprintf("b[height<=%s]/b", o.quality)
+		return "bv*+ba"
+	}
+	if o.video {
+		// Video only, so no merge and no ffmpeg. The fallback to a progressive
+		// stream is deliberate: on the videos that have no adaptive video track,
+		// "the video" is the progressive one.
+		if height != "" {
+			return fmt.Sprintf("bv*[height<=%s]/b[height<=%s]/b", height, height)
+		}
+		return "bv*/b"
+	}
+	if height != "" {
+		if haveFFmpeg {
+			return fmt.Sprintf("bv*[height<=%s]+ba/b[height<=%s]/b", height, height)
+		}
+		return fmt.Sprintf("b[height<=%s]/b", height)
 	}
 	if haveFFmpeg {
 		return "bv*+ba/b"
 	}
+	// Without ffmpeg the best that can be written as one file is the progressive
+	// stream, which tops out around 720p.
 	return "b"
+}
+
+// qualityHeight normalizes --quality. "1080", "1080p" and "1080P" are the same
+// number written three ways, and "best" is the default said out loud.
+func qualityHeight(q string) string {
+	q = strings.TrimSpace(q)
+	if q == "" || strings.EqualFold(q, "best") {
+		return ""
+	}
+	return strings.TrimSuffix(strings.TrimSuffix(q, "p"), "P")
 }
 
 // fetchAndAssemble downloads the selected streams to the output directory and,
 // when two adaptive tracks were chosen, merges them with ffmpeg.
-func (a *App) fetchAndAssemble(ctx context.Context, o downloadOpts, m *youtube.StreamManifest, sel youtube.Selection, fields youtube.OutputFields, ffmpeg string) (string, error) {
+func (a *App) fetchAndAssemble(ctx context.Context, o downloadOpts, m *ytb.StreamManifest, sel ytb.Selection, fields ytb.OutputFields, ffmpeg string) (string, error) {
 	if err := os.MkdirAll(o.out, 0o755); err != nil {
 		return "", err
 	}
@@ -280,7 +373,7 @@ func (a *App) fetchAndAssemble(ctx context.Context, o downloadOpts, m *youtube.S
 		}
 		fields.Ext = ext
 		fields.Resolution = resolutionLabel(s)
-		dst := filepath.Join(o.out, youtube.RenderOutputTemplate(o.tmpl, fields))
+		dst := filepath.Join(o.out, ytb.RenderOutputTemplate(o.tmpl, fields))
 
 		if o.audio && o.audioFormat != "" {
 			raw := dst + ".src"
@@ -288,7 +381,7 @@ func (a *App) fetchAndAssemble(ctx context.Context, o downloadOpts, m *youtube.S
 				return "", err
 			}
 			defer func() { _ = os.Remove(raw) }()
-			if err := youtube.ExtractAudio(ctx, ffmpeg, raw, dst, o.audioFormat, ""); err != nil {
+			if err := ytb.ExtractAudio(ctx, ffmpeg, raw, dst, o.audioFormat, ""); err != nil {
 				return "", err
 			}
 			return dst, nil
@@ -303,7 +396,7 @@ func (a *App) fetchAndAssemble(ctx context.Context, o downloadOpts, m *youtube.S
 	fields.Resolution = resolutionLabel(*v)
 	container := mergeContainer(*v)
 	fields.Ext = container
-	dst := filepath.Join(o.out, youtube.RenderOutputTemplate(o.tmpl, fields))
+	dst := filepath.Join(o.out, ytb.RenderOutputTemplate(o.tmpl, fields))
 
 	vpath := dst + ".video"
 	apath := dst + ".audio"
@@ -314,30 +407,99 @@ func (a *App) fetchAndAssemble(ctx context.Context, o downloadOpts, m *youtube.S
 	if err := a.downloadStream(ctx, o, m, au, apath, fields.Title+" (audio)"); err != nil {
 		return "", err
 	}
-	if err := youtube.MergeAV(ctx, ffmpeg, vpath, apath, dst); err != nil {
+	if err := ytb.MergeAV(ctx, ffmpeg, vpath, apath, dst); err != nil {
 		return "", fmt.Errorf("merge: %w", err)
 	}
 	return dst, nil
 }
 
 // downloadStream resolves a stream's URL and downloads it with a progress bar.
-func (a *App) downloadStream(ctx context.Context, o downloadOpts, m *youtube.StreamManifest, s *youtube.Stream, dst, label string) error {
+func (a *App) downloadStream(ctx context.Context, o downloadOpts, m *ytb.StreamManifest, s *ytb.Stream, dst, label string) error {
 	url, err := a.Client.ResolveStreamURL(ctx, m, s)
 	if err != nil {
 		return err
 	}
-	prog := a.progressReporter(label)
-	return a.Client.DownloadToFileWithUserAgent(ctx, url, dst, s.ContentLength, o.concurrency, s.UserAgent(), prog)
+	chunk, err := parseByteSize(o.chunk)
+	if err != nil {
+		return usageErr(err.Error())
+	}
+	return a.Client.DownloadToFile(ctx, url, dst, ytb.DownloadOptions{
+		Total:      s.ContentLength,
+		ChunkSize:  chunk,
+		Workers:    o.concurrency,
+		UserAgent:  s.UserAgent(),
+		OnProgress: a.progressReporter(label),
+		Resume:     o.resume,
+		// A stream URL expires, and a download of a long video outlives it. Reading
+		// the manifest again and finding the same itag is a cheap request, and it is
+		// the difference between finishing and a 403 partway through.
+		Refresh: func(ctx context.Context) (string, error) {
+			fresh, err := a.Client.StreamManifest(ctx, m.VideoID)
+			if err != nil {
+				return "", err
+			}
+			for i := range fresh.Streams {
+				if fresh.Streams[i].ITag == s.ITag {
+					return a.Client.ResolveStreamURL(ctx, fresh, &fresh.Streams[i])
+				}
+			}
+			return "", fmt.Errorf("itag %d is not in the manifest any more", s.ITag)
+		},
+	})
+}
+
+// parseByteSize reads --chunk. Plain bytes, or K/M/G, because "1M" is what a
+// person types and 1048576 is not.
+func parseByteSize(s string) (int64, error) {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return ytb.DefaultChunkSize, nil
+	}
+	// The unit comes off first, so 1M, 1MB and 1MiB are the same size written
+	// three ways. They all mean 1<<20 here; nothing on this side of the wire
+	// counts in powers of ten.
+	num := strings.TrimSuffix(strings.TrimSuffix(s, "B"), "i")
+	mult := int64(1)
+	if len(num) > 0 {
+		switch num[len(num)-1] {
+		case 'k', 'K':
+			mult, num = 1<<10, num[:len(num)-1]
+		case 'm', 'M':
+			mult, num = 1<<20, num[:len(num)-1]
+		case 'g', 'G':
+			mult, num = 1<<30, num[:len(num)-1]
+		}
+	}
+	n, err := strconv.ParseInt(strings.TrimSpace(num), 10, 64)
+	if err != nil || n <= 0 {
+		return 0, fmt.Errorf("unreadable --chunk %q: want a size like 512K, 1M or 4M", s)
+	}
+	return n * mult, nil
+}
+
+func countTrue(bs ...bool) int {
+	n := 0
+	for _, b := range bs {
+		if b {
+			n++
+		}
+	}
+	return n
 }
 
 // progressReporter returns a throttled stderr progress callback, or nil when
 // output is quiet.
-func (a *App) progressReporter(label string) func(youtube.DownloadProgress) {
-	if a.quiet {
+//
+// -v turns it off too. The bar redraws itself with a carriage return and the
+// trace writes whole lines to the same stream, so running both leaves a screen
+// of half-overwritten percentages. The trace is the better of the two anyway:
+// it names every range as it goes out.
+func (a *App) progressReporter(label string) func(ytb.DownloadProgress) {
+	if a.quiet || a.Verbose > 0 {
 		return nil
 	}
 	lastPct := -1
-	return func(p youtube.DownloadProgress) {
+	return func(p ytb.DownloadProgress) {
 		if p.Total <= 0 {
 			return
 		}
@@ -367,23 +529,29 @@ func (a *App) embedThumbnail(ctx context.Context, videoID, mediaPath, ffmpeg str
 	}
 	defer func() { _ = os.Remove(thumb) }()
 	tmp := mediaPath + ".thumbed" + ext
-	if err := youtube.EmbedThumbnail(ctx, ffmpeg, mediaPath, thumb, tmp); err != nil {
+	if err := ytb.EmbedThumbnail(ctx, ffmpeg, mediaPath, thumb, tmp); err != nil {
 		return err
 	}
 	return os.Rename(tmp, mediaPath)
 }
 
-func (a *App) writeSubtitle(ctx context.Context, videoID string, o downloadOpts, fields youtube.OutputFields, mediaPath string) error {
-	_, segs, err := a.Client.Transcript(ctx, videoID, o.subLangs)
+func (a *App) writeSubtitle(ctx context.Context, videoID string, o downloadOpts, fields ytb.OutputFields, mediaPath string) error {
+	doc, track, err := a.Client.Transcript(ctx, videoID, ytb.TranscriptOptions{Lang: o.subLangs})
 	if err != nil {
 		return err
 	}
-	if len(segs) == 0 {
-		return fmt.Errorf("no subtitle segments for %q", o.subLangs)
+	if len(doc.Cues) == 0 {
+		return fmt.Errorf("no subtitle lines for %q", o.subLangs)
 	}
-	out := youtube.RenderSubtitles(segs, youtube.SubtitleFormat(o.subFormat))
+	out, err := doc.Render(srv3.Format(o.subFormat))
+	if err != nil {
+		return err
+	}
 	base := strings.TrimSuffix(mediaPath, filepath.Ext(mediaPath))
-	subPath := fmt.Sprintf("%s.%s.%s", base, o.subLangs, o.subFormat)
+	// The file is named for the track that was written, which is not always the
+	// one asked for: with no --sub-langs the default track wins and naming the
+	// file "video..srt" would say nothing about what is in it.
+	subPath := fmt.Sprintf("%s.%s.%s", base, track.LanguageCode, o.subFormat)
 	if err := os.WriteFile(subPath, []byte(out), 0o644); err != nil {
 		return err
 	}
@@ -474,7 +642,7 @@ func newExtractCmd() kit.Command {
 	}
 }
 
-func resolutionLabel(s youtube.Stream) string {
+func resolutionLabel(s ytb.Stream) string {
 	if s.QualityLabel != "" {
 		return s.QualityLabel
 	}
@@ -486,7 +654,7 @@ func resolutionLabel(s youtube.Stream) string {
 
 // mergeContainer picks an output container for a merged file: mp4 unless the
 // video track is webm/VP9/AV1, which lives more naturally in mkv/webm.
-func mergeContainer(v youtube.Stream) string {
+func mergeContainer(v ytb.Stream) string {
 	if v.Container == "webm" {
 		return "webm"
 	}
@@ -503,5 +671,8 @@ func humanBytes(n int64) string {
 		div *= unit
 		exp++
 	}
-	return fmt.Sprintf("%.1f%cB", float64(n)/float64(div), "KMGTPE"[exp])
+	// The divisor is 1024, so the unit is MiB and not MB. The two differ by 5% at
+	// megabytes and by 10% at gigabytes, which is the difference between a size that
+	// matches what the shell reports afterwards and one that does not.
+	return fmt.Sprintf("%.1f %ciB", float64(n)/float64(div), "KMGTPE"[exp])
 }

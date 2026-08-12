@@ -1,0 +1,123 @@
+{
+  "has_continuation": false,
+  "items": [
+    {
+      "avatar": [
+        {
+          "height": 88,
+          "source": "payload",
+          "url": "https://yt3.googleusercontent.com/MOWpaiGJdgN4aKMI-NGQLL4jMVP3aDORlQpOBWooi0GSE2TGt4_9ncyepk1pCh-yWQ795AhPbw=s88-c-k-c0x00ffffff-no-rj-mo",
+          "width": 88
+        },
+        {
+          "height": 176,
+          "source": "payload",
+          "url": "https://yt3.googleusercontent.com/MOWpaiGJdgN4aKMI-NGQLL4jMVP3aDORlQpOBWooi0GSE2TGt4_9ncyepk1pCh-yWQ795AhPbw=s176-c-k-c0x00ffffff-no-rj-mo",
+          "width": 176
+        }
+      ],
+      "client": [],
+      "description": "New single 'Raindrops' out now. https://rickastley.lnk.to/Raindrops Tickets for summer shows 2026 on sale now.",
+      "fetched_at": "",
+      "handle": "@RickAstleyYT",
+      "id": "UCuAXFkgsw1L7xaCfnd5JJOw",
+      "is_artist": false,
+      "is_verified": false,
+      "kind": "channel",
+      "missed": [
+        "a search result row: no keywords, no links, no tab strip, no join date and no lifetime view count"
+      ],
+      "sources": [],
+      "subscriber_count": 4520000,
+      "subscriber_count_is_approximate": true,
+      "subscriber_count_text": "4.52M subscribers",
+      "surfaces": [
+        "s2"
+      ],
+      "tier": 0,
+      "title": "Rick Astley",
+      "url": "https://www.youtube.com/@RickAstleyYT",
+      "via": {}
+    },
+    {
+      "channel_id": "UC38IQsAvIsxxjztdMZQtwHA",
+      "channel_title": "RickAstleyVEVO",
+      "client": [],
+      "fetched_at": "",
+      "id": "PL2MI040U_GXobmpXtTwBF7oHBGT5BETSD",
+      "is_generated": false,
+      "kind": "playlist",
+      "metadata_parts": [
+        "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster) · 3:34",
+        "Rick Astley - Together Forever (Official Video) [4K Remaster] · 3:24"
+      ],
+      "missed": [
+        "a listing row: no description, and the item list is a separate read"
+      ],
+      "sources": [],
+      "surfaces": [
+        "s2"
+      ],
+      "thumbnails": [
+        {
+          "height": 202,
+          "source": "payload",
+          "url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hq720.jpg?sqp=-oaymwEXCOgCEMoBSFryq4qpAwkIARUAAIhCGAE=\u0026rs=AOn4CLAmcb8rtMhEjuYeigpkSaXOltKOwg",
+          "width": 360
+        },
+        {
+          "height": 404,
+          "source": "payload",
+          "url": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hq720.jpg?sqp=-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=\u0026rs=AOn4CLDX3LgTmArIBIk6uvvz4y5p95MOcg",
+          "width": 720
+        }
+      ],
+      "tier": 0,
+      "title": "RickAstley - Greatest Hits",
+      "url": "https://www.youtube.com/playlist?list=PL2MI040U_GXobmpXtTwBF7oHBGT5BETSD",
+      "via": {},
+      "video_count": 10,
+      "video_count_text": "10 videos"
+    },
+    {
+      "channel_id": "UC1sGq_H-cSLNT9PANH8b0fg",
+      "channel_title": "Just A Happy Troll",
+      "client": [],
+      "fetched_at": "",
+      "id": "PLtgfAG7SN7m_89NLQQ40pwQnQdIO9Ev7C",
+      "is_generated": false,
+      "kind": "playlist",
+      "metadata_parts": [
+        "Rick Astley Loves Cherry · 1:59",
+        "Rick Astley Sings the Alphabet ABC! · 0:32"
+      ],
+      "missed": [
+        "a listing row: no description, and the item list is a separate read"
+      ],
+      "sources": [],
+      "surfaces": [
+        "s2"
+      ],
+      "thumbnails": [
+        {
+          "height": 202,
+          "source": "payload",
+          "url": "https://i.ytimg.com/vi/fZlUZSMJKgs/hq720.jpg?sqp=-oaymwEXCOgCEMoBSFryq4qpAwkIARUAAIhCGAE=\u0026rs=AOn4CLATtGhdaGnKx6nSxmxp5528FabypQ",
+          "width": 360
+        },
+        {
+          "height": 404,
+          "source": "payload",
+          "url": "https://i.ytimg.com/vi/fZlUZSMJKgs/hq720.jpg?sqp=-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=\u0026rs=AOn4CLAyyuwWaQ8tX1Gy4FKE3lbXe12YdA",
+          "width": 720
+        }
+      ],
+      "tier": 0,
+      "title": "Rick Astley Videos",
+      "url": "https://www.youtube.com/playlist?list=PLtgfAG7SN7m_89NLQQ40pwQnQdIO9Ev7C",
+      "via": {},
+      "video_count": 151,
+      "video_count_text": "151 videos"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "itemSectionRenderer": {
+    "contents": [
+      {
+        "messageRenderer": {
+          "text": {
+            "runs": [
+              {
+                "text": "Restricted Mode has hidden comments for this video."
+              }
+            ]
+          },
+          "trackingParams": "CPYBEJY7GAAiEwiVwLiGhIuWAxUC_4sBHWb5GCU="
+        }
+      }
+    ],
+    "sectionIdentifier": "comment-item-section",
+    "trackingParams": "CPUBELsvGAMiEwiVwLiGhIuWAxUC_4sBHWb5GCU="
+  }
+}

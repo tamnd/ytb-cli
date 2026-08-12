@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/tamnd/any-cli/kit"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 func newExportCmd() kit.Command {
@@ -37,7 +37,7 @@ exported.`,
 				app.logf("would export %q to %s", orAll(channel), out)
 				return nil
 			}
-			if err := youtube.Export(store, channel, out); err != nil {
+			if err := ytb.Export(store, channel, out); err != nil {
 				return err
 			}
 			app.logf("exported to %s", out)

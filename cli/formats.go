@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/tamnd/any-cli/kit"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 func newFormatsCmd() kit.Command {
@@ -20,9 +21,14 @@ func newFormatsCmd() kit.Command {
 		Use:   "formats <video-id|url>",
 		Short: "Streaming formats (metadata only)",
 		Long: `List the muxed and adaptive formats from /player streamingData, deduped by
-itag. --audio/--video filter by track type, --muxed shows only progressive
-formats. This lists metadata only; it does not resolve playable URLs unless you
-pass --urls.`,
+itag, audio first then video then muxed. --audio/--video filter by track type,
+--muxed shows only progressive formats. This lists metadata only; it does not
+resolve playable URLs unless you pass --urls.
+
+The note printed at the end says which client answered and when its URLs expire,
+and it says that fetching any of them without a Range header runs at 32 KiB/s.
+That last part is the most useful line the command prints: ranged, the same URL
+runs at 4 MiB/s.`,
 		Args: kit.ExactArgs(1),
 		Flags: func(f *kit.FlagSet) {
 			f.BoolVar(&audio, "audio", false, "audio-only adaptive formats")
@@ -35,32 +41,61 @@ pass --urls.`,
 			if urls {
 				return emitStreamURLs(ctx, app, args[0], audio, video, muxed)
 			}
-			formats, err := app.Client.Formats(ctx, args[0])
+			list, err := app.Client.FormatList(ctx, args[0])
 			if err != nil {
 				return err
 			}
-			if len(formats) == 0 {
+			if list == nil || len(list.Formats) == 0 {
 				return noResults("no formats available")
 			}
 			var n int
-			for _, f := range formats {
-				if !formatMatches(f, audio, video, muxed) {
+			for _, f := range list.Formats {
+				if !ytb.FormatMatches(f, audio, video, muxed) {
 					continue
 				}
-				if err := app.Out.Emit(formatRow(f)); err != nil {
+				stop, err := app.Emit(formatRow(f))
+				if err != nil {
 					return err
 				}
 				n++
-				if app.Limit > 0 && n >= app.Limit {
+				if stop {
 					break
 				}
 			}
 			if n == 0 {
 				return noResults("no formats matched the filter")
 			}
-			return app.Out.Flush()
+			if err := app.Out.Flush(); err != nil {
+				return err
+			}
+			app.logf("%s", formatsNote(list))
+			return nil
 		},
 	}
+}
+
+// formatsNote is the two line note under the table, printed once per read.
+//
+// It goes to stderr so that -o json stays a clean stream, and it is one note for
+// the whole list rather than a column, because the two facts on it are facts about
+// the read and not about any one format: which client answered, and when the URLs
+// it handed out stop working.
+func formatsNote(list *ytb.FormatList) string {
+	var b strings.Builder
+	b.WriteString("note  fetching any of these without a Range header runs at 32 KiB/s; ytb download\n")
+	b.WriteString("      always ranges.")
+	if len(list.Client) > 0 {
+		fmt.Fprintf(&b, " client %s,", strings.Join(list.Client, "+"))
+	}
+	switch {
+	case !list.Fetchable:
+		b.WriteString(" no urls in this list: the mobile player did not answer")
+	case !list.Expires.IsZero():
+		fmt.Fprintf(&b, " urls expire %s", list.Expires.Format(time.RFC3339))
+	default:
+		b.WriteString(" urls carry no expiry")
+	}
+	return b.String()
 }
 
 // emitStreamURLs resolves and prints the deciphered, directly-fetchable URL for
@@ -84,18 +119,19 @@ func emitStreamURLs(ctx context.Context, app *App, idOrURL string, audio, video,
 			app.logf("itag %d: %v", s.ITag, err)
 			continue
 		}
-		if err := app.Out.Emit(Row{
+		stop, err := app.Emit(Row{
 			Cols: []string{"itag", "ext", "resolution", "url"},
 			Vals: []string{fmt.Sprint(s.ITag), s.Ext(), resolutionLabel(s), url},
 			Value: struct {
-				youtube.Stream
+				ytb.Stream
 				URL string `json:"url"`
 			}{s, url},
-		}); err != nil {
+		})
+		if err != nil {
 			return err
 		}
 		n++
-		if app.Limit > 0 && n >= app.Limit {
+		if stop {
 			break
 		}
 	}
@@ -105,7 +141,7 @@ func emitStreamURLs(ctx context.Context, app *App, idOrURL string, audio, video,
 	return app.Out.Flush()
 }
 
-func streamMatches(s youtube.Stream, audio, video, muxed bool) bool {
+func streamMatches(s ytb.Stream, audio, video, muxed bool) bool {
 	switch {
 	case muxed:
 		return s.Muxed()
@@ -113,21 +149,6 @@ func streamMatches(s youtube.Stream, audio, video, muxed bool) bool {
 		return s.AudioOnly()
 	case video:
 		return s.VideoOnly()
-	default:
-		return true
-	}
-}
-
-func formatMatches(f youtube.VideoFormat, audio, video, muxed bool) bool {
-	isAudio := strings.HasPrefix(f.MimeType, "audio/")
-	isVideoOnly := f.IsAdaptive && strings.HasPrefix(f.MimeType, "video/")
-	switch {
-	case muxed:
-		return !f.IsAdaptive
-	case audio:
-		return isAudio
-	case video:
-		return isVideoOnly
 	default:
 		return true
 	}

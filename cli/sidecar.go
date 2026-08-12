@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/tamnd/any-cli/kit"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 func newSponsorBlockCmd() kit.Command {
@@ -22,7 +22,7 @@ func newSponsorBlockCmd() kit.Command {
 		},
 		Run: func(ctx context.Context, args []string) error {
 			app := appFromCtx(ctx)
-			videoID := youtube.ExtractVideoID(args[0])
+			videoID := ytb.ExtractVideoID(args[0])
 			if videoID == "" {
 				videoID = args[0]
 			}
@@ -33,8 +33,8 @@ func newSponsorBlockCmd() kit.Command {
 			if len(segs) == 0 {
 				return noResults("no SponsorBlock segments")
 			}
-			for _, s := range segs {
-				if err := app.Out.Emit(Row{
+			return EmitAll(app, segs, func(s ytb.SponsorSegment) Row {
+				return Row{
 					Cols: []string{"category", "start", "end", "action"},
 					Vals: []string{
 						s.Category,
@@ -43,41 +43,49 @@ func newSponsorBlockCmd() kit.Command {
 						s.Action,
 					},
 					Value: s,
-				}); err != nil {
-					return err
 				}
-			}
-			return app.Out.Flush()
+			})
 		},
 	}
 }
 
+// newThumbnailCmd lists a video's renditions, or writes one.
+//
+// The list is HEADed before it is printed, because the five standard i.ytimg.com
+// names can be constructed for any video id and only some of them exist. A video
+// with no maxresdefault answers that URL with 404 and a 1097 byte body that is
+// still Content-Type image/jpeg, so nothing but the status code separates a
+// rendition from a placeholder, and a list printed without asking is a list of
+// URLs some of which 404 for whoever tries them next. --unconfirmed skips the
+// asking and says so in the source column.
 func newThumbnailCmd() kit.Command {
 	var (
-		download bool
-		out      string
+		fetch       bool
+		unconfirmed bool
+		out         string
 	)
 	return kit.Command{
 		Use:   "thumbnail <id|url>",
-		Short: "List or download a video's thumbnail renditions",
+		Short: "List a video's thumbnail renditions, or fetch the best one",
 		Args:  kit.ExactArgs(1),
 		Flags: func(f *kit.FlagSet) {
-			f.BoolVar(&download, "download", false, "download the best available rendition")
-			f.StringVar(&out, "out", "", "output path or directory for --download")
+			f.BoolVar(&fetch, "fetch", false, "write the best available rendition to disk")
+			f.BoolVar(&unconfirmed, "unconfirmed", false, "list the constructed URLs without HEADing them")
+			f.StringVar(&out, "out", "", "output path or directory for --fetch")
 		},
 		Run: func(ctx context.Context, args []string) error {
 			app := appFromCtx(ctx)
-			videoID := youtube.ExtractVideoID(args[0])
+			videoID := ytb.ExtractVideoID(args[0])
 			if videoID == "" {
 				videoID = args[0]
 			}
-			if download {
+			if fetch {
 				dst := out
 				if dst == "" || isDir(dst) {
 					dst = filepath.Join(dst, videoID+".jpg")
 				}
 				if app.dryRun {
-					app.logf("would download thumbnail to %s", dst)
+					app.logf("would fetch thumbnail to %s", dst)
 					return nil
 				}
 				t, err := app.Client.DownloadThumbnail(ctx, videoID, dst)
@@ -87,47 +95,57 @@ func newThumbnailCmd() kit.Command {
 				_, _ = fmt.Fprintf(cmdErr, "saved %s (%s, %dx%d)\n", dst, t.Name, t.Width, t.Height)
 				return nil
 			}
-			for _, t := range youtube.Thumbnails(videoID) {
-				if err := app.Out.Emit(Row{
-					Cols:  []string{"name", "width", "height", "url"},
-					Vals:  []string{t.Name, fmt.Sprint(t.Width), fmt.Sprint(t.Height), t.URL},
-					Value: t,
-				}); err != nil {
-					return err
-				}
+			thumbs := ytb.Thumbnails(videoID)
+			if !unconfirmed {
+				thumbs = app.Client.ConfirmThumbnails(ctx, thumbs)
 			}
-			return app.Out.Flush()
+			if len(thumbs) == 0 {
+				return noResults("no thumbnail renditions exist for " + videoID)
+			}
+			return EmitAll(app, thumbs, func(t ytb.Thumbnail) Row {
+				return Row{
+					Cols: []string{"name", "width", "height", "size", "source", "url"},
+					Vals: []string{
+						t.Name, fmt.Sprint(t.Width), fmt.Sprint(t.Height),
+						sizeText(t.Bytes), t.Source, t.URL,
+					},
+					Value: t,
+				}
+			})
 		},
 	}
 }
 
+// newChaptersCmd lists a video's chapters with where each one came from.
+//
+// origin is a column rather than a footnote because a macro marker and a
+// timestamped description are two different things that produce the same list.
+// markers means YouTube served a macroMarkersListRenderer, so the site itself
+// treats these as chapters, shows them on the scrubber and has a preview frame for
+// each. description means somebody typed "1:23 Verse 2" and the list is only as
+// good as their typing, with no thumbnail and no guarantee the numbers are in
+// order. Printing them the same way makes the second look like the first.
 func newChaptersCmd() kit.Command {
 	return kit.Command{
 		Use:   "chapters <id|url>",
-		Short: "List a video's chapter markers",
+		Short: "List a video's chapters, with where each one came from",
 		Args:  kit.ExactArgs(1),
 		Run: func(ctx context.Context, args []string) error {
 			app := appFromCtx(ctx)
-			res, err := app.Client.FetchVideo(ctx, args[0], youtube.VideoOptions{
-				Player: true,
-				Next:   true,
-			})
+			res, err := app.Client.FetchVideo(ctx, args[0], ytb.VideoOptions{Next: true})
 			if err != nil {
 				return err
 			}
 			if res == nil || len(res.Chapters) == 0 {
 				return noResults("no chapters")
 			}
-			for _, c := range res.Chapters {
-				if err := app.Out.Emit(Row{
-					Cols:  []string{"position", "start", "title"},
-					Vals:  []string{fmt.Sprint(c.Position), hms(c.StartSeconds), c.Title},
+			return EmitAll(app, res.Chapters, func(c ytb.Chapter) Row {
+				return Row{
+					Cols:  []string{"position", "start", "title", "origin"},
+					Vals:  []string{fmt.Sprint(c.Position), hms(c.StartSeconds), c.Title, c.Origin},
 					Value: c,
-				}); err != nil {
-					return err
 				}
-			}
-			return app.Out.Flush()
+			})
 		},
 	}
 }

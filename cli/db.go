@@ -3,20 +3,28 @@ package cli
 import (
 	"context"
 	"fmt"
-	"sort"
+	"os"
 	"strings"
 
 	"github.com/tamnd/any-cli/kit"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 func newDBCmd() kit.Command {
 	return kit.Command{
 		Use:   "db",
-		Short: "The local SQLite store",
-		Long:  `Inspect and query the local SQLite store at <data-dir>/ytb.db. Pure-Go, no cgo.`,
+		Short: "The local store",
+		Long: `Inspect the local SQLite store at <data-dir>/ytb.db. Pure-Go, no cgo.
+
+Three tables. nodes is everything that has an identity, one row per URI, with
+the record as JSON and a null record for a node a claim named that nobody has
+fetched yet. claims is the edges, one row per observation, so the same edge seen
+on the watch page and in a browse response is two rows. reads is the log: every
+request, what answered, and how big it was.
+
+To run SQL over them use ytb query, which opens the file read-only.`,
 		Sub: []kit.Command{
 			newDBStatsCmd(),
-			newDBQueryCmd(),
 			newDBSearchCmd(),
 			newDBPathCmd(),
 			newDBVacuumCmd(),
@@ -28,7 +36,7 @@ func newDBCmd() kit.Command {
 func newDBStatsCmd() kit.Command {
 	return kit.Command{
 		Use:   "stats",
-		Short: "Row counts per table",
+		Short: "What is in the store: nodes by kind, claims by predicate, reads by surface",
 		Args:  kit.NoArgs,
 		Run: func(ctx context.Context, _ []string) error {
 			app := appFromCtx(ctx)
@@ -40,36 +48,52 @@ func newDBStatsCmd() kit.Command {
 			if err != nil {
 				return err
 			}
-			tables := make([]string, 0, len(stats))
-			for t := range stats {
-				tables = append(tables, t)
+			if len(stats) == 0 {
+				return noResults("the store is empty")
 			}
-			sort.Strings(tables)
-			for _, t := range tables {
-				if err := app.Out.Emit(Row{
-					Cols:  []string{"table", "rows"},
-					Vals:  []string{t, i64a(stats[t])},
-					Value: map[string]any{"table": t, "rows": stats[t]},
-				}); err != nil {
-					return err
+			return EmitAll(app, stats, func(s ytb.StatRow) Row {
+				vals := []string{s.Table, s.Key, i64a(s.Rows), ""}
+				if s.Bytes > 0 {
+					vals[3] = humanBytes(s.Bytes)
 				}
-			}
-			return app.Out.Flush()
+				return Row{
+					Cols:  []string{"table", "key", "rows", "bytes"},
+					Vals:  vals,
+					Value: s,
+				}
+			})
 		},
 	}
 }
 
-func newDBQueryCmd() kit.Command {
+// newQueryCmd is doc 04 section 4: SQL over the store with no wrapper.
+//
+// The file is opened mode=ro, so a finger slip that says delete is refused by
+// SQLite rather than by a check in this tool.
+func newQueryCmd() kit.Command {
 	return kit.Command{
 		Use:   "query <sql>",
-		Short: "Run a read-only SQL query",
-		Args:  kit.ExactArgs(1),
+		Short: "Run SQL over the store, read-only",
+		Long: `Run a SQL statement against <data-dir>/ytb.db and print the rows.
+
+The file is opened read-only, so a statement that would write is refused by
+SQLite itself rather than by a check here.
+
+  ytb query "select predicate, count(*) c from claims group by 1 order by c desc"
+  ytb query "select uri from nodes where kind='video' and record is null limit 20"
+  ytb query "select json_extract(record,'$.title') from nodes where kind='channel'"`,
+		Args: kit.ExactArgs(1),
 		Run: func(ctx context.Context, args []string) error {
 			app := appFromCtx(ctx)
-			store, err := app.RequireStore()
+			path := app.StorePath()
+			if _, err := os.Stat(path); err != nil {
+				return fmt.Errorf("no store at %s yet: ytb crawl writes one", path)
+			}
+			store, err := ytb.OpenStoreReadOnly(path)
 			if err != nil {
 				return err
 			}
+			defer func() { _ = store.Close() }()
 			cols, rows, err := store.Query(args[0])
 			if err != nil {
 				return err
@@ -77,7 +101,7 @@ func newDBQueryCmd() kit.Command {
 			if len(rows) == 0 {
 				return noResults("no rows")
 			}
-			for _, r := range rows {
+			return EmitAll(app, rows, func(r []any) Row {
 				vals := make([]string, len(r))
 				obj := make(map[string]any, len(r))
 				for i, v := range r {
@@ -86,11 +110,8 @@ func newDBQueryCmd() kit.Command {
 						obj[cols[i]] = v
 					}
 				}
-				if err := app.Out.Emit(Row{Cols: cols, Vals: vals, Value: obj}); err != nil {
-					return err
-				}
-			}
-			return app.Out.Flush()
+				return Row{Cols: cols, Vals: vals, Value: obj}
+			})
 		},
 	}
 }
@@ -123,12 +144,7 @@ func newDBSearchCmd() kit.Command {
 				if len(rows) == 0 {
 					return noResults("no matching channels")
 				}
-				for _, c := range rows {
-					if err := app.Out.Emit(channelRow(c)); err != nil {
-						return err
-					}
-				}
-				return app.Out.Flush()
+				return EmitAll(app, rows, channelRow)
 			}
 			rows, err := store.SearchVideos(q, limit)
 			if err != nil {
@@ -137,12 +153,7 @@ func newDBSearchCmd() kit.Command {
 			if len(rows) == 0 {
 				return noResults("no matching videos")
 			}
-			for _, v := range rows {
-				if err := app.Out.Emit(videoRow(v)); err != nil {
-					return err
-				}
-			}
-			return app.Out.Flush()
+			return EmitAll(app, rows, videoRow)
 		},
 	}
 }

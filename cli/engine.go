@@ -11,7 +11,7 @@ import (
 	"github.com/tamnd/any-cli/kit"
 	"github.com/tamnd/any-cli/kit/errs"
 	"github.com/tamnd/any-cli/kit/render"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 // Row is one output record: an ordered set of named columns plus the original
@@ -20,20 +20,22 @@ import (
 type Row = render.Record
 
 // App is the run state an escape-hatch command works through. The record
-// operations live in the youtube domain and receive the *youtube.Client by
+// operations live in the youtube domain and receive the *ytb.Client by
 // injection; the escape-hatch commands (download, transcript text, the local
 // store, config) need more than the client, so they rebuild this state from the
 // run context with appFromCtx and share the same renderer, limit, and pacing.
 type App struct {
-	Cfg       youtube.Config
-	Client    *youtube.Client
+	Cfg       ytb.Config
+	Client    *ytb.Client
 	Out       *render.Renderer
 	st        *kit.State
 	DataDir   string
-	store     *youtube.Store // the typed crawl store, opened once on demand
+	store     *ytb.Store // the typed crawl store, opened once on demand
 	Limit     int
+	emitted   int // rows written so far, for Emit to weigh against Limit
 	MaxPages  int
 	Workers   int
+	Verbose   int
 	quiet     bool
 	dryRun    bool
 	yes       bool
@@ -50,7 +52,7 @@ type App struct {
 // bug, surfaced as a panic rather than threaded through every command.
 func appFromCtx(ctx context.Context) *App {
 	st := kit.FromContext(ctx)
-	yc := kit.MustClient[*youtube.Client](ctx)
+	yc := kit.MustClient[*ytb.Client](ctx)
 	kc := st.Config
 	a := &App{
 		Cfg:       ytConfig(kc),
@@ -60,6 +62,7 @@ func appFromCtx(ctx context.Context) *App {
 		Limit:     st.Globals.Limit,
 		MaxPages:  atoi(kc.Extra["max-pages"]),
 		Workers:   kc.Workers,
+		Verbose:   kc.Verbose,
 		quiet:     kc.Quiet,
 		dryRun:    kc.DryRun,
 		yes:       kc.Extra["yes"] == "true",
@@ -71,10 +74,10 @@ func appFromCtx(ctx context.Context) *App {
 }
 
 // ytConfig folds the resolved framework config and the youtube globals (carried
-// in Config.Extra) into a youtube.Config. It mirrors the domain client factory,
+// in Config.Extra) into a ytb.Config. It mirrors the domain client factory,
 // so the standalone binary and an ant host build the same client.
-func ytConfig(kc kit.Config) youtube.Config {
-	yc := youtube.DefaultConfig()
+func ytConfig(kc kit.Config) ytb.Config {
+	yc := ytb.DefaultConfig()
 	if kc.Workers > 0 {
 		yc.Workers = kc.Workers
 	}
@@ -114,9 +117,9 @@ func (a *App) Line(s string) error {
 	return err
 }
 
-// StorePath is the fixed location of the typed crawl store, under the data dir.
-// Unlike kit's generic --db record tee, this store carries the rich youtube
-// schema the crawl, queue, export, and db commands read and write.
+// StorePath is the fixed location of the graph store, under the data dir.
+// Unlike kit's generic --db record tee, this store carries the nodes, claims and
+// reads that crawl, archive, export, query and db read and write.
 func (a *App) StorePath() string {
 	dir := a.DataDir
 	if dir == "" {
@@ -126,7 +129,7 @@ func (a *App) StorePath() string {
 }
 
 // Store opens (once) and returns the typed crawl store, creating the data dir.
-func (a *App) Store() (*youtube.Store, error) {
+func (a *App) Store() (*ytb.Store, error) {
 	if a.store != nil {
 		return a.store, nil
 	}
@@ -134,7 +137,7 @@ func (a *App) Store() (*youtube.Store, error) {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return nil, err
 	}
-	s, err := youtube.OpenStore(path)
+	s, err := ytb.OpenStore(path)
 	if err != nil {
 		return nil, fmt.Errorf("open store %q: %w", path, err)
 	}
@@ -145,11 +148,50 @@ func (a *App) Store() (*youtube.Store, error) {
 // RequireStore returns the typed crawl store. It exists for the commands whose
 // whole job is the store; the store always opens at the fixed path, so this no
 // longer fails for a missing flag.
-func (a *App) RequireStore() (*youtube.Store, error) { return a.Store() }
+func (a *App) RequireStore() (*ytb.Store, error) { return a.Store() }
 
 // PageOptions builds a PageOptions from the resolved -n / --max-pages values.
-func (a *App) PageOptions(enrich bool) youtube.PageOptions {
-	return youtube.PageOptions{Max: a.Limit, MaxPages: a.MaxPages, Enrich: enrich}
+func (a *App) PageOptions(enrich bool) ytb.PageOptions {
+	return ytb.PageOptions{Max: a.Limit, MaxPages: a.MaxPages, Enrich: enrich}
+}
+
+// Emit writes one row unless -n has already been reached, and reports whether
+// the caller should stop.
+//
+// A paging read is told the limit up front, through PageOptions, so it can stop
+// asking for continuations. A read that answers in one request has nothing to
+// stop asking for, and those commands used to emit their whole list whatever -n
+// said: six caption tracks for -n 2, twenty one predicates for -n 3. A global
+// flag that works on a search and does nothing on a caption list is worse than
+// one that does not exist, because nobody checks the ones that work.
+//
+// The count is on the App rather than on the loop, so a command that emits a
+// header and then a list counts both against the same -n instead of applying it
+// once per shape.
+func (a *App) Emit(row Row) (stop bool, err error) {
+	if a.Limit > 0 && a.emitted >= a.Limit {
+		return true, nil
+	}
+	if err := a.Out.Emit(row); err != nil {
+		return true, err
+	}
+	a.emitted++
+	return a.Limit > 0 && a.emitted >= a.Limit, nil
+}
+
+// EmitAll writes a slice of already-read items as rows, stops at -n, and
+// flushes. It is Emit for the common case where the whole command is one list.
+func EmitAll[T any](a *App, items []T, row func(T) Row) error {
+	for _, item := range items {
+		stop, err := a.Emit(row(item))
+		if err != nil {
+			return err
+		}
+		if stop {
+			break
+		}
+	}
+	return a.Out.Flush()
 }
 
 // logf writes a progress line to stderr unless --quiet.

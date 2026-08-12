@@ -1,0 +1,1468 @@
+{
+ "metadata": {
+  "channelMetadataRenderer": {
+   "title": "BBC News",
+   "description": "Breaking news, live updates and in-depth analysis from BBC News journalists around the world. \n\nFor the latest news, download the BBC News app or visit BBC.com/news\n",
+   "rssUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UC16niRr50-MSBwiO3YDb3RA",
+   "channelConversionUrl": "https://www.youtube.com/pagead/viewthroughconversion/962985656/?backend=innertube&cname=1&cver=2_20260731_00_00&data=backend%3Dinnertube%3Bcname%3D1%3Bcver%3D2_20260731_00_00%3Bptype%3Dcview%3Btype%3Dcview%3Butuid%3D16niRr50-MSBwiO3YDb3RA&foc_id=16niRr50-MSBwiO3YDb3RA&label=followon_cvisit&ptype=cview&utuid=16niRr50-MSBwiO3YDb3RA",
+   "externalId": "UC16niRr50-MSBwiO3YDb3RA",
+   "keywords": "BBC News \"breaking news\" \"international news\" \"UK news\" \"live news\"",
+   "ownerUrls": [
+    "http://www.youtube.com/@BBCNews"
+   ],
+   "avatar": {
+    "thumbnails": [
+     {
+      "url": "https://yt3.googleusercontent.com/v4JamQ9B-PUiJHjmZQs9UwTaoLQW8vijJMMpV5QvA2wHQ6iwWM8Q1s6O4jgTl0dtDigVWAi7SA=s900-c-k-c0x00ffffff-no-rj",
+      "width": 900,
+      "height": 900
+     }
+    ]
+   },
+   "channelUrl": "https://www.youtube.com/channel/UC16niRr50-MSBwiO3YDb3RA",
+   "isFamilySafe": true,
+   "facebookProfileId": "bbcnews",
+   "availableCountryCodes": [
+    "HM",
+    "AD",
+    "BF",
+    "NL",
+    "BH",
+    "CC",
+    "MG",
+    "BM",
+    "DJ",
+    "LS",
+    "NF",
+    "DO",
+    "RU",
+    "LC",
+    "YT",
+    "ZA",
+    "GG",
+    "MQ",
+    "TL",
+    "FO",
+    "HT",
+    "KW",
+    "SB",
+    "NE",
+    "SY",
+    "HR",
+    "GM",
+    "GP",
+    "PT",
+    "RE",
+    "IS",
+    "MK",
+    "IO",
+    "TZ",
+    "GS",
+    "LB",
+    "FR",
+    "AQ",
+    "PG",
+    "SN",
+    "BO",
+    "FI",
+    "CF",
+    "MH",
+    "EH",
+    "PF",
+    "FJ",
+    "IE",
+    "KR",
+    "GW",
+    "TW",
+    "DZ",
+    "DM",
+    "AT",
+    "EC",
+    "ER",
+    "MA",
+    "BD",
+    "WF",
+    "PE",
+    "ES",
+    "MF",
+    "RS",
+    "GR",
+    "HU",
+    "GQ",
+    "WS",
+    "PR",
+    "GL",
+    "KE",
+    "GD",
+    "MW",
+    "CH",
+    "BY",
+    "MS",
+    "JP",
+    "UG",
+    "CY",
+    "BV",
+    "MX",
+    "SZ",
+    "US",
+    "TG",
+    "CA",
+    "VN",
+    "SS",
+    "SI",
+    "PN",
+    "JE",
+    "MM",
+    "NU",
+    "MO",
+    "PS",
+    "AS",
+    "GT",
+    "UM",
+    "GF",
+    "MP",
+    "MU",
+    "SE",
+    "SA",
+    "BE",
+    "AI",
+    "BN",
+    "PH",
+    "BG",
+    "CO",
+    "RO",
+    "SD",
+    "VC",
+    "TH",
+    "LI",
+    "ML",
+    "SC",
+    "CW",
+    "BI",
+    "TF",
+    "IR",
+    "JO",
+    "HN",
+    "KM",
+    "MN",
+    "PK",
+    "BA",
+    "TR",
+    "MT",
+    "TT",
+    "BQ",
+    "BW",
+    "IL",
+    "SV",
+    "SK",
+    "IM",
+    "AO",
+    "KI",
+    "EG",
+    "CR",
+    "TO",
+    "MD",
+    "NC",
+    "AX",
+    "GE",
+    "BR",
+    "IT",
+    "LT",
+    "MR",
+    "ID",
+    "TV",
+    "QA",
+    "TM",
+    "GU",
+    "SG",
+    "ZM",
+    "DK",
+    "AU",
+    "NO",
+    "BZ",
+    "TK",
+    "CL",
+    "IN",
+    "AR",
+    "KH",
+    "LV",
+    "GI",
+    "RW",
+    "SH",
+    "SO",
+    "CK",
+    "GA",
+    "GB",
+    "VG",
+    "ST",
+    "PL",
+    "CV",
+    "CX",
+    "FM",
+    "KZ",
+    "CN",
+    "NA",
+    "ET",
+    "UA",
+    "CZ",
+    "SR",
+    "CG",
+    "LU",
+    "PM",
+    "CI",
+    "VU",
+    "KG",
+    "GN",
+    "NP",
+    "SJ",
+    "BT",
+    "GH",
+    "UY",
+    "KN",
+    "LK",
+    "UZ",
+    "ZW",
+    "FK",
+    "ME",
+    "MY",
+    "PW",
+    "AM",
+    "YE",
+    "TN",
+    "AG",
+    "LA",
+    "KY",
+    "LY",
+    "DE",
+    "GY",
+    "NG",
+    "IQ",
+    "AL",
+    "VA",
+    "BL",
+    "CM",
+    "NZ",
+    "PY",
+    "MZ",
+    "HK",
+    "SL",
+    "BB",
+    "OM",
+    "NR",
+    "TD",
+    "KP",
+    "AF",
+    "TC",
+    "PA",
+    "AW",
+    "MC",
+    "EE",
+    "CU",
+    "JM",
+    "CD",
+    "NI",
+    "SX",
+    "TJ",
+    "SM",
+    "AE",
+    "BJ",
+    "AZ",
+    "VE",
+    "VI",
+    "BS",
+    "LR",
+    "MV"
+   ],
+   "androidDeepLink": "android-app://com.google.android.youtube/http/www.youtube.com/channel/UC16niRr50-MSBwiO3YDb3RA",
+   "androidAppindexingLink": "android-app://com.google.android.youtube/http/www.youtube.com/channel/UC16niRr50-MSBwiO3YDb3RA",
+   "iosAppindexingLink": "ios-app://544007664/vnd.youtube/www.youtube.com/channel/UC16niRr50-MSBwiO3YDb3RA",
+   "vanityChannelUrl": "http://www.youtube.com/@BBCNews"
+  }
+ },
+ "microformat": {
+  "microformatDataRenderer": {
+   "urlCanonical": "https://www.youtube.com/channel/UC16niRr50-MSBwiO3YDb3RA",
+   "title": "BBC News",
+   "description": "Breaking news, live updates and in-depth analysis from BBC News journalists around the world. For the latest news, download the BBC News app or visit BBC.com...",
+   "thumbnail": {
+    "thumbnails": [
+     {
+      "url": "https://yt3.googleusercontent.com/v4JamQ9B-PUiJHjmZQs9UwTaoLQW8vijJMMpV5QvA2wHQ6iwWM8Q1s6O4jgTl0dtDigVWAi7SA=s200-c-k-c0x00ffffff-no-rj?days_since_epoch=20666",
+      "width": 200,
+      "height": 200
+     }
+    ]
+   },
+   "siteName": "YouTube",
+   "appName": "YouTube",
+   "androidPackage": "com.google.android.youtube",
+   "iosAppStoreId": "544007664",
+   "iosAppArguments": "https://www.youtube.com/channel/UC16niRr50-MSBwiO3YDb3RA",
+   "ogType": "yt-fb-app:channel",
+   "urlApplinksWeb": "https://www.youtube.com/channel/UC16niRr50-MSBwiO3YDb3RA?feature=applinks",
+   "urlApplinksIos": "vnd.youtube://www.youtube.com/channel/UC16niRr50-MSBwiO3YDb3RA?feature=applinks",
+   "urlApplinksAndroid": "vnd.youtube://www.youtube.com/channel/UC16niRr50-MSBwiO3YDb3RA?feature=applinks",
+   "urlTwitterIos": "vnd.youtube://www.youtube.com/channel/UC16niRr50-MSBwiO3YDb3RA?feature=twitter-deep-link",
+   "urlTwitterAndroid": "vnd.youtube://www.youtube.com/channel/UC16niRr50-MSBwiO3YDb3RA?feature=twitter-deep-link",
+   "twitterCardType": "summary",
+   "twitterSiteHandle": "@YouTube",
+   "schemaDotOrgType": "http://schema.org/http://schema.org/YoutubeChannelV2",
+   "noindex": false,
+   "unlisted": false,
+   "familySafe": true,
+   "tags": [
+    "BBC",
+    "News",
+    "breaking news",
+    "international news",
+    "UK news",
+    "live news"
+   ],
+   "availableCountries": [
+    "HM",
+    "AD",
+    "BF",
+    "NL",
+    "BH",
+    "CC",
+    "MG",
+    "BM",
+    "DJ",
+    "LS",
+    "NF",
+    "DO",
+    "RU",
+    "LC",
+    "YT",
+    "ZA",
+    "GG",
+    "MQ",
+    "TL",
+    "FO",
+    "HT",
+    "KW",
+    "SB",
+    "NE",
+    "SY",
+    "HR",
+    "GM",
+    "GP",
+    "PT",
+    "RE",
+    "IS",
+    "MK",
+    "IO",
+    "TZ",
+    "GS",
+    "LB",
+    "FR",
+    "AQ",
+    "PG",
+    "SN",
+    "BO",
+    "FI",
+    "CF",
+    "MH",
+    "EH",
+    "PF",
+    "FJ",
+    "IE",
+    "KR",
+    "GW",
+    "TW",
+    "DZ",
+    "DM",
+    "AT",
+    "EC",
+    "ER",
+    "MA",
+    "BD",
+    "WF",
+    "PE",
+    "ES",
+    "MF",
+    "RS",
+    "GR",
+    "HU",
+    "GQ",
+    "WS",
+    "PR",
+    "GL",
+    "KE",
+    "GD",
+    "MW",
+    "CH",
+    "BY",
+    "MS",
+    "JP",
+    "UG",
+    "CY",
+    "BV",
+    "MX",
+    "SZ",
+    "US",
+    "TG",
+    "CA",
+    "VN",
+    "SS",
+    "SI",
+    "PN",
+    "JE",
+    "MM",
+    "NU",
+    "MO",
+    "PS",
+    "AS",
+    "GT",
+    "UM",
+    "GF",
+    "MP",
+    "MU",
+    "SE",
+    "SA",
+    "BE",
+    "AI",
+    "BN",
+    "PH",
+    "BG",
+    "CO",
+    "RO",
+    "SD",
+    "VC",
+    "TH",
+    "LI",
+    "ML",
+    "SC",
+    "CW",
+    "BI",
+    "TF",
+    "IR",
+    "JO",
+    "HN",
+    "KM",
+    "MN",
+    "PK",
+    "BA",
+    "TR",
+    "MT",
+    "TT",
+    "BQ",
+    "BW",
+    "IL",
+    "SV",
+    "SK",
+    "IM",
+    "AO",
+    "KI",
+    "EG",
+    "CR",
+    "TO",
+    "MD",
+    "NC",
+    "AX",
+    "GE",
+    "BR",
+    "IT",
+    "LT",
+    "MR",
+    "ID",
+    "TV",
+    "QA",
+    "TM",
+    "GU",
+    "SG",
+    "ZM",
+    "DK",
+    "AU",
+    "NO",
+    "BZ",
+    "TK",
+    "CL",
+    "IN",
+    "AR",
+    "KH",
+    "LV",
+    "GI",
+    "RW",
+    "SH",
+    "SO",
+    "CK",
+    "GA",
+    "GB",
+    "VG",
+    "ST",
+    "PL",
+    "CV",
+    "CX",
+    "FM",
+    "KZ",
+    "CN",
+    "NA",
+    "ET",
+    "UA",
+    "CZ",
+    "SR",
+    "CG",
+    "LU",
+    "PM",
+    "CI",
+    "VU",
+    "KG",
+    "GN",
+    "NP",
+    "SJ",
+    "BT",
+    "GH",
+    "UY",
+    "KN",
+    "LK",
+    "UZ",
+    "ZW",
+    "FK",
+    "ME",
+    "MY",
+    "PW",
+    "AM",
+    "YE",
+    "TN",
+    "AG",
+    "LA",
+    "KY",
+    "LY",
+    "DE",
+    "GY",
+    "NG",
+    "IQ",
+    "AL",
+    "VA",
+    "BL",
+    "CM",
+    "NZ",
+    "PY",
+    "MZ",
+    "HK",
+    "SL",
+    "BB",
+    "OM",
+    "NR",
+    "TD",
+    "KP",
+    "AF",
+    "TC",
+    "PA",
+    "AW",
+    "MC",
+    "EE",
+    "CU",
+    "JM",
+    "CD",
+    "NI",
+    "SX",
+    "TJ",
+    "SM",
+    "AE",
+    "BJ",
+    "AZ",
+    "VE",
+    "VI",
+    "BS",
+    "LR",
+    "MV"
+   ],
+   "linkAlternates": [
+    {
+     "hrefUrl": "https://m.youtube.com/channel/UC16niRr50-MSBwiO3YDb3RA"
+    },
+    {
+     "hrefUrl": "android-app://com.google.android.youtube/http/youtube.com/channel/UC16niRr50-MSBwiO3YDb3RA"
+    },
+    {
+     "hrefUrl": "ios-app://544007664/http/youtube.com/channel/UC16niRr50-MSBwiO3YDb3RA"
+    }
+   ]
+  }
+ },
+ "header": {
+  "pageHeaderRenderer": {
+   "pageTitle": "BBC News",
+   "content": {
+    "pageHeaderViewModel": {
+     "title": {
+      "dynamicTextViewModel": {
+       "text": {
+        "content": "BBC News",
+        "styleRuns": [
+         {
+          "startIndex": 8,
+          "styleRunExtensions": {
+           "styleRunColorMapExtension": {
+            "colorMap": [
+             {
+              "key": "USER_INTERFACE_THEME_DARK",
+              "value": 4294967295
+             },
+             {
+              "key": "USER_INTERFACE_THEME_LIGHT",
+              "value": 4279440147
+             }
+            ]
+           }
+          }
+         }
+        ],
+        "attachmentRuns": [
+         {
+          "startIndex": 8,
+          "length": 0,
+          "element": {
+           "type": {
+            "imageType": {
+             "image": {
+              "sources": [
+               {
+                "clientResource": {
+                 "imageName": "CHECK_CIRCLE_FILLED"
+                },
+                "width": 24,
+                "height": 24
+               }
+              ]
+             }
+            }
+           },
+           "properties": {
+            "layoutProperties": {
+             "height": {
+              "value": 24,
+              "unit": "DIMENSION_UNIT_POINT"
+             },
+             "width": {
+              "value": 24,
+              "unit": "DIMENSION_UNIT_POINT"
+             },
+             "margin": {
+              "left": {
+               "value": 8,
+               "unit": "DIMENSION_UNIT_POINT"
+              }
+             }
+            }
+           }
+          },
+          "alignment": "ALIGNMENT_VERTICAL_CENTER"
+         }
+        ]
+       },
+       "maxLines": 2,
+       "rendererContext": {
+        "loggingContext": {
+         "loggingDirectives": {
+          "trackingParams": "CCMQj-QKIhMIjuKMkoz_lQMVXUX1BR3GDzT3",
+          "visibility": {
+           "types": "12"
+          }
+         }
+        },
+        "accessibilityContext": {
+         "label": "BBC News, Verified"
+        }
+       }
+      }
+     },
+     "image": {
+      "decoratedAvatarViewModel": {
+       "avatar": {
+        "avatarViewModel": {
+         "image": {
+          "sources": [
+           {
+            "url": "https://yt3.googleusercontent.com/v4JamQ9B-PUiJHjmZQs9UwTaoLQW8vijJMMpV5QvA2wHQ6iwWM8Q1s6O4jgTl0dtDigVWAi7SA=s72-c-k-c0x00ffffff-no-rj",
+            "width": 72,
+            "height": 72
+           },
+           {
+            "url": "https://yt3.googleusercontent.com/v4JamQ9B-PUiJHjmZQs9UwTaoLQW8vijJMMpV5QvA2wHQ6iwWM8Q1s6O4jgTl0dtDigVWAi7SA=s120-c-k-c0x00ffffff-no-rj",
+            "width": 120,
+            "height": 120
+           },
+           {
+            "url": "https://yt3.googleusercontent.com/v4JamQ9B-PUiJHjmZQs9UwTaoLQW8vijJMMpV5QvA2wHQ6iwWM8Q1s6O4jgTl0dtDigVWAi7SA=s160-c-k-c0x00ffffff-no-rj",
+            "width": 160,
+            "height": 160
+           }
+          ],
+          "processor": {
+           "borderImageProcessor": {
+            "circular": true
+           }
+          }
+         },
+         "avatarImageSize": "AVATAR_SIZE_XL",
+         "loggingDirectives": {
+          "trackingParams": "CCIQ6OENIhMIjuKMkoz_lQMVXUX1BR3GDzT3",
+          "visibility": {
+           "types": "12"
+          }
+         }
+        }
+       }
+      }
+     },
+     "metadata": {
+      "contentMetadataViewModel": {
+       "metadataRows": [
+        {
+         "metadataParts": [
+          {
+           "text": {
+            "content": "@BBCNews",
+            "styleRuns": [
+             {
+              "weightLabel": "FONT_WEIGHT_MEDIUM",
+              "styleRunExtensions": {
+               "styleRunColorMapExtension": {
+                "colorMap": [
+                 {
+                  "key": "USER_INTERFACE_THEME_DARK",
+                  "value": 4294967295
+                 },
+                 {
+                  "key": "USER_INTERFACE_THEME_LIGHT",
+                  "value": 4279440147
+                 }
+                ]
+               }
+              }
+             }
+            ]
+           },
+           "enableTruncation": true
+          }
+         ]
+        },
+        {
+         "metadataParts": [
+          {
+           "text": {
+            "content": "19.9M subscribers"
+           },
+           "accessibilityLabel": "19.9 million subscribers"
+          },
+          {
+           "text": {
+            "content": "32K videos",
+            "styleRuns": [
+             {
+              "startIndex": 0,
+              "length": 10
+             }
+            ]
+           }
+          }
+         ]
+        }
+       ],
+       "delimiter": "•",
+       "rendererContext": {
+        "loggingContext": {
+         "loggingDirectives": {
+          "trackingParams": "CCEQ9eQKIhMIjuKMkoz_lQMVXUX1BR3GDzT3",
+          "visibility": {
+           "types": "12"
+          }
+         }
+        }
+       }
+      }
+     },
+     "actions": {
+      "flexibleActionsViewModel": {
+       "actionsRows": [
+        {
+         "actions": [
+          {
+           "buttonViewModel": {
+            "title": "Subscribe",
+            "onTap": {
+             "innertubeCommand": {
+              "clickTrackingParams": "CBIQot8KIhMIjuKMkoz_lQMVXUX1BR3GDzT3ygEE6j4CwA==",
+              "commandMetadata": {
+               "webCommandMetadata": {
+                "ignoreNavigation": true
+               }
+              },
+              "modalEndpoint": {
+               "modal": {
+                "modalWithTitleAndButtonRenderer": {
+                 "title": {
+                  "simpleText": "Want to subscribe to this channel?"
+                 },
+                 "content": {
+                  "simpleText": "Sign in to subscribe to this channel."
+                 },
+                 "button": {
+                  "buttonRenderer": {
+                   "style": "STYLE_MONO_FILLED",
+                   "size": "SIZE_DEFAULT",
+                   "isDisabled": false,
+                   "text": {
+                    "simpleText": "Sign in"
+                   },
+                   "navigationEndpoint": {
+                    "clickTrackingParams": "CCAQ_YYEIhMIjuKMkoz_lQMVXUX1BR3GDzT3MglzdWJzY3JpYmXKAQTqPgLA",
+                    "commandMetadata": {
+                     "webCommandMetadata": {
+                      "url": "https://accounts.google.com/ServiceLogin?service=youtube&uilel=3&passive=true&continue=https%3A%2F%2Fwww.youtube.com%2Fsignin%3Faction_handle_signin%3Dtrue%26app%3Ddesktop%26hl%3Den%26next%3D%252F%2540BBCNews%26continue_action%3DQUM4Zm9rUy02NHp6Q2dDTXYySldvRHVSU1gxMnxBR3JiS2FseXpGYWxXOEEyZVlKSnI4QkhITmF3SXJUQ0hORG92d2t0ZDBOWmw4NEZBa0lIWlNFTHljMmFRem96SkZhZzBYQWNKWGg0WGFBS0FEZktLel93VmNiQ3JEZXFVeHQ3bV9fb3pCUlNBWXpUQnlmZFZWWC10Q2QzN2QxT3F0czZGSllGUXNNSGxuRFNQdF9aZHdqWm9pZEtTLXFMQ3ZNMmVVZ0RDa29tQ19YendXWnptc1VBWkFR&hl=en&ec=66429",
+                      "webPageType": "WEB_PAGE_TYPE_UNKNOWN",
+                      "rootVe": 83769
+                     }
+                    },
+                    "signInEndpoint": {
+                     "nextEndpoint": {
+                      "clickTrackingParams": "CCAQ_YYEIhMIjuKMkoz_lQMVXUX1BR3GDzT3ygEE6j4CwA==",
+                      "commandMetadata": {
+                       "webCommandMetadata": {
+                        "url": "/@BBCNews",
+                        "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+                        "rootVe": 3611,
+                        "apiUrl": "/youtubei/v1/browse"
+                       }
+                      },
+                      "browseEndpoint": {
+                       "browseId": "UC16niRr50-MSBwiO3YDb3RA",
+                       "params": "EgA%3D",
+                       "canonicalBaseUrl": "/@BBCNews"
+                      }
+                     },
+                     "continueAction": "QUM4Zm9rUy02NHp6Q2dDTXYySldvRHVSU1gxMnxBR3JiS2FseXpGYWxXOEEyZVlKSnI4QkhITmF3SXJUQ0hORG92d2t0ZDBOWmw4NEZBa0lIWlNFTHljMmFRem96SkZhZzBYQWNKWGg0WGFBS0FEZktLel93VmNiQ3JEZXFVeHQ3bV9fb3pCUlNBWXpUQnlmZFZWWC10Q2QzN2QxT3F0czZGSllGUXNNSGxuRFNQdF9aZHdqWm9pZEtTLXFMQ3ZNMmVVZ0RDa29tQ19YendXWnptc1VBWkFR",
+                     "idamTag": "66429"
+                    }
+                   },
+                   "trackingParams": "CCAQ_YYEIhMIjuKMkoz_lQMVXUX1BR3GDzT3"
+                  }
+                 }
+                }
+               }
+              }
+             }
+            },
+            "accessibilityText": "Subscribe",
+            "style": "BUTTON_VIEW_MODEL_STYLE_MONO",
+            "trackingParams": "CBIQot8KIhMIjuKMkoz_lQMVXUX1BR3GDzT3",
+            "isFullWidth": false,
+            "type": "BUTTON_VIEW_MODEL_TYPE_FILLED",
+            "buttonSize": "BUTTON_VIEW_MODEL_SIZE_DEFAULT",
+            "state": "BUTTON_VIEW_MODEL_STATE_ACTIVE"
+           }
+          }
+         ]
+        }
+       ],
+       "justifyContent": "FLEXIBLE_ACTIONS_JUSTIFY_CONTENT_START",
+       "minimumRowHeight": 44,
+       "rendererContext": {
+        "loggingContext": {
+         "loggingDirectives": {
+          "trackingParams": "CBIQot8KIhMIjuKMkoz_lQMVXUX1BR3GDzT3",
+          "visibility": {
+           "types": "12"
+          },
+          "clientVeSpec": {
+           "uiType": 184974,
+           "veCounter": 215687944
+          }
+         }
+        }
+       }
+      }
+     },
+     "description": {
+      "descriptionPreviewViewModel": {
+       "description": {
+        "content": "Breaking news, live updates and in-depth analysis from BBC News journalists around the world. "
+       },
+       "maxLines": 2,
+       "truncationText": {
+        "content": "...more",
+        "styleRuns": [
+         {
+          "startIndex": 0,
+          "length": 7,
+          "weight": 500
+         }
+        ]
+       },
+       "alwaysShowTruncationText": true,
+       "rendererContext": {
+        "loggingContext": {
+         "loggingDirectives": {
+          "trackingParams": "CBsQr_4KIhMIjuKMkoz_lQMVXUX1BR3GDzT3",
+          "visibility": {
+           "types": "12"
+          }
+         }
+        },
+        "accessibilityContext": {
+         "label": "Description. Breaking news, live updates and in-depth analysis from BBC N...tap for more."
+        },
+        "commandContext": {
+         "onTap": {
+          "innertubeCommand": {
+           "clickTrackingParams": "CBsQr_4KIhMIjuKMkoz_lQMVXUX1BR3GDzT3ygEE6j4CwA==",
+           "showEngagementPanelEndpoint": {
+            "engagementPanel": {
+             "engagementPanelSectionListRenderer": {
+              "header": {
+               "engagementPanelTitleHeaderRenderer": {
+                "title": {
+                 "simpleText": "BBC News"
+                },
+                "visibilityButton": {
+                 "buttonRenderer": {
+                  "style": "STYLE_DEFAULT",
+                  "size": "SIZE_DEFAULT",
+                  "isDisabled": false,
+                  "icon": {
+                   "iconType": "CLOSE"
+                  },
+                  "accessibility": {
+                   "label": "Close"
+                  },
+                  "trackingParams": "CB8Q8FsiEwiO4oySjP-VAxVdRfUFHcYPNPc=",
+                  "accessibilityData": {
+                   "accessibilityData": {
+                    "label": "Close"
+                   }
+                  },
+                  "command": {
+                   "clickTrackingParams": "CB8Q8FsiEwiO4oySjP-VAxVdRfUFHcYPNPfKAQTqPgLA",
+                   "changeEngagementPanelVisibilityAction": {
+                    "targetId": "6c32b229-0000-2fc6-834e-582429c06d20",
+                    "visibility": "ENGAGEMENT_PANEL_VISIBILITY_HIDDEN"
+                   }
+                  }
+                 }
+                },
+                "trackingParams": "CBwQ040EIhMIjuKMkoz_lQMVXUX1BR3GDzT3"
+               }
+              },
+              "content": {
+               "sectionListRenderer": {
+                "contents": [
+                 {
+                  "itemSectionRenderer": {
+                   "contents": [
+                    {
+                     "continuationItemRenderer": {
+                      "trigger": "CONTINUATION_TRIGGER_ON_ITEM_SHOWN",
+                      "continuationEndpoint": {
+                       "clickTrackingParams": "CB4Quy8YACITCI7ijJKM_5UDFV1F9QUdxg8098oBBOo-AsA=",
+                       "commandMetadata": {
+                        "webCommandMetadata": {
+                         "sendPost": true,
+                         "apiUrl": "/youtubei/v1/browse"
+                        }
+                       },
+                       "continuationCommand": {
+                        "token": "4qmFsgJgEhhVQzE2bmlScjUwLU1TQndpTzNZRGIzUkEaRDhnWXJHaW1hQVNZS0pEWmpNekppTWpKaExUQXdNREF0TW1aak5pMDRNelJsTFRVNE1qUXlPV013Tm1ReU1BJTNEJTNE",
+                        "request": "CONTINUATION_REQUEST_TYPE_BROWSE"
+                       }
+                      }
+                     }
+                    }
+                   ],
+                   "trackingParams": "CB4Quy8YACITCI7ijJKM_5UDFV1F9QUdxg809w==",
+                   "sectionIdentifier": "6c32b22a-0000-2fc6-834e-582429c06d20",
+                   "targetId": "6c32b22a-0000-2fc6-834e-582429c06d20"
+                  }
+                 }
+                ],
+                "trackingParams": "CB0Qui8iEwiO4oySjP-VAxVdRfUFHcYPNPc=",
+                "scrollPaneStyle": {
+                 "scrollable": true
+                }
+               }
+              },
+              "targetId": "6c32b229-0000-2fc6-834e-582429c06d20",
+              "identifier": {
+               "surface": "ENGAGEMENT_PANEL_SURFACE_BROWSE",
+               "tag": "6c32b229-0000-2fc6-834e-582429c06d20"
+              }
+             }
+            },
+            "identifier": {
+             "surface": "ENGAGEMENT_PANEL_SURFACE_BROWSE",
+             "tag": "6c32b229-0000-2fc6-834e-582429c06d20"
+            },
+            "engagementPanelPresentationConfigs": {
+             "engagementPanelPopupPresentationConfig": {
+              "popupType": "PANEL_POPUP_TYPE_DIALOG"
+             }
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     },
+     "attribution": {
+      "attributionViewModel": {
+       "text": {
+        "content": " bbc.com/news",
+        "commandRuns": [
+         {
+          "startIndex": 0,
+          "length": 13,
+          "onTap": {
+           "innertubeCommand": {
+            "clickTrackingParams": "CBoQmokLGAIiEwiO4oySjP-VAxVdRfUFHcYPNPfKAQTqPgLA",
+            "commandMetadata": {
+             "webCommandMetadata": {
+              "url": "https://www.youtube.com/redirect?event=channel_header&redir_token=QUM4Zm9rU1d0eXFYRnUxdUk1eEhPVFZNR0VUOHxBR3JiS2FuUVJHemtGN3NZZ01FOWo1Si1Eb3p4dUFoRXdNOVJsNk9oeGtZc2s5QTVxenRFWWhDendCUTFSUEVHa3h0dlprc0lXdDBBQ21qazlNTmZaOEVSbWRhVF9iZ1J2Uy1h&q=http%3A%2F%2Fwww.bbc.com%2Fnews",
+              "webPageType": "WEB_PAGE_TYPE_UNKNOWN",
+              "rootVe": 83769
+             }
+            },
+            "urlEndpoint": {
+             "url": "https://www.youtube.com/redirect?event=channel_header&redir_token=QUM4Zm9rU1d0eXFYRnUxdUk1eEhPVFZNR0VUOHxBR3JiS2FuUVJHemtGN3NZZ01FOWo1Si1Eb3p4dUFoRXdNOVJsNk9oeGtZc2s5QTVxenRFWWhDendCUTFSUEVHa3h0dlprc0lXdDBBQ21qazlNTmZaOEVSbWRhVF9iZ1J2Uy1h&q=http%3A%2F%2Fwww.bbc.com%2Fnews",
+             "target": "TARGET_NEW_WINDOW"
+            }
+           }
+          },
+          "loggingDirectives": {
+           "trackingParams": "CBoQmokLGAIiEwiO4oySjP-VAxVdRfUFHcYPNPc=",
+           "visibility": {
+            "types": "12"
+           }
+          }
+         }
+        ],
+        "styleRuns": [
+         {
+          "weightLabel": "FONT_WEIGHT_NORMAL",
+          "styleRunExtensions": {
+           "styleRunColorMapExtension": {
+            "colorMap": [
+             {
+              "key": "USER_INTERFACE_THEME_DARK",
+              "value": 4282296063
+             },
+             {
+              "key": "USER_INTERFACE_THEME_LIGHT",
+              "value": 4278607828
+             }
+            ]
+           }
+          }
+         }
+        ],
+        "attachmentRuns": [
+         {
+          "startIndex": 0,
+          "length": 0,
+          "element": {
+           "type": {
+            "imageType": {
+             "image": {
+              "sources": [
+               {
+                "customImageSource": {
+                 "youtubeIconSource": {
+                  "clientResource": {
+                   "icon": "YTICON_OUTLINE_LINK_S24"
+                  }
+                 }
+                }
+               }
+              ]
+             }
+            }
+           },
+           "properties": {
+            "layoutProperties": {
+             "height": {
+              "value": 14,
+              "unit": "DIMENSION_UNIT_POINT"
+             },
+             "width": {
+              "value": 14,
+              "unit": "DIMENSION_UNIT_POINT"
+             }
+            }
+           }
+          },
+          "alignment": "ALIGNMENT_VERTICAL_CENTER"
+         }
+        ]
+       },
+       "suffix": {
+        "content": "and 4 more links",
+        "commandRuns": [
+         {
+          "startIndex": 0,
+          "length": 16,
+          "onTap": {
+           "innertubeCommand": {
+            "clickTrackingParams": "CBUQmIkLGAAiEwiO4oySjP-VAxVdRfUFHcYPNPfKAQTqPgLA",
+            "showEngagementPanelEndpoint": {
+             "engagementPanel": {
+              "engagementPanelSectionListRenderer": {
+               "header": {
+                "engagementPanelTitleHeaderRenderer": {
+                 "title": {
+                  "simpleText": "BBC News"
+                 },
+                 "visibilityButton": {
+                  "buttonRenderer": {
+                   "style": "STYLE_DEFAULT",
+                   "size": "SIZE_DEFAULT",
+                   "isDisabled": false,
+                   "icon": {
+                    "iconType": "CLOSE"
+                   },
+                   "accessibility": {
+                    "label": "Close"
+                   },
+                   "trackingParams": "CBkQ8FsiEwiO4oySjP-VAxVdRfUFHcYPNPc=",
+                   "accessibilityData": {
+                    "accessibilityData": {
+                     "label": "Close"
+                    }
+                   },
+                   "command": {
+                    "clickTrackingParams": "CBkQ8FsiEwiO4oySjP-VAxVdRfUFHcYPNPfKAQTqPgLA",
+                    "changeEngagementPanelVisibilityAction": {
+                     "targetId": "6c32b22b-0000-2fc6-834e-582429c06d20",
+                     "visibility": "ENGAGEMENT_PANEL_VISIBILITY_HIDDEN"
+                    }
+                   }
+                  }
+                 },
+                 "trackingParams": "CBYQ040EIhMIjuKMkoz_lQMVXUX1BR3GDzT3"
+                }
+               },
+               "content": {
+                "sectionListRenderer": {
+                 "contents": [
+                  {
+                   "itemSectionRenderer": {
+                    "contents": [
+                     {
+                      "continuationItemRenderer": {
+                       "trigger": "CONTINUATION_TRIGGER_ON_ITEM_SHOWN",
+                       "continuationEndpoint": {
+                        "clickTrackingParams": "CBgQuy8YACITCI7ijJKM_5UDFV1F9QUdxg8098oBBOo-AsA=",
+                        "commandMetadata": {
+                         "webCommandMetadata": {
+                          "sendPost": true,
+                          "apiUrl": "/youtubei/v1/browse"
+                         }
+                        },
+                        "continuationCommand": {
+                         "token": "4qmFsgJgEhhVQzE2bmlScjUwLU1TQndpTzNZRGIzUkEaRDhnWXJHaW1hQVNZS0pEWmpNekppTWpKakxUQXdNREF0TW1aak5pMDRNelJsTFRVNE1qUXlPV013Tm1ReU1BJTNEJTNE",
+                         "request": "CONTINUATION_REQUEST_TYPE_BROWSE"
+                        }
+                       }
+                      }
+                     }
+                    ],
+                    "trackingParams": "CBgQuy8YACITCI7ijJKM_5UDFV1F9QUdxg809w==",
+                    "sectionIdentifier": "6c32b22c-0000-2fc6-834e-582429c06d20",
+                    "targetId": "6c32b22c-0000-2fc6-834e-582429c06d20"
+                   }
+                  }
+                 ],
+                 "trackingParams": "CBcQui8iEwiO4oySjP-VAxVdRfUFHcYPNPc=",
+                 "scrollPaneStyle": {
+                  "scrollable": true
+                 }
+                }
+               },
+               "targetId": "6c32b22b-0000-2fc6-834e-582429c06d20",
+               "identifier": {
+                "surface": "ENGAGEMENT_PANEL_SURFACE_BROWSE",
+                "tag": "6c32b22b-0000-2fc6-834e-582429c06d20"
+               }
+              }
+             },
+             "identifier": {
+              "surface": "ENGAGEMENT_PANEL_SURFACE_BROWSE",
+              "tag": "6c32b22b-0000-2fc6-834e-582429c06d20"
+             },
+             "engagementPanelPresentationConfigs": {
+              "engagementPanelPopupPresentationConfig": {
+               "popupType": "PANEL_POPUP_TYPE_DIALOG"
+              }
+             }
+            }
+           }
+          },
+          "loggingDirectives": {
+           "trackingParams": "CBUQmIkLGAAiEwiO4oySjP-VAxVdRfUFHcYPNPc=",
+           "visibility": {
+            "types": "12"
+           }
+          }
+         }
+        ],
+        "styleRuns": [
+         {
+          "fontName": "",
+          "fontSize": 0,
+          "weightLabel": "FONT_WEIGHT_MEDIUM"
+         }
+        ]
+       },
+       "rendererContext": {
+        "loggingContext": {
+         "loggingDirectives": {
+          "trackingParams": "CBQQjaULIhMIjuKMkoz_lQMVXUX1BR3GDzT3",
+          "visibility": {
+           "types": "12"
+          }
+         }
+        }
+       }
+      }
+     },
+     "banner": {
+      "imageBannerViewModel": {
+       "image": {
+        "sources": [
+         {
+          "url": "https://yt3.googleusercontent.com/xDk7iLEwnQRQkEzHiNXonOI8UbLbYKATVoPoErXOKleYpfS4PYvJmg8DYcAj7MQXiIZvqC_s8fE=w1060-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj",
+          "width": 1060,
+          "height": 175
+         },
+         {
+          "url": "https://yt3.googleusercontent.com/xDk7iLEwnQRQkEzHiNXonOI8UbLbYKATVoPoErXOKleYpfS4PYvJmg8DYcAj7MQXiIZvqC_s8fE=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj",
+          "width": 1138,
+          "height": 188
+         },
+         {
+          "url": "https://yt3.googleusercontent.com/xDk7iLEwnQRQkEzHiNXonOI8UbLbYKATVoPoErXOKleYpfS4PYvJmg8DYcAj7MQXiIZvqC_s8fE=w1707-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj",
+          "width": 1707,
+          "height": 283
+         },
+         {
+          "url": "https://yt3.googleusercontent.com/xDk7iLEwnQRQkEzHiNXonOI8UbLbYKATVoPoErXOKleYpfS4PYvJmg8DYcAj7MQXiIZvqC_s8fE=w2120-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj",
+          "width": 2120,
+          "height": 351
+         },
+         {
+          "url": "https://yt3.googleusercontent.com/xDk7iLEwnQRQkEzHiNXonOI8UbLbYKATVoPoErXOKleYpfS4PYvJmg8DYcAj7MQXiIZvqC_s8fE=w2276-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj",
+          "width": 2276,
+          "height": 377
+         },
+         {
+          "url": "https://yt3.googleusercontent.com/xDk7iLEwnQRQkEzHiNXonOI8UbLbYKATVoPoErXOKleYpfS4PYvJmg8DYcAj7MQXiIZvqC_s8fE=w2560-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj",
+          "width": 2560,
+          "height": 424
+         }
+        ]
+       },
+       "style": "IMAGE_BANNER_STYLE_INSET",
+       "rendererContext": {
+        "loggingContext": {
+         "loggingDirectives": {
+          "trackingParams": "CBMQnfILIhMIjuKMkoz_lQMVXUX1BR3GDzT3",
+          "visibility": {
+           "types": "12"
+          }
+         }
+        }
+       }
+      }
+     },
+     "rendererContext": {
+      "loggingContext": {
+       "loggingDirectives": {
+        "trackingParams": "CBIQot8KIhMIjuKMkoz_lQMVXUX1BR3GDzT3",
+        "visibility": {
+         "types": "12"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "contents": {
+  "twoColumnBrowseResultsRenderer": {
+   "tabs": [
+    {
+     "tabRenderer": {
+      "title": "Home",
+      "endpoint": {
+       "clickTrackingParams": "CCoQ8JMBGAUiEwiO4oySjP-VAxVdRfUFHcYPNPfKAQTqPgLA",
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@BBCNews/featured",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UC16niRr50-MSBwiO3YDb3RA",
+        "params": "EghmZWF0dXJlZPIGBAoCMgA%3D",
+        "canonicalBaseUrl": "/@BBCNews"
+       }
+      },
+      "selected": true
+     }
+    },
+    {
+     "tabRenderer": {
+      "title": "Videos",
+      "endpoint": {
+       "clickTrackingParams": "CCkQ8JMBGAYiEwiO4oySjP-VAxVdRfUFHcYPNPfKAQTqPgLA",
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@BBCNews/videos",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UC16niRr50-MSBwiO3YDb3RA",
+        "params": "EgZ2aWRlb3PyBgQKAjoA",
+        "canonicalBaseUrl": "/@BBCNews"
+       }
+      }
+     }
+    },
+    {
+     "tabRenderer": {
+      "title": "Shorts",
+      "endpoint": {
+       "clickTrackingParams": "CCgQ8JMBGAciEwiO4oySjP-VAxVdRfUFHcYPNPfKAQTqPgLA",
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@BBCNews/shorts",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UC16niRr50-MSBwiO3YDb3RA",
+        "params": "EgZzaG9ydHPyBgUKA5oBAA%3D%3D",
+        "canonicalBaseUrl": "/@BBCNews"
+       }
+      }
+     }
+    },
+    {
+     "tabRenderer": {
+      "title": "Live",
+      "endpoint": {
+       "clickTrackingParams": "CCcQ8JMBGAgiEwiO4oySjP-VAxVdRfUFHcYPNPfKAQTqPgLA",
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@BBCNews/streams",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UC16niRr50-MSBwiO3YDb3RA",
+        "params": "EgdzdHJlYW1z8gYECgJ6AA%3D%3D",
+        "canonicalBaseUrl": "/@BBCNews"
+       }
+      }
+     }
+    },
+    {
+     "tabRenderer": {
+      "title": "Podcasts",
+      "endpoint": {
+       "clickTrackingParams": "CCYQ8JMBGAkiEwiO4oySjP-VAxVdRfUFHcYPNPfKAQTqPgLA",
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@BBCNews/podcasts",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UC16niRr50-MSBwiO3YDb3RA",
+        "params": "Eghwb2RjYXN0c_IGBQoDugEA",
+        "canonicalBaseUrl": "/@BBCNews"
+       }
+      }
+     }
+    },
+    {
+     "tabRenderer": {
+      "title": "Playlists",
+      "endpoint": {
+       "clickTrackingParams": "CCUQ8JMBGAoiEwiO4oySjP-VAxVdRfUFHcYPNPfKAQTqPgLA",
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@BBCNews/playlists",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UC16niRr50-MSBwiO3YDb3RA",
+        "params": "EglwbGF5bGlzdHPyBgQKAkIA",
+        "canonicalBaseUrl": "/@BBCNews"
+       }
+      }
+     }
+    },
+    {
+     "tabRenderer": {
+      "title": "Posts",
+      "endpoint": {
+       "clickTrackingParams": "CCQQ8JMBGAsiEwiO4oySjP-VAxVdRfUFHcYPNPfKAQTqPgLA",
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@BBCNews/posts",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UC16niRr50-MSBwiO3YDb3RA",
+        "params": "EgVwb3N0c_IGBAoCSgA%3D",
+        "canonicalBaseUrl": "/@BBCNews"
+       }
+      }
+     }
+    },
+    {
+     "expandableTabRenderer": {
+      "title": "Search",
+      "endpoint": {
+       "clickTrackingParams": "CAAQhGciEwiO4oySjP-VAxVdRfUFHcYPNPfKAQTqPgLA",
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@BBCNews/search",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UC16niRr50-MSBwiO3YDb3RA",
+        "params": "EgZzZWFyY2jyBgQKAloA",
+        "canonicalBaseUrl": "/@BBCNews"
+       }
+      },
+      "selected": false
+     }
+    }
+   ]
+  }
+ }
+}

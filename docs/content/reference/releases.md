@@ -4,60 +4,47 @@ description: "What changed in each ytb release."
 weight: 35
 ---
 
-Every release ships as prebuilt archives, Linux packages (deb, rpm, apk), and a
-multi-arch container image, each with checksums, an SBOM, and a cosign
-signature. Grab one from the [releases page] or install the latest with
-`go install`.
+Every release ships as prebuilt archives, Linux packages (deb, rpm, apk), and a multi-arch container image, each with checksums, an SBOM, and a cosign signature.
+Grab one from the [releases page] or install the latest with `go install`.
 
 [releases page]: https://github.com/tamnd/ytb-cli/releases
 
 ## v0.4.1
 
-Restores native media downloads for current YouTube streams. The downloader now
-keeps the watch-page visitor session and uses the stream's matching client
-User-Agent when fetching Googlevideo URLs, so `ytb download` and
-`ytb download -x --audio-format mp3` work again without `--use-yt-dlp` for
-common anonymous streams.
+Restores native media downloads for current YouTube streams.
+The downloader now keeps the watch-page visitor session and uses the stream's matching client User-Agent when fetching Googlevideo URLs, so `ytb download` and `ytb download -x --audio-format mp3` work again without `--use-yt-dlp` for common anonymous streams.
 
 ## v0.4.0
 
-Adds `discover`, a breadth-first graph walk from videos, channels, and
-playlists. The command follows uploaders, related videos, uploads, playlists,
-items, owners, community posts, and commenters, with depth and fanout bounds.
+Adds `discover`, a breadth-first graph walk from videos, channels, and playlists.
+The command follows uploaders, related videos, uploads, playlists, items, owners, community posts, and commenters, with depth and fanout bounds.
 
 ## v0.3.1
 
-Documentation release. Adds this release notes page and documents the v0.3.0
-output work: the `markdown` format, the color rules, and shrink-to-fit tables.
+Documentation release.
+Adds this release notes page and documents the v0.3.0 output work: the `markdown` format, the color rules, and shrink-to-fit tables.
 No behavior changed.
 
 ## v0.3.0
 
-Output got a face-lift. Every list command renders through a redrawn formatter
-built on [lipgloss](https://github.com/charmbracelet/lipgloss).
+Output got a face-lift.
+Every list command renders through a redrawn formatter built on [lipgloss](https://github.com/charmbracelet/lipgloss).
 
-- **`-o table`** is now a rounded-border grid with an accented bold header and a
-  dim border, colored on a terminal and plain in a pipe.
-- **`-o markdown`** (alias `md`) — a GitHub pipe table you can paste straight
-  into a README, issue, or PR. Pipes inside titles are escaped, so the table is
-  always valid Markdown.
-- **`-o json` and `-o jsonl`** are syntax-highlighted on a terminal: keys,
-  strings, numbers, and literals each get a color. A pipe still receives plain,
-  parseable bytes, so `ytb ... | jq` is unaffected.
-- **`--color auto|always|never`** controls all of the above and honors
-  `NO_COLOR`. The default colors only an interactive terminal.
-- A too-wide table **shrinks to fit the terminal** instead of wrapping at the
-  edge.
+- **`-o table`** is now a rounded-border grid with an accented bold header and a dim border, colored on a terminal and plain in a pipe.
+- **`-o markdown`** (alias `md`) is a GitHub pipe table you can paste straight into a README, issue, or PR.
+  Pipes inside titles are escaped, so the table is always valid Markdown.
+- **`-o json` and `-o jsonl`** are syntax-highlighted on a terminal: keys, strings, numbers, and literals each get a color.
+  A pipe still receives plain, parseable bytes, so `ytb ... | jq` is unaffected.
+- **`--color auto|always|never`** controls all of the above and honors `NO_COLOR`.
+  The default colors only an interactive terminal.
+- A too-wide table **shrinks to fit the terminal** instead of wrapping at the edge.
 
-None of the existing formats or flags changed, so scripts that pipe `ytb` keep
-working byte for byte.
+None of the existing formats or flags changed, so scripts that pipe `ytb` keep working byte for byte.
 
 ## v0.2.0
 
-Rebuilt `ytb` on the shared [any-cli/kit](https://github.com/tamnd/any-cli)
-framework. One operation registry now backs the CLI, the `serve` HTTP surface,
-and the `mcp` tool set, and every command shares the same output contract
-(`-o`, `--fields`, `--template`, `-n`).
+Rebuilt `ytb` on the shared [any-cli/kit](https://github.com/tamnd/any-cli) framework.
+One operation registry now backs the CLI, the `serve` HTTP surface, and the `mcp` tool set, and every command shares the same output contract (`-o`, `--fields`, `--template`, `-n`).
 
 ## v0.1.1
 
@@ -65,6 +52,4 @@ Maintenance release.
 
 ## v0.1.0
 
-First public release: video, channel, playlist, search, comments, transcripts,
-downloads, community and hashtag feeds, YouTube Music, and a local SQLite store,
-from one pure-Go binary with no API key.
+First public release: video, channel, playlist, search, comments, transcripts, downloads, community and hashtag feeds, YouTube Music, and a local SQLite store, from one pure-Go binary with no API key.

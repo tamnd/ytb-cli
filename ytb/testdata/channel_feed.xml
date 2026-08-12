@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
+ <link rel="self" href="http://www.youtube.com/feeds/videos.xml?channel_id=UCuAXFkgsw1L7xaCfnd5JJOw"/>
+ <id>yt:channel:uAXFkgsw1L7xaCfnd5JJOw</id>
+ <yt:channelId>uAXFkgsw1L7xaCfnd5JJOw</yt:channelId>
+ <title>Rick Astley</title>
+ <link rel="alternate" href="https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw"/>
+ <author>
+  <name>Rick Astley</name>
+  <uri>https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw</uri>
+ </author>
+ <published>2015-02-01T16:32:30+00:00</published>
+ <entry>
+  <id>yt:video:GdbjNGtWPe4</id>
+  <yt:videoId>GdbjNGtWPe4</yt:videoId>
+  <yt:channelId>UCuAXFkgsw1L7xaCfnd5JJOw</yt:channelId>
+  <title>39 years of Never Gonna Give You Up!🕺Next year it’s the big 4-0… how should we celebrate? Team Rick</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/GdbjNGtWPe4"/>
+  <author>
+   <name>Rick Astley</name>
+   <uri>https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw</uri>
+  </author>
+  <published>2026-07-27T14:30:23+00:00</published>
+  <updated>2026-07-28T06:47:42+00:00</updated>
+  <media:group>
+   <media:title>39 years of Never Gonna Give You Up!🕺Next year it’s the big 4-0… how should we celebrate? Team Rick</media:title>
+   <media:content url="https://www.youtube.com/v/GdbjNGtWPe4?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/GdbjNGtWPe4/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="1168" average="5.00" min="1" max="5"/>
+    <media:statistics views="22934"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:YJi5uH8YHG8</id>
+  <yt:videoId>YJi5uH8YHG8</yt:videoId>
+  <yt:channelId>UCuAXFkgsw1L7xaCfnd5JJOw</yt:channelId>
+  <title>Copenhagen, you were amazing. Tak 🇩🇰♥️ #rickastley #tivoligardens</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/YJi5uH8YHG8"/>
+  <author>
+   <name>Rick Astley</name>
+   <uri>https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw</uri>
+  </author>
+  <published>2026-07-27T12:14:54+00:00</published>
+  <updated>2026-07-28T06:13:06+00:00</updated>
+  <media:group>
+   <media:title>Copenhagen, you were amazing. Tak 🇩🇰♥️ #rickastley #tivoligardens</media:title>
+   <media:content url="https://www.youtube.com/v/YJi5uH8YHG8?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/YJi5uH8YHG8/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="1017" average="5.00" min="1" max="5"/>
+    <media:statistics views="13237"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:WmXE7IfqXQ8</id>
+  <yt:videoId>WmXE7IfqXQ8</yt:videoId>
+  <yt:channelId>UCuAXFkgsw1L7xaCfnd5JJOw</yt:channelId>
+  <title>Fly Me To The Moon 🌙 #rickastley</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/WmXE7IfqXQ8"/>
+  <author>
+   <name>Rick Astley</name>
+   <uri>https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw</uri>
+  </author>
+  <published>2026-07-27T12:11:28+00:00</published>
+  <updated>2026-07-28T06:37:09+00:00</updated>
+  <media:group>
+   <media:title>Fly Me To The Moon 🌙 #rickastley</media:title>
+   <media:content url="https://www.youtube.com/v/WmXE7IfqXQ8?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/WmXE7IfqXQ8/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="1309" average="5.00" min="1" max="5"/>
+    <media:statistics views="24903"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:S069PVmKXZ4</id>
+  <yt:videoId>S069PVmKXZ4</yt:videoId>
+  <yt:channelId>UCuAXFkgsw1L7xaCfnd5JJOw</yt:channelId>
+  <title>Last but not least… Angels on My Side ♥️ watch and stream now.</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/S069PVmKXZ4"/>
+  <author>
+   <name>Rick Astley</name>
+   <uri>https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw</uri>
+  </author>
+  <published>2026-06-29T12:54:29+00:00</published>
+  <updated>2026-06-30T08:06:18+00:00</updated>
+  <media:group>
+   <media:title>Last but not least… Angels on My Side ♥️ watch and stream now.</media:title>
+   <media:content url="https://www.youtube.com/v/S069PVmKXZ4?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/S069PVmKXZ4/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="943" average="5.00" min="1" max="5"/>
+    <media:statistics views="23243"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:jbHtuMS-7m0</id>
+  <yt:videoId>jbHtuMS-7m0</yt:videoId>
+  <yt:channelId>UCuAXFkgsw1L7xaCfnd5JJOw</yt:channelId>
+  <title>We’re back with another one! Full performance of ‘Dance’ from The O2 is out now. 🕺#rickastley</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/jbHtuMS-7m0"/>
+  <author>
+   <name>Rick Astley</name>
+   <uri>https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw</uri>
+  </author>
+  <published>2026-06-29T12:53:06+00:00</published>
+  <updated>2026-06-30T08:58:17+00:00</updated>
+  <media:group>
+   <media:title>We’re back with another one! Full performance of ‘Dance’ from The O2 is out now. 🕺#rickastley</media:title>
+   <media:content url="https://www.youtube.com/v/jbHtuMS-7m0?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i3.ytimg.com/vi/jbHtuMS-7m0/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="1567" average="5.00" min="1" max="5"/>
+    <media:statistics views="34493"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:PXC_PYeB6F8</id>
+  <yt:videoId>PXC_PYeB6F8</yt:videoId>
+  <yt:channelId>UCuAXFkgsw1L7xaCfnd5JJOw</yt:channelId>
+  <title>Rick Astley - Angels On My Side (Live at The O2, London, April 2026)</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=PXC_PYeB6F8"/>
+  <author>
+   <name>Rick Astley</name>
+   <uri>https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw</uri>
+  </author>
+  <published>2026-06-26T16:00:07+00:00</published>
+  <updated>2026-06-26T16:05:58+00:00</updated>
+  <media:group>
+   <media:title>Rick Astley - Angels On My Side (Live at The O2, London, April 2026)</media:title>
+   <media:content url="https://www.youtube.com/v/PXC_PYeB6F8?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/PXC_PYeB6F8/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Taken from Rick Astley’s sold-out Reflections Tour, this live performance of “Angels On My Side” was recorded at London’s O2 Arena in April 2026.
+
+Originally featured on Rick’s chart-topping album 50, this live version of &quot;Angels On My Side&quot; is now included on the 10th Anniversary Deluxe Edition of 50, celebrating a decade since the album’s release.
+
+50 (10th Anniversary Deluxe Edition) is out now via BMG.
+
+Buy/Stream: https://rickastley.lnk.to/50Anniversary
+
+Subscribe to the official Rick Astley YouTube channel: https://RickAstley.lnk.to/YTSubID 
+
+Follow Rick Astley:
+Facebook: https://RickAstley.lnk.to/FBFollowID  
+Twitter: https://RickAstley.lnk.to/TwitterID  
+Instagram: https://RickAstley.lnk.to/InstagramID 
+Website: https://RickAstley.lnk.to/storeID 
+TikTok: https://RickAstley.lnk.to/TikTokID
+
+Listen to Rick Astley:
+Spotify: https://RickAstley.lnk.to/SpotifyID 
+Apple Music: https://RickAstley.lnk.to/AppleMusicID 
+Amazon Music: https://RickAstley.lnk.to/AmazonMusicID 
+Deezer: https://RickAstley.lnk.to/DeezerID 
+
+#RickAstley</media:description>
+   <media:community>
+    <media:starRating count="1272" average="5.00" min="1" max="5"/>
+    <media:statistics views="39369"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:LaOUkDBDjW8</id>
+  <yt:videoId>LaOUkDBDjW8</yt:videoId>
+  <yt:channelId>UCuAXFkgsw1L7xaCfnd5JJOw</yt:channelId>
+  <title>Rick Astley - Dance (Live at The O2, London, April 2026)</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=LaOUkDBDjW8"/>
+  <author>
+   <name>Rick Astley</name>
+   <uri>https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw</uri>
+  </author>
+  <published>2026-06-24T16:00:06+00:00</published>
+  <updated>2026-06-25T06:52:20+00:00</updated>
+  <media:group>
+   <media:title>Rick Astley - Dance (Live at The O2, London, April 2026)</media:title>
+   <media:content url="https://www.youtube.com/v/LaOUkDBDjW8?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/LaOUkDBDjW8/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Taken from Rick Astley’s sold-out Reflections Tour, this live performance of “Keep Singing” was recorded at London’s O2 Arena in April 2026.
+
+Originally featured on Rick’s chart-topping album 50, this live version of &quot;Keep Singing&quot; is now included on the 10th Anniversary Deluxe Edition of 50, celebrating a decade since the album’s release.
+
+50 (10th Anniversary Deluxe Edition) is out now via BMG.
+
+Buy/Stream: https://rickastley.lnk.to/50Anniversary
+
+Subscribe to the official Rick Astley YouTube channel: https://RickAstley.lnk.to/YTSubID 
+
+Follow Rick Astley:
+Facebook: https://RickAstley.lnk.to/FBFollowID  
+Twitter: https://RickAstley.lnk.to/TwitterID  
+Instagram: https://RickAstley.lnk.to/InstagramID 
+Website: https://RickAstley.lnk.to/storeID 
+TikTok: https://RickAstley.lnk.to/TikTokID
+
+Listen to Rick Astley:
+Spotify: https://RickAstley.lnk.to/SpotifyID 
+Apple Music: https://RickAstley.lnk.to/AppleMusicID 
+Amazon Music: https://RickAstley.lnk.to/AmazonMusicID 
+Deezer: https://RickAstley.lnk.to/DeezerID 
+
+#RickAstley</media:description>
+   <media:community>
+    <media:starRating count="837" average="5.00" min="1" max="5"/>
+    <media:statistics views="18089"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:QVpvmDYrnPo</id>
+  <yt:videoId>QVpvmDYrnPo</yt:videoId>
+  <yt:channelId>UCuAXFkgsw1L7xaCfnd5JJOw</yt:channelId>
+  <title>OMG Denmark ! What a night! I would have signed everything if I could have. 🙏❤️😎 #rickastley</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/QVpvmDYrnPo"/>
+  <author>
+   <name>Rick Astley</name>
+   <uri>https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw</uri>
+  </author>
+  <published>2026-06-22T14:46:13+00:00</published>
+  <updated>2026-06-27T12:27:19+00:00</updated>
+  <media:group>
+   <media:title>OMG Denmark ! What a night! I would have signed everything if I could have. 🙏❤️😎 #rickastley</media:title>
+   <media:content url="https://www.youtube.com/v/QVpvmDYrnPo?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/QVpvmDYrnPo/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="994" average="5.00" min="1" max="5"/>
+    <media:statistics views="13566"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:qB6u-nqQ67w</id>
+  <yt:videoId>qB6u-nqQ67w</yt:videoId>
+  <yt:channelId>UCuAXFkgsw1L7xaCfnd5JJOw</yt:channelId>
+  <title>In 2016, Rick went live talking through his new album ‘50’. 10 years later, he’s doing it again 👀</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/qB6u-nqQ67w"/>
+  <author>
+   <name>Rick Astley</name>
+   <uri>https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw</uri>
+  </author>
+  <published>2026-06-22T14:26:14+00:00</published>
+  <updated>2026-06-27T11:30:28+00:00</updated>
+  <media:group>
+   <media:title>In 2016, Rick went live talking through his new album ‘50’. 10 years later, he’s doing it again 👀</media:title>
+   <media:content url="https://www.youtube.com/v/qB6u-nqQ67w?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/qB6u-nqQ67w/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="759" average="5.00" min="1" max="5"/>
+    <media:statistics views="17486"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:Jtnz8GsmWCI</id>
+  <yt:videoId>Jtnz8GsmWCI</yt:videoId>
+  <yt:channelId>UCuAXFkgsw1L7xaCfnd5JJOw</yt:channelId>
+  <title>‘Keep Singing’ filmed live from The O2 ♥️First one from a very special night. #rickastley</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/Jtnz8GsmWCI"/>
+  <author>
+   <name>Rick Astley</name>
+   <uri>https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw</uri>
+  </author>
+  <published>2026-06-22T14:24:25+00:00</published>
+  <updated>2026-06-27T12:13:33+00:00</updated>
+  <media:group>
+   <media:title>‘Keep Singing’ filmed live from The O2 ♥️First one from a very special night. #rickastley</media:title>
+   <media:content url="https://www.youtube.com/v/Jtnz8GsmWCI?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i3.ytimg.com/vi/Jtnz8GsmWCI/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="773" average="5.00" min="1" max="5"/>
+    <media:statistics views="15567"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:wvr7-pDJUOA</id>
+  <yt:videoId>wvr7-pDJUOA</yt:videoId>
+  <yt:channelId>UCuAXFkgsw1L7xaCfnd5JJOw</yt:channelId>
+  <title>Rick Astley - Keep Singing (Live at The O2, London, April 2026)</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=wvr7-pDJUOA"/>
+  <author>
+   <name>Rick Astley</name>
+   <uri>https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw</uri>
+  </author>
+  <published>2026-06-22T14:00:06+00:00</published>
+  <updated>2026-06-22T14:06:15+00:00</updated>
+  <media:group>
+   <media:title>Rick Astley - Keep Singing (Live at The O2, London, April 2026)</media:title>
+   <media:content url="https://www.youtube.com/v/wvr7-pDJUOA?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/wvr7-pDJUOA/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Taken from Rick Astley’s sold-out Reflections Tour, this live performance of “Keep Singing” was recorded at London’s O2 Arena in April 2026.
+
+Originally featured on Rick’s chart-topping album 50, this live version of &quot;Keep Singing&quot; is now included on the 10th Anniversary Deluxe Edition of 50, celebrating a decade since the album’s release.
+
+50 (10th Anniversary Deluxe Edition) is out now via BMG.
+
+Buy/Stream: https://rickastley.lnk.to/50Anniversary
+
+Subscribe to the official Rick Astley YouTube channel: https://RickAstley.lnk.to/YTSubID 
+
+Follow Rick Astley:
+Facebook: https://RickAstley.lnk.to/FBFollowID  
+Twitter: https://RickAstley.lnk.to/TwitterID  
+Instagram: https://RickAstley.lnk.to/InstagramID 
+Website: https://RickAstley.lnk.to/storeID 
+TikTok: https://RickAstley.lnk.to/TikTokID
+
+Listen to Rick Astley:
+Spotify: https://RickAstley.lnk.to/SpotifyID 
+Apple Music: https://RickAstley.lnk.to/AppleMusicID 
+Amazon Music: https://RickAstley.lnk.to/AmazonMusicID 
+Deezer: https://RickAstley.lnk.to/DeezerID 
+
+#RickAstley #KeepSinging</media:description>
+   <media:community>
+    <media:starRating count="1191" average="5.00" min="1" max="5"/>
+    <media:statistics views="25603"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:dE2TxYSDy4Y</id>
+  <yt:videoId>dE2TxYSDy4Y</yt:videoId>
+  <yt:channelId>UCuAXFkgsw1L7xaCfnd5JJOw</yt:channelId>
+  <title>Rick Astley - '50' Track By Track (10 Years Later)</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=dE2TxYSDy4Y"/>
+  <author>
+   <name>Rick Astley</name>
+   <uri>https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw</uri>
+  </author>
+  <published>2026-06-19T16:00:06+00:00</published>
+  <updated>2026-06-23T01:11:41+00:00</updated>
+  <media:group>
+   <media:title>Rick Astley - '50' Track By Track (10 Years Later)</media:title>
+   <media:content url="https://www.youtube.com/v/dE2TxYSDy4Y?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/dE2TxYSDy4Y/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Listen to '50' (10th Anniversary Deluxe Edition) now: https://rickastley.lnk.to/50Anniversary
+
+Subscribe to the official Rick Astley YouTube channel: https://RickAstley.lnk.to/YTSubID 
+
+Follow Rick Astley:
+Facebook: https://RickAstley.lnk.to/FBFollowID  
+Twitter: https://RickAstley.lnk.to/TwitterID  
+Instagram: https://RickAstley.lnk.to/InstagramID 
+Website: https://RickAstley.lnk.to/storeID 
+TikTok: https://RickAstley.lnk.to/TikTokID
+
+Listen to Rick Astley:
+Spotify: https://RickAstley.lnk.to/SpotifyID 
+Apple Music: https://RickAstley.lnk.to/AppleMusicID 
+Amazon Music: https://RickAstley.lnk.to/AmazonMusicID 
+Deezer: https://RickAstley.lnk.to/DeezerID 
+
+#RickAstley</media:description>
+   <media:community>
+    <media:starRating count="899" average="5.00" min="1" max="5"/>
+    <media:statistics views="9032"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:5E1MOlBDWgQ</id>
+  <yt:videoId>5E1MOlBDWgQ</yt:videoId>
+  <yt:channelId>UCuAXFkgsw1L7xaCfnd5JJOw</yt:channelId>
+  <title>Summer shows kicked off this week in Sweden and Denmark!! 🇸🇪🇩🇰</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/5E1MOlBDWgQ"/>
+  <author>
+   <name>Rick Astley</name>
+   <uri>https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw</uri>
+  </author>
+  <published>2026-05-27T13:25:24+00:00</published>
+  <updated>2026-05-28T07:58:06+00:00</updated>
+  <media:group>
+   <media:title>Summer shows kicked off this week in Sweden and Denmark!! 🇸🇪🇩🇰</media:title>
+   <media:content url="https://www.youtube.com/v/5E1MOlBDWgQ?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/5E1MOlBDWgQ/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="1690" average="5.00" min="1" max="5"/>
+    <media:statistics views="66660"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:tJBSRSxbfsU</id>
+  <yt:videoId>tJBSRSxbfsU</yt:videoId>
+  <yt:channelId>UCuAXFkgsw1L7xaCfnd5JJOw</yt:channelId>
+  <title>What a fantastic night in Gothenburg. Really had a lot of fun. Would love to come back! 🎶🕺🏾💕☀️</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/tJBSRSxbfsU"/>
+  <author>
+   <name>Rick Astley</name>
+   <uri>https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw</uri>
+  </author>
+  <published>2026-05-27T13:23:24+00:00</published>
+  <updated>2026-05-28T06:53:47+00:00</updated>
+  <media:group>
+   <media:title>What a fantastic night in Gothenburg. Really had a lot of fun. Would love to come back! 🎶🕺🏾💕☀️</media:title>
+   <media:content url="https://www.youtube.com/v/tJBSRSxbfsU?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/tJBSRSxbfsU/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="1300" average="5.00" min="1" max="5"/>
+    <media:statistics views="27111"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:zhp51BbvYQk</id>
+  <yt:videoId>zhp51BbvYQk</yt:videoId>
+  <yt:channelId>UCuAXFkgsw1L7xaCfnd5JJOw</yt:channelId>
+  <title>Thank you for having us Jelling Musikfestival! ♥️🇩🇰</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/zhp51BbvYQk"/>
+  <author>
+   <name>Rick Astley</name>
+   <uri>https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw</uri>
+  </author>
+  <published>2026-05-27T13:20:15+00:00</published>
+  <updated>2026-07-14T18:05:07+00:00</updated>
+  <media:group>
+   <media:title>Thank you for having us Jelling Musikfestival! ♥️🇩🇰</media:title>
+   <media:content url="https://www.youtube.com/v/zhp51BbvYQk?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i3.ytimg.com/vi/zhp51BbvYQk/hqdefault.jpg" width="480" height="360"/>
+   <media:description></media:description>
+   <media:community>
+    <media:starRating count="839" average="5.00" min="1" max="5"/>
+    <media:statistics views="27703"/>
+   </media:community>
+  </media:group>
+ </entry>
+</feed>

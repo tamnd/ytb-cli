@@ -1,0 +1,48 @@
+capture.txt says where every fixture in this directory came from.
+
+None of these files is hand written. Each one is bytes YouTube sent, trimmed to
+the subtree the parser reads and pretty printed or left compact depending on how
+big it was. A fixture with no provenance is a fixture nobody can re-capture when
+the shape changes, and capture_test.go fails on a file with no row here and on a
+row with no file.
+
+The columns are the file, the day it landed in the tree, the client that asked,
+and the command. Where the command is curl rather than ytb it is because ytb
+refuses to make that request, which is itself the thing under test.
+
+The subjects are deliberately few and boring. @RickAstleyYT and dQw4w9WgXcQ are
+the most stable pair on the site, @BBCNews is the one with eight tabs and a
+verified badge, and MrBeast is where a short comes from. Reusing them means a
+fixture that has to be re-captured can be re-captured from the same place.
+
+file                          | date       | client  | command
+------------------------------|------------|---------|------------------------------------------------------------
+about_channel.json            | 2026-07-30 | WEB     | ytb channel @RickAstleyYT --about, the about panel continuation
+channel_feed.xml              | 2026-08-01 | none    | curl https://www.youtube.com/feeds/videos.xml?channel_id=UCuAXFkgsw1L7xaCfnd5JJOw
+channel_ldjson.html           | 2026-08-01 | WEB     | the ld+json ProfilePage block off https://www.youtube.com/@RickAstleyYT
+channel_page_artist.json      | 2026-08-01 | WEB     | ytb archive @RickAstleyYT, ytInitialData reduced to contents, header, metadata, microformat
+channel_page_verified.json    | 2026-08-01 | WEB     | ytb archive @BBCNews, the same reduction, eight tabs and a verified badge
+channel_page_vi.json          | 2026-08-12 | WEB     | ytb archive @BBCNews --hl vi --gl VN, the same reduction, the locale pair
+channel_tabs.json             | 2026-07-30 | WEB     | ytb channel @RickAstleyYT --tabs, the tab strip alone
+comments_restricted.json      | 2026-08-06 | WEB     | ytb comments dQw4w9WgXcQ, the comment section, one messageRenderer and nothing else
+mix_unviewable.json           | 2026-08-12 | WEB     | curl of browseId VLRDdQw4w9WgXcQ. ytb refuses an RD id before the request, so curl made it
+music_album.json              | 2026-08-07 | WEB_REMIX | ytb music album MPREb_dcYZhAh5urI
+music_artist.json             | 2026-08-07 | WEB_REMIX | ytb music artist, the browse of a release playlist
+music_lyrics.json             | 2026-08-07 | WEB_REMIX | ytb music lyrics dQw4w9WgXcQ, a musicDescriptionShelfRenderer
+music_lyrics_none.json        | 2026-08-07 | WEB_REMIX | the same read on a track with none, which answers with a messageRenderer
+music_search_card.json        | 2026-08-07 | WEB_REMIX | ytb music search, the top result card shape
+music_search_rows.json        | 2026-08-07 | WEB_REMIX | ytb music search, the shelf rows shape
+player_web_nourl.json         | 2026-08-12 | WEB     | ytInitialPlayerResponse off the watch page for dQw4w9WgXcQ, 27 formats and no urls
+playlist_header_album.json    | 2026-08-01 | WEB     | ytb playlist OLAK5uy_lGQfnMNGvYCRdDq9ZLzJV2BJL2aHQsz9Y, the album header
+playlist_header_uploads.json  | 2026-08-01 | WEB     | ytb playlist UUuAXFkgsw1L7xaCfnd5JJOw, the uploads header
+playlist_header_viewmodel.json| 2026-08-01 | WEB     | ytb playlist PLlaN88a7y2_rosKX2WQt2VjFbjyDQXOkR, the view model header
+playlist_items.json           | 2026-08-01 | WEB     | the same read's items, four lockups and a continuation
+playlist_shorts_uush.json     | 2026-08-12 | WEB     | ytb playlist UUSH16niRr50-MSBwiO3YDb3RA, 83 shorts lockups and no ordinary renderer
+posts_refusal.json            | 2026-07-30 | WEB     | ytb posts, a channel whose posts tab declines
+search_plain.json             | 2026-08-01 | WEB     | ytb search "rick astley", no filter, and its continuation six levels down
+search_playlists.json         | 2026-08-01 | WEB     | ytb search "rick astley" --type playlist
+video_captions_android.json   | 2026-08-06 | ANDROID | ytb transcript dQw4w9WgXcQ, the caption track list with six tracks on one audio track
+video_microdata.html          | 2026-08-12 | WEB     | the schema.org VideoObject subtree off the watch page for dQw4w9WgXcQ
+video_player.json             | 2026-07-30 | WEB     | ytb video dQw4w9WgXcQ, the player response
+video_player_short.json       | 2026-07-30 | WEB     | ytb video Df5Y-2ndQyU, a short
+video_player_stream.json      | 2026-07-30 | WEB     | ytb video 201MyYKtXaQ, a live stream

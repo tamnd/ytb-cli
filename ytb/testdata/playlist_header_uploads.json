@@ -1,0 +1,257 @@
+{
+ "header": {
+  "playlistHeaderRenderer": {
+   "playlistId": "UUuAXFkgsw1L7xaCfnd5JJOw",
+   "title": {
+    "simpleText": "Uploads from Rick Astley"
+   },
+   "numVideosText": {
+    "runs": [
+     {
+      "text": "435"
+     },
+     {
+      "text": " videos"
+     }
+    ]
+   },
+   "ownerText": {
+    "runs": [
+     {
+      "text": "Rick Astley",
+      "navigationEndpoint": {
+       "commandMetadata": {
+        "webCommandMetadata": {
+         "url": "/@RickAstleyYT",
+         "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+         "rootVe": 3611,
+         "apiUrl": "/youtubei/v1/browse"
+        }
+       },
+       "browseEndpoint": {
+        "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+        "canonicalBaseUrl": "/@RickAstleyYT"
+       }
+      }
+     }
+    ]
+   },
+   "viewCountText": {
+    "simpleText": "281,893 views"
+   },
+   "isEditable": false,
+   "likeButton": {
+    "likeButtonRenderer": {
+     "target": {
+      "playlistId": "UUuAXFkgsw1L7xaCfnd5JJOw"
+     },
+     "likeStatus": "INDIFFERENT",
+     "likesAllowed": false,
+     "hideDislikeButton": false
+    }
+   },
+   "ownerEndpoint": {
+    "commandMetadata": {
+     "webCommandMetadata": {
+      "url": "/@RickAstleyYT",
+      "webPageType": "WEB_PAGE_TYPE_CHANNEL",
+      "rootVe": 3611,
+      "apiUrl": "/youtubei/v1/browse"
+     }
+    },
+    "browseEndpoint": {
+     "browseId": "UCuAXFkgsw1L7xaCfnd5JJOw",
+     "canonicalBaseUrl": "/@RickAstleyYT"
+    }
+   },
+   "stats": [
+    {
+     "runs": [
+      {
+       "text": "435"
+      },
+      {
+       "text": " videos"
+      }
+     ]
+    },
+    {
+     "simpleText": "281,893 views"
+    }
+   ],
+   "briefStats": [
+    {
+     "runs": [
+      {
+       "text": "435"
+      },
+      {
+       "text": " videos"
+      }
+     ]
+    }
+   ],
+   "playlistHeaderBanner": {
+    "heroPlaylistThumbnailRenderer": {
+     "thumbnail": {
+      "thumbnails": [
+       {
+        "url": "https://i.ytimg.com/vi/GdbjNGtWPe4/oar2.jpg?sqp=-oaymwEYCJUDENAFSFqQAgHyq4qpAwcIARUAAIhC&rs=AOn4CLBMNB0kjYF9gZwTHIYlMaRhCrevcw&usqp=CCk",
+        "width": 405,
+        "height": 720
+       },
+       {
+        "url": "https://i.ytimg.com/vi/GdbjNGtWPe4/oar2.jpg?sqp=-oaymwEbCJUDEOAESFqQAgHyq4qpAwoIARUAAIhCyAEB&rs=AOn4CLA9xKG0RoySA07fGH2HkKTqp19Qdg&usqp=CCk",
+        "width": 405,
+        "height": 608
+       }
+      ],
+      "isOriginalAspectRatio": true
+     },
+     "maxRatio": 0.5625,
+     "onTap": {
+      "commandMetadata": {
+       "webCommandMetadata": {
+        "url": "/watch?v=GdbjNGtWPe4&list=UUuAXFkgsw1L7xaCfnd5JJOw",
+        "webPageType": "WEB_PAGE_TYPE_WATCH",
+        "rootVe": 3832
+       }
+      },
+      "watchEndpoint": {
+       "videoId": "GdbjNGtWPe4",
+       "playlistId": "UUuAXFkgsw1L7xaCfnd5JJOw",
+       "watchEndpointSupportedOnesieConfig": {
+        "html5PlaybackOnesieConfig": {
+         "commonConfig": {
+          "url": "https://rr2---sn-8qj-i5orz.googlevideo.com/initplayback?source=youtube&oeis=1&c=WEB&oad=3200&ovd=3200&oaad=11000&oavd=11000&ocs=700&oewis=1&oputc=1&olis=1&ofpcc=1&msp=1&odepv=1&id=19d6e3346b563dee&ip=14.177.111.100&vip=216.239.38.119&initcwndbps=2743750&mt=1785576574&oweuc="
+         }
+        }
+       }
+      }
+     }
+    }
+   },
+   "byline": [
+    {
+     "playlistBylineRenderer": {
+      "text": {
+       "runs": [
+        {
+         "text": "435"
+        },
+        {
+         "text": " videos"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "playlistBylineRenderer": {
+      "text": {
+       "simpleText": "281,893 views"
+      }
+     }
+    },
+    {
+     "playlistBylineRenderer": {
+      "text": {
+       "runs": [
+        {
+         "text": "Updated "
+        },
+        {
+         "text": "4"
+        },
+        {
+         "text": " days ago"
+        }
+       ]
+      }
+     }
+    }
+   ]
+  }
+ },
+ "microformat": {
+  "microformatDataRenderer": {
+   "urlCanonical": "http://www.youtube.com/playlist?list=UUuAXFkgsw1L7xaCfnd5JJOw",
+   "title": "Uploads from Rick Astley",
+   "description": "",
+   "thumbnail": {
+    "thumbnails": [
+     {
+      "url": "https://i.ytimg.com/vi/GdbjNGtWPe4/hqdefault.jpg?sqp=-oaymwEXCOADEI4CSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLDItaz3_av_fhJpx8gXw5FFHO7nPA&days_since_epoch=20666",
+      "width": 480,
+      "height": 270
+     }
+    ],
+    "sampledThumbnailColor": {
+     "red": 89,
+     "green": 59,
+     "blue": 59
+    },
+    "darkColorPalette": {
+     "section2Color": 3351073,
+     "iconInactiveColor": 9664374,
+     "iconDisabledColor": 5850179
+    },
+    "vibrantColorPalette": {
+     "iconInactiveColor": 10054763
+    }
+   },
+   "siteName": "YouTube",
+   "appName": "YouTube",
+   "androidPackage": "com.google.android.youtube",
+   "iosAppStoreId": "544007664",
+   "iosAppArguments": "http://www.youtube.com/playlist?list=UUuAXFkgsw1L7xaCfnd5JJOw",
+   "ogType": "website",
+   "urlApplinksWeb": "http://www.youtube.com/playlist?list=UUuAXFkgsw1L7xaCfnd5JJOw&feature=applinks",
+   "urlApplinksIos": "http://www.youtube.com/playlist?list=UUuAXFkgsw1L7xaCfnd5JJOw&feature=applinks",
+   "urlApplinksAndroid": "http://www.youtube.com/playlist?list=UUuAXFkgsw1L7xaCfnd5JJOw&feature=applinks",
+   "urlTwitterIos": "http://www.youtube.com/playlist?list=UUuAXFkgsw1L7xaCfnd5JJOw&feature=twitter-deep-link",
+   "urlTwitterAndroid": "http://www.youtube.com/playlist?list=UUuAXFkgsw1L7xaCfnd5JJOw&feature=twitter-deep-link",
+   "twitterCardType": "summary",
+   "twitterSiteHandle": "@YouTube",
+   "schemaDotOrgType": "http://schema.org/WebPage",
+   "noindex": false,
+   "unlisted": false,
+   "linkAlternates": [
+    {
+     "hrefUrl": "http://www.youtube.com/playlist?list=UUuAXFkgsw1L7xaCfnd5JJOw"
+    },
+    {
+     "hrefUrl": "android-app://com.google.android.youtube/http/youtube.comhttp://www.youtube.com/playlist?list=UUuAXFkgsw1L7xaCfnd5JJOw"
+    },
+    {
+     "hrefUrl": "ios-app://544007664/http/youtube.comhttp://www.youtube.com/playlist?list=UUuAXFkgsw1L7xaCfnd5JJOw"
+    }
+   ]
+  }
+ },
+ "alerts": [
+  {
+   "alertWithButtonRenderer": {
+    "type": "INFO",
+    "text": {
+     "simpleText": "Unavailable videos are hidden"
+    },
+    "dismissButton": {
+     "buttonRenderer": {
+      "style": "STYLE_DEFAULT",
+      "size": "SIZE_DEFAULT",
+      "isDisabled": false,
+      "icon": {
+       "iconType": "CLOSE"
+      },
+      "accessibilityData": {
+       "accessibilityData": {
+        "label": "Dismiss"
+       }
+      }
+     }
+    }
+   }
+  }
+ ]
+}

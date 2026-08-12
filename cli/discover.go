@@ -4,12 +4,9 @@ import (
 	"context"
 
 	"github.com/tamnd/any-cli/kit"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/pkg/graph"
+	"github.com/tamnd/ytb-cli/ytb"
 )
-
-// defaultDiscoverBudget caps a streaming walk when the user did not pass -n, so
-// `ytb discover <video>` always terminates instead of spidering YouTube forever.
-const defaultDiscoverBudget = 500
 
 // newDiscoverCmd is the breadth-first graph walk. Where the record reads each
 // answer one question about one object, discover chains them: from a seed video,
@@ -17,8 +14,8 @@ const defaultDiscoverBudget = 500
 // follows theirs, hop by hop, emitting one row per node as it is reached.
 //
 // It shares the read group with the per-object commands because it is a read; it
-// only touches the store when --store is set, where it persists each node and
-// records every traversed edge into the edges table.
+// only touches the store when --store is set, where it writes each node it
+// reached as a record.
 func newDiscoverCmd() kit.Command {
 	var (
 		depth  int
@@ -28,7 +25,7 @@ func newDiscoverCmd() kit.Command {
 	)
 	return kit.Command{
 		Use:     "discover <seed>...",
-		Aliases: []string{"walk", "graph"},
+		Aliases: []string{"walk"},
 		Group:   "read",
 		Short:   "Breadth-first walk of the graph linked from a video, channel, or playlist",
 		Long: `Walk the graph of linked YouTube objects, breadth first, starting from one or
@@ -54,20 +51,23 @@ nodes (default 500). Comments are served only when YouTube is not applying its
 per-IP Restricted Mode to this network; when it is, the comment edges are noted
 and skipped and the rest of the walk continues.
 
-Add --store to persist every node into its typed table and record each traversed
-edge into the edges table, so a walk doubles as a crawl. Query it afterwards with
-ytb db query.`,
+Add --store to write every node it reached into the store. A node the walk
+fetched is stored as a record; a node it only saw in a shelf is stored as a
+sighting with no record, so a later crawl still knows to go and read it. It
+writes nodes and not claims: the edge names above are walk instructions rather
+than the predicates a claim is made of, so ytb crawl is what writes the graph.
+Query either afterwards with ytb query.`,
 		Args: kit.MinimumNArgs(1),
 		Flags: func(f *kit.FlagSet) {
 			f.IntVar(&depth, "depth", 1, "hops to follow from each seed (0 = seeds only)")
 			f.IntVar(&fanout, "fanout", 25, "max neighbors to follow per edge (0 = unlimited)")
-			f.StringVar(&follow, "follow", "content", "edges to follow ("+youtube.EdgeHelp()+")")
-			f.BoolVar(&store, "store", false, "persist nodes and edges into the local store")
+			f.StringVar(&follow, "follow", "content", "edges to follow ("+ytb.EdgeHelp()+")")
+			f.BoolVar(&store, "store", false, "write every node reached into the local store")
 		},
 		Run: func(ctx context.Context, args []string) error {
 			app := appFromCtx(ctx)
 
-			edges, err := youtube.ParseEdges(follow)
+			edges, err := ytb.ParseEdges(follow)
 			if err != nil {
 				return usageErr(err.Error())
 			}
@@ -76,7 +76,7 @@ ytb db query.`,
 				return err
 			}
 
-			var st *youtube.Store
+			var st *ytb.Store
 			if store {
 				st, err = app.RequireStore()
 				if err != nil {
@@ -86,26 +86,21 @@ ytb db query.`,
 
 			budget := app.Limit
 			if budget <= 0 {
-				budget = defaultDiscoverBudget
+				budget = ytb.DefaultWalkBudget
 			}
 
-			opts := youtube.WalkOptions{
+			opts := ytb.WalkOptions{
 				Depth:  depth,
 				Max:    budget,
 				Fanout: fanout,
 				Edges:  edges,
 				Note:   func(s string) { app.logf("note: %s", s) },
 			}
-			if st != nil {
-				opts.OnEdge = func(src, dst string, e youtube.Edge) {
-					_ = st.UpsertEdge(src, dst, string(e))
-				}
-			}
 
 			n := 0
-			err = app.Client.Walk(ctx, seeds, opts, func(nd *youtube.Node) error {
+			err = app.Client.Walk(ctx, seeds, opts, func(nd *ytb.Node) error {
 				if st != nil {
-					_ = st.UpsertNode(nd)
+					storeWalkNode(st, nd)
 				}
 				if e := app.Out.Emit(nodeRow(nd)); e != nil {
 					return e
@@ -130,12 +125,59 @@ ytb db query.`,
 	}
 }
 
+// storeWalkNode writes a walked node into the store.
+//
+// Records only, and only for the nodes the walk actually asked about. The walk's
+// edge names are how a person describes a hop rather than the predicates the
+// claims table is built on: "uploads" is a walk instruction and published is a
+// claim about the world, so writing the first as the second would put rows in
+// the store that no crawl would produce and no query over doc 04's vocabulary
+// would find. Use ytb crawl for claims.
+//
+// A node the walk only saw in somebody else's shelf is written down as a
+// sighting with no record, which is what leaves it on the next crawl's frontier
+// instead of marking it read on the strength of a title.
+func storeWalkNode(st *ytb.Store, nd *ytb.Node) {
+	var rec any
+	var uri graph.URI
+	switch nd.Kind {
+	case ytb.KindVideo:
+		if nd.Video != nil {
+			rec, uri = *nd.Video, graph.VideoURI(nd.Video.VideoID)
+		}
+	case ytb.KindChannel:
+		if nd.Channel != nil {
+			rec, uri = *nd.Channel, graph.ChannelURI(nd.Channel.ChannelID)
+		}
+	case ytb.KindPlaylist:
+		if nd.Playlist != nil {
+			rec, uri = *nd.Playlist, graph.PlaylistURI(nd.Playlist.PlaylistID)
+		}
+	case ytb.KindComment:
+		if nd.Comment != nil {
+			rec, uri = *nd.Comment, graph.CommentURI(nd.Comment.ID)
+		}
+	case ytb.KindPost:
+		if nd.Post != nil {
+			rec, uri = *nd.Post, graph.PostURI(nd.Post.PostID)
+		}
+	}
+	if rec == nil {
+		return
+	}
+	if !nd.Fetched {
+		_ = st.Sight(uri)
+		return
+	}
+	_, _ = st.PutRecord(rec)
+}
+
 // parseSeeds turns the positional arguments into walk seeds, reporting an
 // unrecognized reference as a usage error rather than a plain failure.
-func parseSeeds(args []string) ([]youtube.Seed, error) {
-	seeds := make([]youtube.Seed, 0, len(args))
+func parseSeeds(args []string) ([]ytb.Seed, error) {
+	seeds := make([]ytb.Seed, 0, len(args))
 	for _, a := range args {
-		s, err := youtube.ParseSeed(a)
+		s, err := ytb.ParseSeed(a)
 		if err != nil {
 			return nil, usageErr(err.Error())
 		}
