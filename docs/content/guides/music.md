@@ -90,7 +90,8 @@ The record says so in `missed` and points at the album page for the title and th
 
 ## Track detail and lyrics
 
-`music track` takes a video id and returns the track. Pass `--lyrics` to fetch the lyrics tab as well.
+`music track` takes a video id and returns the track.
+Pass `--lyrics` to fetch the lyrics tab as well.
 
 ```sh
 ytb music track lYBUbBu4W08
@@ -100,7 +101,8 @@ ytb music track lYBUbBu4W08 --lyrics
 Lyrics arrive as lines and are kept as lines, because a verse is not a paragraph.
 The credit comes with them in `lyrics_source`, usually `Source: Musixmatch`.
 
-Not every id has them. The official video of a song often does not even when its art track does, and the tab answers in words when it refuses.
+Not every id has them.
+The official video of a song often does not even when its art track does, and the tab answers in words when it refuses.
 Whatever it said is recorded in `missed` rather than reported as nothing:
 
 ```sh

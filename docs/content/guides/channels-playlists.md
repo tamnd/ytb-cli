@@ -135,5 +135,6 @@ ytb items PLFgquLnL59alCl_2TQvOiD5Vgm1hCaGSI -o url | ytb video -
 
 ## Persisting
 
-These commands stream and keep nothing. `ytb crawl @handle` writes the channel, its playlists, the videos they name and the claims that connect them into the local store.
+These commands stream and keep nothing.
+`ytb crawl @handle` writes the channel, its playlists, the videos they name and the claims that connect them into the local store.
 See [The store](/guides/the-store/).

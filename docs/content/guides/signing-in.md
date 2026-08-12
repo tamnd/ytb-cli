@@ -55,10 +55,14 @@ The command names the cookies and never prints one, in any output format, so it 
 Into the data directory, mode 0600, and into a request header to youtube.com.
 Nowhere else, and the list of nowhere else is the part worth reading.
 
-- Not to the CDN. A media request goes to `googlevideo.com`, which is a different host, and the session is not attached to it.
-- Not into the cache. A cache key becomes a filename, so the key carries a short hash of the account rather than anything belonging to it.
-- Not into the store. Records are what a read returned, and a cookie is not that.
-- Not into an archive. `ytb archive` writes the request headers down beside the payload and replaces the ones that carried a session with a sentence saying one was sent, because a capture with a blank `Cookie` header describes a different request from the one that was made.
+- Not to the CDN.
+  A media request goes to `googlevideo.com`, which is a different host, and the session is not attached to it.
+- Not into the cache.
+  A cache key becomes a filename, so the key carries a short hash of the account rather than anything belonging to it.
+- Not into the store.
+  Records are what a read returned, and a cookie is not that.
+- Not into an archive.
+  `ytb archive` writes the request headers down beside the payload and replaces the ones that carried a session with a sentence saying one was sent, because a capture with a blank `Cookie` header describes a different request from the one that was made.
 
 `Authorization: SAPISIDHASH` is computed fresh for each request from the timestamp, the cookie and the origin, the same way the site computes it in the browser.
 Nothing is stored precomputed and nothing is reused.
