@@ -42,19 +42,3 @@ func confirm(assumeYes bool, prompt string) bool {
 	ans := strings.ToLower(strings.TrimSpace(sc.Text()))
 	return ans == "y" || ans == "yes"
 }
-
-// readLines reads non-empty trimmed lines from r (used for "-" stdin args).
-func readLines(r io.Reader, fn func(string) error) error {
-	sc := bufio.NewScanner(r)
-	sc.Buffer(make([]byte, 1<<20), 16<<20)
-	for sc.Scan() {
-		line := strings.TrimSpace(sc.Text())
-		if line == "" {
-			continue
-		}
-		if err := fn(line); err != nil {
-			return err
-		}
-	}
-	return sc.Err()
-}
