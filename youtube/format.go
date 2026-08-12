@@ -141,7 +141,7 @@ func sortFormats(formats []VideoFormat) {
 }
 
 func kindRank(f VideoFormat) int {
-	switch f.Kind {
+	switch f.MediaKind {
 	case "audio":
 		return 0
 	case "video":
@@ -223,7 +223,7 @@ func formatCodec(mime string) string {
 // format has no label and its quality is "tiny" for every bitrate, so the answer
 // is audioQuality: itag 140 and itag 251 are both tiny and both medium.
 func (f VideoFormat) QualityText() string {
-	if f.Kind == "audio" {
+	if f.MediaKind == "audio" {
 		if q := strings.TrimPrefix(f.AudioQuality, "AUDIO_QUALITY_"); q != "" && q != f.AudioQuality {
 			return strings.ToLower(q)
 		}

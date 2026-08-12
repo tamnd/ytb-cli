@@ -32,11 +32,12 @@ var unstamped = map[string]string{
 	// The walk calls the reads below it, so every node it yields holds a record
 	// that was stamped on the way out of the read that produced it.
 	"Walk": "the nodes it emits hold records the reads below it already stamped",
-	// Both of these are one line: return streamPlaylist(...), and that is where
-	// the stamp is. The test cannot see through a delegation and it is not worth
+	// Each of these is one line: return theOtherOne(...), and that is where the
+	// stamp is. The test cannot see through a delegation and it is not worth
 	// teaching it to, because a wrapper that grows a body will be flagged then.
 	"StreamPlaylistItems":      "delegates to streamPlaylist, which stamps",
 	"StreamPlaylistWithHeader": "delegates to streamPlaylist, which stamps",
+	"StreamHashtag":            "delegates to StreamHashtagWithHeader, which stamps",
 }
 
 func TestEveryReadStampsItsTier(t *testing.T) {

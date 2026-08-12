@@ -110,7 +110,7 @@ func formatRow(f youtube.VideoFormat) Row {
 	return Row{
 		Cols: []string{"itag", "kind", "container", "quality", "codec", "bitrate", "size", "note"},
 		Vals: []string{
-			itoa(f.ITag), f.Kind, f.Container, f.QualityText(), f.Codec,
+			itoa(f.ITag), f.MediaKind, f.Container, f.QualityText(), f.Codec,
 			bitrateText(f.Bitrate), sizeText(f.ContentLength), f.Note,
 		},
 		Value: f,

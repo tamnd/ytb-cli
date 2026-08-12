@@ -274,7 +274,7 @@ func itags(formats []VideoFormat) []int {
 func TestFormatDerivedFields(t *testing.T) {
 	muxed := VideoFormat{
 		ITag: 18, MimeType: `video/mp4; codecs="avc1.42001E, mp4a.40.2"`,
-		Kind: "muxed", Container: "mp4", Codec: "avc1.42001E+mp4a.40.2",
+		MediaKind: "muxed", Container: "mp4", Codec: "avc1.42001E+mp4a.40.2",
 		Quality: "medium", QualityLabel: "360p", AudioQuality: "AUDIO_QUALITY_LOW",
 	}
 	got := parseFormat(map[string]any{
@@ -287,8 +287,8 @@ func TestFormatDerivedFields(t *testing.T) {
 	if got == nil {
 		t.Fatal("parseFormat returned nil for a real muxed format")
 	}
-	if got.Kind != muxed.Kind || got.Container != muxed.Container || got.Codec != muxed.Codec {
-		t.Errorf("muxed: kind %q container %q codec %q", got.Kind, got.Container, got.Codec)
+	if got.MediaKind != muxed.MediaKind || got.Container != muxed.Container || got.Codec != muxed.Codec {
+		t.Errorf("muxed: kind %q container %q codec %q", got.MediaKind, got.Container, got.Codec)
 	}
 	if q := got.QualityText(); q != "360p" {
 		t.Errorf("muxed quality = %q, want the label rather than %q", q, got.Quality)
@@ -303,8 +303,8 @@ func TestFormatDerivedFields(t *testing.T) {
 		"itag": 140.0, "mimeType": `audio/mp4; codecs="mp4a.40.2"`,
 		"quality": "tiny", "audioQuality": "AUDIO_QUALITY_MEDIUM",
 	}, "", true)
-	if audio.Kind != "audio" {
-		t.Errorf("audio kind = %q", audio.Kind)
+	if audio.MediaKind != "audio" {
+		t.Errorf("audio kind = %q", audio.MediaKind)
 	}
 	if q := audio.QualityText(); q != "medium" {
 		t.Errorf("audio quality = %q, want medium rather than tiny", q)
@@ -313,8 +313,8 @@ func TestFormatDerivedFields(t *testing.T) {
 	video := parseFormat(map[string]any{
 		"itag": 313.0, "mimeType": `video/webm; codecs="vp9"`, "qualityLabel": "2160p",
 	}, "", true)
-	if video.Kind != "video" || video.Container != "webm" || video.Codec != "vp9" {
-		t.Errorf("video: kind %q container %q codec %q", video.Kind, video.Container, video.Codec)
+	if video.MediaKind != "video" || video.Container != "webm" || video.Codec != "vp9" {
+		t.Errorf("video: kind %q container %q codec %q", video.MediaKind, video.Container, video.Codec)
 	}
 }
 

@@ -94,7 +94,7 @@ func ParseCaptionTracks(playerResp map[string]any, videoID string) []CaptionTrac
 			LanguageCode: stringValue(m["languageCode"]),
 			Name:         extractText(m["name"]),
 			BaseURL:      stringValue(m["baseUrl"]),
-			Kind:         kind,
+			TrackKind:    kind,
 			// kind is "asr" on a machine track and absent on a human one. An absent
 			// string is not an answer to "was this typed by a person", so the boolean
 			// is stated rather than left to the caller to infer.

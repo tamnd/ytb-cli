@@ -9,7 +9,6 @@ import (
 	"github.com/tamnd/any-cli/kit"
 	"github.com/tamnd/any-cli/kit/errs"
 	"github.com/tamnd/ytb-cli/pkg/graph"
-	"github.com/tamnd/ytb-cli/pkg/srv3"
 )
 
 // ops.go registers the reads whose command line is hand-written. Spec 3005 doc
@@ -219,7 +218,11 @@ type discoverRef struct {
 
 // --- handlers ---
 
-func listFormats(ctx context.Context, in formatsRef, emit func(VideoFormat) error) error {
+// The five handlers below wrap what they emit. Doc 03 gives each of these kinds
+// an envelope, and the shared type they hold does not have one because it is also
+// a field of a video. records.go has the reasoning.
+
+func listFormats(ctx context.Context, in formatsRef, emit func(FormatRecord) error) error {
 	list, err := in.Client.FormatList(ctx, in.Ref)
 	if err != nil {
 		return ExitError(err)
@@ -231,42 +234,62 @@ func listFormats(ctx context.Context, in formatsRef, emit func(VideoFormat) erro
 		if !FormatMatches(f, in.Audio, in.Video, in.Muxed) {
 			continue
 		}
-		if err := emit(f); err != nil {
+		if err := emit(newFormatRecord(f, list.Envelope)); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func listCaptions(ctx context.Context, in oneVideoRef, emit func(CaptionTrack) error) error {
+func listCaptions(ctx context.Context, in oneVideoRef, emit func(CaptionRecord) error) error {
 	tracks, err := in.Client.Captions(ctx, in.Ref)
 	if err != nil {
 		return ExitError(err)
 	}
+	// The tracks come off one ANDROID player response, which is the only surface
+	// whose baseUrl returns bytes. Doc 01 section 3.2.
+	env := newEnvelope("caption_track", SurfaceMobilePlayer)
+	env.addClient("ANDROID")
+	env.addSource(ClientANDROID().Endpoint("player"))
+	in.Client.stampEnvelope(&env)
 	for _, t := range tracks {
-		if err := emit(t); err != nil {
+		if err := emit(newCaptionRecord(t, env)); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func listTranscript(ctx context.Context, in transcriptRef, emit func(srv3.Cue) error) error {
-	doc, _, err := in.Client.Transcript(ctx, in.Ref, TranscriptOptions{
+func listTranscript(ctx context.Context, in transcriptRef, emit func(TranscriptRecord) error) error {
+	doc, track, err := in.Client.Transcript(ctx, in.Ref, TranscriptOptions{
 		Lang: in.Lang, Auto: in.Auto, TranslateTo: in.Translate,
 	})
 	if err != nil {
 		return ExitError(err)
 	}
+	// Two surfaces answered: the player listed the track, the timedtext endpoint
+	// served the srv3 the cues were parsed from.
+	env := newEnvelope("transcript", SurfaceMobilePlayer, SurfaceInnerTube)
+	env.addClient("ANDROID")
+	env.addSource(ClientANDROID().Endpoint("player"))
+	env.addSource(track.BaseURL)
+	in.Client.stampEnvelope(&env)
 	for _, c := range doc.Cues {
-		if err := emit(c); err != nil {
+		rec := TranscriptRecord{
+			VideoID:      track.VideoID,
+			LanguageCode: track.LanguageCode,
+			Kind:         track.TrackKind,
+			Cue:          c,
+			Envelope:     env,
+		}
+		if err := emit(rec); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func listChapters(ctx context.Context, in oneVideoRef, emit func(Chapter) error) error {
+func listChapters(ctx context.Context, in oneVideoRef, emit func(ChapterRecord) error) error {
 	res, err := in.Client.FetchVideo(ctx, in.Ref, VideoOptions{Next: true})
 	if err != nil {
 		return ExitError(err)
@@ -274,25 +297,38 @@ func listChapters(ctx context.Context, in oneVideoRef, emit func(Chapter) error)
 	if res == nil {
 		return errs.NotFound("video %q not found", in.Ref)
 	}
+	// The chapters came off the video read, so they carry the video's provenance
+	// rather than one invented here. That matters: a chapter list read off macro
+	// markers and one read off description timestamps came from different blocks
+	// of different surfaces, and origin alone does not say which read saw them.
 	for _, c := range res.Chapters {
-		if err := emit(c); err != nil {
+		if err := emit(newChapterRecord(c, res.Video.Envelope)); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func listThumbnails(ctx context.Context, in thumbnailsRef, emit func(Thumbnail) error) error {
+func listThumbnails(ctx context.Context, in thumbnailsRef, emit func(ThumbnailRecord) error) error {
 	id := ExtractVideoID(in.Ref)
 	if id == "" {
 		id = in.Ref
 	}
 	thumbs := Thumbnails(id)
-	if !in.Unconfirmed {
+	env := newEnvelope("thumbnail")
+	if in.Unconfirmed {
+		// No request was made, so no surface answered and the envelope says so
+		// rather than naming one. These URLs are the naming convention and nothing
+		// more. Doc 01 section 7.
+		env.miss("nothing was fetched, so these URLs are the convention and not renditions anything has confirmed")
+	} else {
 		thumbs = in.Client.ConfirmThumbnails(ctx, thumbs)
+		env.addSurface(SurfaceThumbCDN)
+		env.addSource("https://i.ytimg.com/vi/" + id + "/")
 	}
+	in.Client.stampEnvelope(&env)
 	for _, t := range thumbs {
-		if err := emit(t); err != nil {
+		if err := emit(newThumbnailRecord(id, t, env)); err != nil {
 			return err
 		}
 	}

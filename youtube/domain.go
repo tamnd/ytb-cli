@@ -278,6 +278,7 @@ type commentsRef struct {
 
 type hashtagRef struct {
 	Tag      string  `kit:"arg" help:"hashtag, with or without the #"`
+	Info     bool    `kit:"flag" help:"the hashtag's own record instead of its videos"`
 	MaxPages int     `kit:"flag,name=max-pages" help:"max continuation pages (0 = unlimited)"`
 	Client   *Client `kit:"inject"`
 }
@@ -449,8 +450,25 @@ func listCommunity(ctx context.Context, in pagedRef, emit func(CommunityPost) er
 	return ExitError(in.Client.StreamCommunity(ctx, in.Ref, pageOpts(in.MaxPages, false), emit))
 }
 
-func listHashtag(ctx context.Context, in hashtagRef, emit func(Video) error) error {
-	return ExitError(in.Client.StreamHashtag(ctx, in.Tag, pageOpts(in.MaxPages, false), emit))
+func listHashtag(ctx context.Context, in hashtagRef, emit func(any) error) error {
+	if !in.Info {
+		return ExitError(in.Client.StreamHashtag(ctx, in.Tag, pageOpts(in.MaxPages, false), func(v Video) error {
+			return emit(v)
+		}))
+	}
+	// --info is one record and never a record followed by rows, so the read stops
+	// at the first video rather than paging a feed nobody asked for. The header
+	// rides on the same first page either way, so this costs one request.
+	rec, err := in.Client.StreamHashtagWithHeader(ctx, in.Tag, PageOptions{MaxPages: 1}, func(Video) error {
+		return ErrStop
+	})
+	if err != nil {
+		return ExitError(err)
+	}
+	if rec == nil {
+		return errs.NotFound("hashtag %q has no feed", strings.TrimPrefix(in.Tag, "#"))
+	}
+	return emit(*rec)
 }
 
 func listTrending(ctx context.Context, in trendingRef, emit func(Video) error) error {

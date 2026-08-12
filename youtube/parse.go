@@ -711,7 +711,7 @@ func parseFormat(item any, videoID string, adaptive bool) *VideoFormat {
 		VideoID:          videoID,
 		ITag:             itag,
 		MimeType:         mime,
-		Kind:             formatKind(mime, adaptive),
+		MediaKind:        formatKind(mime, adaptive),
 		Container:        formatContainer(mime),
 		Codec:            formatCodec(mime),
 		Quality:          stringValue(m["quality"]),
