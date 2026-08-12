@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/tamnd/any-cli/kit/errs"
 )
 
 // live_test.go asks the one question the other three suites cannot: are these
@@ -309,5 +311,88 @@ func TestLiveCommentsNeedCookies(t *testing.T) {
 	skipRefusals(t, err)
 	if count == 0 {
 		t.Error("a session was loaded and the read returned no comments and no refusal")
+	}
+}
+
+// TestLivePlaylistTabsStillServeTheirShapes reads each of the four playlist tabs
+// off a channel that has it.
+//
+// The three that are not "playlists" shipped unreadable, and each for its own
+// reason: releases and courses serve playlistRenderer, which the tree reader did
+// not know, and podcasts serves a lockup whose contentType is PODCAST, which the
+// lockup reader rejected. A unit test over a captured shape cannot catch the day
+// a tab changes shape again, so it is asked here, of the live page.
+//
+// The subjects are the channels that have the tab. @RickAstleyYT has releases
+// and no podcasts, @TED has podcasts and courses and no releases, and that is
+// ordinary: a survey of ten well known channels found releases on two of them
+// and courses on two.
+func TestLivePlaylistTabsStillServeTheirShapes(t *testing.T) {
+	for _, tc := range []struct {
+		tab     string
+		channel string
+	}{
+		{"playlists", liveChannel},
+		{"releases", liveChannel},
+		{"podcasts", "@TED"},
+		{"courses", "@TED"},
+	} {
+		t.Run(tc.tab, func(t *testing.T) {
+			c := liveClient(t)
+			var got []Playlist
+			err := c.StreamChannelPlaylistTab(liveContext(t), tc.channel, tc.tab, PageOptions{Max: 5}, func(p Playlist) error {
+				got = append(got, p)
+				return nil
+			})
+			skipRefusals(t, err)
+			if len(got) == 0 {
+				t.Fatalf("the %s tab on %s answered with no rows, which is how all three of these shipped", tc.tab, tc.channel)
+			}
+			for _, p := range got {
+				if p.PlaylistID == "" || p.Title == "" {
+					t.Errorf("a row came back with no id or no title: %+v", p)
+				}
+				// The url is the playlist and never the watch url of its first video,
+				// which is what the row's own navigationEndpoint points at.
+				if !strings.Contains(p.URL, "list="+p.PlaylistID) || strings.Contains(p.URL, "/watch?v=") {
+					t.Errorf("%s url = %q, want the playlist url", p.PlaylistID, p.URL)
+				}
+				if p.VideoCount <= 0 {
+					t.Errorf("%s (%q) came back with video_count %d", p.PlaylistID, p.Title, p.VideoCount)
+				}
+				// A date in the channel title is the byline flattened, which is the bug
+				// the releases tab had: "Rick Astley . Jul 6, 2026" in place of a name.
+				if strings.Contains(p.ChannelTitle, "·") {
+					t.Errorf("%s channel title = %q, so the byline was flattened rather than split", p.PlaylistID, p.ChannelTitle)
+				}
+				if len(p.Sources) == 0 {
+					t.Errorf("%s says nothing about where it came from", p.PlaylistID)
+				}
+			}
+		})
+	}
+}
+
+// TestLiveAMissingTabIsNotAnEmptyAnswer is the check that matters most on this
+// command. YouTube answers a request for a tab a channel does not have with the
+// channel's home page and a 200, so without AssertTab a courses read on a
+// channel with no courses would return whatever the home page holds and look
+// like it worked.
+func TestLiveAMissingTabIsNotAnEmptyAnswer(t *testing.T) {
+	c := liveClient(t)
+	err := c.StreamChannelPlaylistTab(liveContext(t), liveChannel, "podcasts", PageOptions{Max: 1}, func(Playlist) error {
+		return nil
+	})
+	if err == nil {
+		t.Fatalf("%s has no podcasts tab and the read came back happy", liveChannel)
+	}
+	if r, ok := AsRefusal(err); ok {
+		t.Skipf("YouTube refused: %s", r.Message)
+	}
+	if code := errs.ExitCode(err); code != 3 {
+		t.Fatalf("exit code = %d, want 3 (no results): %v", code, err)
+	}
+	if !strings.Contains(err.Error(), "playlists") {
+		t.Errorf("the error does not name the tabs the channel does have: %v", err)
 	}
 }
