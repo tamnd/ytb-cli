@@ -821,10 +821,10 @@ func ParseCommentRenderer(m map[string]any, videoID, parentID string) *Comment {
 		return nil
 	}
 	c := &Comment{
-		ID:        id,
-		VideoID:   videoID,
-		ParentID:  parentID,
-		FetchedAt: time.Now(),
+		ID:       id,
+		VideoID:  videoID,
+		ParentID: parentID,
+		Envelope: newEnvelope("comment", SurfaceInnerTube),
 	}
 	if author, ok := r["authorText"].(map[string]any); ok {
 		c.AuthorDisplayName = extractText(author)
@@ -915,7 +915,7 @@ func parseCommentEntityPayload(p map[string]any) (string, *Comment) {
 		TextDisplay:        stringValue(mapValue(props, "content")["content"]),
 		PublishedText:      stringValue(props["publishedTime"]),
 		IsOwnerComment:     boolValue(author["isCreator"]),
-		FetchedAt:          time.Now(),
+		Envelope:           newEnvelope("comment", SurfaceInnerTube),
 	}
 	c.LikeCount = parseCountText(stringValue(toolbar["likeCountNotliked"]))
 	c.ReplyCount = int(parseCountText(stringValue(toolbar["replyCount"])))
@@ -938,7 +938,7 @@ func ParseCommunityPost(m map[string]any, channelID string) *CommunityPost {
 	p := &CommunityPost{
 		PostID:    postID,
 		ChannelID: channelID,
-		FetchedAt: time.Now(),
+		Envelope:  newEnvelope("post", SurfaceInnerTube),
 	}
 	if author, ok := r["authorText"].(map[string]any); ok {
 		p.AuthorName = extractText(author)

@@ -84,6 +84,7 @@ func (c *Client) FormatList(ctx context.Context, idOrURL string) (*FormatList, e
 	if unsized := unsizedITags(list.Formats); unsized != "" {
 		list.miss("itag %s came back with no contentLength, so the size is unknown until a ranged request reports one", unsized)
 	}
+	c.stamp(list)
 	return list, nil
 }
 

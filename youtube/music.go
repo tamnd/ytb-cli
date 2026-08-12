@@ -752,6 +752,7 @@ func musicItemFromTwoRow(r map[string]any, shelf string) MusicItem {
 // heading above them to read a type out of, which is why this used to return
 // nothing without --type.
 func (c *Client) MusicSearch(ctx context.Context, query, typ string, opt PageOptions, emit func(any) error) error {
+	emit = c.stampEmitAny(emit)
 	it := NewInnerTube(c)
 	params := musicSearchParams(typ)
 	source := musicBaseURL + "/search?q=" + url.QueryEscape(query)
@@ -918,6 +919,7 @@ func (c *Client) FetchArtist(ctx context.Context, idOrURL string) (*Artist, erro
 		a.miss("this page states no monthly listener count")
 	}
 	a.miss("the discography shelves are one page each: more releases sit behind their own browse id")
+	c.stamp(a)
 	return a, nil
 }
 
@@ -1043,6 +1045,8 @@ func (c *Client) FetchAlbum(ctx context.Context, idOrURL string) (*Album, []Trac
 	}
 
 	alb, tracks := parseAlbumPage(data, browseID)
+	c.stamp(alb)
+	stampAll(c, tracks)
 	return alb, tracks, nil
 }
 
@@ -1233,6 +1237,8 @@ func (c *Client) FetchMusicPlaylist(ctx context.Context, idOrURL string) (*Playl
 	if !ytid.IsChannel(p.ChannelID) {
 		p.ChannelID = ""
 	}
+	c.stamp(&p)
+	stampAll(c, tracks)
 	return &p, tracks, nil
 }
 
@@ -1292,6 +1298,7 @@ func (c *Client) FetchTrack(ctx context.Context, videoID string, withLyrics bool
 	track.IsExplicit = musicIsExplicit(row)
 	track.Thumbnails = musicRowThumbnails(row)
 	track.miss("/next states no play count, which only a listing row carries")
+	c.stamp(track)
 
 	if !withLyrics {
 		return track, nil

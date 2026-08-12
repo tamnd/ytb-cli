@@ -89,7 +89,7 @@ func (c *Client) doInnerTube(ctx context.Context, spec ClientSpec, url string, b
 		// entry keyed on it would miss for the rest of a run after a rotation
 		// without the answer having changed.
 		URL:    stripQueryParam(url, "key"),
-		Client: spec.Name + "/" + spec.Version,
+		Client: c.cacheClient(spec.Name + "/" + spec.Version),
 		Body:   body,
 	}
 	if status, cached, ok := c.cache.Get(key); ok && status == 200 {
@@ -119,6 +119,7 @@ func (c *Client) doInnerTube(ctx context.Context, spec ClientSpec, url string, b
 			req.Header.Set(k, v)
 		}
 		c.setLanguageHeaders(req)
+		c.applySession(req)
 		read := Read{
 			Method: http.MethodPost,
 			// The harvested key is stripped for the same reason the cache key strips

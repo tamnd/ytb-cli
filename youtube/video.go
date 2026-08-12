@@ -155,6 +155,8 @@ func (c *Client) FetchVideo(ctx context.Context, idOrURL string, opt VideoOption
 		video.Player = stringValue(data.YTCFG["PLAYER_JS_URL"])
 	}
 
+	c.stamp(video)
+	stampAll(c, related)
 	return &VideoResult{
 		Video:        *video,
 		Formats:      formats,

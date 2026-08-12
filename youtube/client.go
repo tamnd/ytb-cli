@@ -10,6 +10,7 @@ import (
 	"math/rand"
 	"net/http"
 	"net/http/cookiejar"
+	"reflect"
 	"strings"
 	"sync"
 	"time"
@@ -33,6 +34,143 @@ type Client struct {
 	cache     *Cache
 	onRequest func(method, url string)
 	onRead    func(Read)
+
+	session Session
+}
+
+// SetSession attaches the user's own cookies, which is all tier 1 is. An empty
+// session is the same as none, so a caller can hand over whatever LoadSession
+// returned without checking it first.
+func (c *Client) SetSession(s Session) { c.session = s }
+
+// Session returns the attached session. It is here for the archive writer,
+// which needs to know a read was authenticated in order to say so, and it is
+// not a way to get the cookies back out for anything else.
+func (c *Client) Session() Session { return c.session }
+
+// Tier is 1 when a session is attached and 0 when none is, which is the number
+// every record this client returns carries.
+func (c *Client) Tier() int {
+	if c == nil || c.session.Empty() {
+		return 0
+	}
+	return 1
+}
+
+// envelopeCarrier is what every record is: seven types embed Envelope, so the
+// pointer to any of them has this method without writing it seven times.
+type envelopeCarrier interface{ envelope() *Envelope }
+
+// stamp marks records as read at this client's tier.
+//
+// Doc 01 section 12: a dataset built with cookies has to be distinguishable
+// from one built without, which means the tier is on the record and not only in
+// the run that produced it. The envelope is filled in by the parsers, which have
+// no client and cannot know, so the read stamps it on the way out.
+//
+// A nil record and a record with no envelope in it are both skipped, so a
+// caller can pass whatever it is about to return without a nil check first.
+func (c *Client) stamp(recs ...any) {
+	if c == nil || c.session.Empty() {
+		return
+	}
+	for _, r := range recs {
+		if ec, ok := r.(envelopeCarrier); ok && ec != nil {
+			c.stampEnvelope(ec.envelope())
+		}
+	}
+}
+
+func (c *Client) stampEnvelope(e *Envelope) {
+	if e == nil {
+		return
+	}
+	e.addSurface(SurfaceSession)
+	e.raiseTier(1)
+}
+
+// stampAll stamps a slice in place, which is what a read that returns a page of
+// records has to hand back.
+func stampAll[T any](c *Client, recs []T) {
+	if c == nil || c.session.Empty() {
+		return
+	}
+	for i := range recs {
+		if ec, ok := any(&recs[i]).(envelopeCarrier); ok {
+			c.stampEnvelope(ec.envelope())
+		}
+	}
+}
+
+// stampEmit wraps a streaming read's callback so each record is stamped as it
+// goes past. A stream has no single return value to stamp, and the alternative,
+// stamping at every emit site in every pager, is the version that gets one
+// wrong.
+func stampEmit[T any](c *Client, emit func(T) error) func(T) error {
+	if c == nil || c.session.Empty() {
+		return emit
+	}
+	return func(v T) error {
+		if ec, ok := any(&v).(envelopeCarrier); ok {
+			c.stampEnvelope(ec.envelope())
+		}
+		return emit(v)
+	}
+}
+
+// stampEmitAny is stampEmit for the two reads that emit a mixed stream.
+//
+// search and music search return videos, channels and playlists interleaved, so
+// their callback takes an any and the generic wrapper cannot take the address of
+// what is inside it. stampAny copies through reflect instead, which costs one
+// allocation per row on a read that is already several hundred kilobytes of
+// JSON, and only when a session is attached.
+func (c *Client) stampEmitAny(emit func(any) error) func(any) error {
+	if c == nil || c.session.Empty() {
+		return emit
+	}
+	return func(v any) error { return emit(c.stampAny(v)) }
+}
+
+// stampAny stamps a record held in an interface, whether it is a pointer or a
+// value, and returns what to emit in its place.
+func (c *Client) stampAny(v any) any {
+	if c == nil || c.session.Empty() {
+		return v
+	}
+	if ec, ok := v.(envelopeCarrier); ok {
+		c.stampEnvelope(ec.envelope())
+		return v
+	}
+	rv := reflect.ValueOf(v)
+	if !rv.IsValid() || rv.Kind() != reflect.Struct {
+		return v
+	}
+	p := reflect.New(rv.Type())
+	p.Elem().Set(rv)
+	if ec, ok := p.Interface().(envelopeCarrier); ok {
+		c.stampEnvelope(ec.envelope())
+		return p.Elem().Interface()
+	}
+	return v
+}
+
+// cacheClient is the client field of a cache key, with the session folded in.
+//
+// A tier 1 response is a different answer to the same question: the watch page
+// of an age-restricted video is a refusal signed out and the video signed in,
+// and a comments read on a Restricted Mode network is empty until it is not.
+// Keying them the same would serve one to the other, in whichever order they
+// happened to be fetched, and that is a wrong answer with nothing on it to say
+// so.
+func (c *Client) cacheClient(name string) string {
+	if c == nil {
+		return name
+	}
+	if m := c.session.marker(); m != "" {
+		return name + "+session:" + m
+	}
+	return name
 }
 
 // SetOnRequest installs a hook called once for every request that actually goes
@@ -117,7 +255,7 @@ func (c *Client) Fetch(ctx context.Context, url string) ([]byte, int, error) {
 	key := CacheKey{
 		Method: http.MethodGet,
 		URL:    c.localise(url),
-		Client: "WEB/html",
+		Client: c.cacheClient("WEB/html"),
 	}
 	if status, body, ok := c.cache.Get(key); ok && status == 200 {
 		return body, status, nil
@@ -146,6 +284,7 @@ func (c *Client) Fetch(ctx context.Context, url string) ([]byte, int, error) {
 		req.Header.Set("User-Agent", c.userAgents[rand.Intn(len(c.userAgents))])
 		req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
 		c.setLanguageHeaders(req)
+		c.applySession(req)
 		read := Read{
 			Method:  http.MethodGet,
 			URL:     c.localise(url),
@@ -424,6 +563,7 @@ func (c *Client) postJSONWithHeaders(ctx context.Context, url string, body map[s
 			}
 		}
 		req.AddCookie(&http.Cookie{Name: "CONSENT", Value: "YES+"})
+		c.applySession(req)
 		resp, err := c.http.Do(req)
 		if err != nil {
 			lastErr = err

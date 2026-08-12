@@ -156,6 +156,16 @@ func newClient(_ context.Context, cfg kit.Config) (any, error) {
 	}
 	c := NewClient(yc)
 	c.SetCache(NewCache(innertubeCacheDir(cfg), cacheTTL(cfg.Extra["cache-ttl"])))
+	// The session is loaded here and not in each surface, so the command line,
+	// ytb serve and ytb mcp all read at the same tier from the same file.
+	//
+	// A session file that will not parse leaves the client at tier 0 rather than
+	// failing the run. Every command comes through this factory, so returning the
+	// error here would take `ytb auth clear` down with it, and clearing it is the
+	// fix. `ytb auth status` reads the file itself and says what is wrong with it.
+	if s, err := LoadSession(cfg.DataDir); err == nil {
+		c.SetSession(s)
+	}
 	return c, nil
 }
 

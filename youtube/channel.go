@@ -51,6 +51,7 @@ func (c *Client) FetchChannel(ctx context.Context, idOrURL string, opt ChannelOp
 	} else {
 		ch.miss("the four derived playlist counts were not read; --counts reads them, four requests")
 	}
+	c.stamp(ch)
 	return ch, nil
 }
 
@@ -197,6 +198,7 @@ var uploadKinds = map[string]struct {
 // StreamUploads streams a channel's uploads through whichever plane was asked
 // for.
 func (c *Client) StreamUploads(ctx context.Context, idOrURL string, opt UploadsOptions, emit func(Video) error) error {
+	emit = stampEmit(c, emit)
 	kind := strings.ToLower(opt.Kind)
 	if kind == "" {
 		kind = "all"
@@ -261,6 +263,7 @@ func (c *Client) StreamUploads(ctx context.Context, idOrURL string, opt UploadsO
 // If opt.Enrich is true, each video is enriched with a /player call.
 // The emit function receives each Video; returning ErrStop halts iteration cleanly.
 func (c *Client) StreamChannelTab(ctx context.Context, idOrURL, tab string, opt PageOptions, emit func(Video) error) error {
+	emit = stampEmit(c, emit)
 	tab = strings.ToLower(tab)
 	if tab == "" {
 		tab = "videos"
@@ -384,6 +387,7 @@ func (c *Client) StreamChannelTab(ctx context.Context, idOrURL, tab string, opt 
 // StreamChannelPlaylists streams playlists from a channel's playlists tab.
 // The emit function receives each Playlist; returning ErrStop halts iteration cleanly.
 func (c *Client) StreamChannelPlaylists(ctx context.Context, idOrURL string, opt PageOptions, emit func(Playlist) error) error {
+	emit = stampEmit(c, emit)
 	channelBase := NormalizeChannelURL(idOrURL)
 	playlistsURL := strings.Replace(channelBase, "/videos", "/playlists", 1)
 

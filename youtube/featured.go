@@ -57,5 +57,7 @@ func (c *Client) FeaturedChannels(ctx context.Context, idOrURL string) (*Channel
 			featured = append(featured, got)
 		}
 	})
+	c.stamp(ch)
+	stampAll(c, featured)
 	return ch, featured, nil
 }

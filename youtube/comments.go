@@ -27,6 +27,7 @@ import (
 // StreamComments streams a video's comments, and its replies when asked.
 // Returning ErrStop from emit halts iteration cleanly.
 func (c *Client) StreamComments(ctx context.Context, idOrURL string, opt CommentOptions, emit func(Comment) error) error {
+	emit = stampEmit(c, emit)
 	videoID := ExtractVideoID(idOrURL)
 	if videoID == "" {
 		videoID = idOrURL

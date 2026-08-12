@@ -27,6 +27,7 @@ func (c *Client) FetchPlaylist(ctx context.Context, ref string) (*Playlist, erro
 	p.addSource(NormalizePlaylistURL(id))
 	p.addClient("WEB")
 	p.miss("the item list is a separate read; ytb items pages it")
+	c.stamp(p)
 	return p, nil
 }
 
@@ -89,6 +90,15 @@ func (c *Client) StreamPlaylistWithHeader(ctx context.Context, ref string, opt P
 }
 
 func (c *Client) streamPlaylist(ctx context.Context, ref string, opt PageOptions, emit func(PlaylistVideo, Video) error) (*Playlist, error) {
+	// The row is the record here and the edge beside it is a pair of ids, so the
+	// stamp goes on the video and the header below.
+	if !c.session.Empty() {
+		row := emit
+		emit = func(e PlaylistVideo, v Video) error {
+			c.stampEnvelope(&v.Envelope)
+			return row(e, v)
+		}
+	}
 	resp, id, err := c.browsePlaylist(ctx, ref)
 	if err != nil {
 		return nil, err
@@ -100,6 +110,7 @@ func (c *Client) streamPlaylist(ctx context.Context, ref string, opt PageOptions
 	}
 	p.addSource(NormalizePlaylistURL(id))
 	p.addClient("WEB")
+	c.stamp(p)
 
 	// The alerts on the first page are why the list about to be streamed is
 	// shorter than the header's count, so every item carries them. A consumer

@@ -9,6 +9,7 @@ import (
 // channel may be a channel ID (UC...), handle (@name), vanity name, or URL.
 // Returning ErrStop from emit halts iteration cleanly.
 func (c *Client) StreamCommunity(ctx context.Context, channel string, opt PageOptions, emit func(CommunityPost) error) error {
+	emit = stampEmit(c, emit)
 	it := NewInnerTube(c)
 
 	// Resolve to a UC-style channel ID (the Browse API requires it).

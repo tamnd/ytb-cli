@@ -78,7 +78,9 @@ func (c *Client) FetchChannelFeed(ctx context.Context, idOrURL string) ([]Video,
 	if code == 404 {
 		return nil, fmt.Errorf("channel feed %s: %w", channelID, ErrChannelNotFound)
 	}
-	return ParseChannelFeed(body, feedURL)
+	entries, err := ParseChannelFeed(body, feedURL)
+	stampAll(c, entries)
+	return entries, err
 }
 
 // ParseChannelFeed turns the Atom document into video records.

@@ -351,8 +351,9 @@ type Comment struct {
 	// ago", rounded, with no exact time behind it at any tier. There is no
 	// published_at on this record on purpose. A zero timestamp in the json is a
 	// claim about when the comment was written, and it would be a false one.
-	PublishedText string    `json:"published_text" table:"published"`
-	FetchedAt     time.Time `json:"fetched_at" table:"-"`
+	PublishedText string `json:"published_text" table:"published"`
+
+	Envelope
 }
 
 // Chapter is one chapter marker on a video.
@@ -388,17 +389,18 @@ const (
 
 // CommunityPost is one community/posts-tab post. Attachments is a JSON array.
 type CommunityPost struct {
-	PostID        string    `json:"post_id" kit:"id" table:"id"`
-	ChannelID     string    `json:"channel_id" kit:"link,kind=youtube/channel" table:"-"`
-	AuthorName    string    `json:"author_name" table:"author,truncate"`
-	AuthorAvatar  string    `json:"author_avatar_url" table:"-"`
-	ContentText   string    `json:"content_text" kit:"body" table:"text,truncate"`
-	LikeCount     int64     `json:"like_count" table:"likes"`
-	ReplyCount    int       `json:"reply_count" table:"-"`
-	VoteCount     string    `json:"vote_count_text" table:"-"`
-	PublishedText string    `json:"published_text" table:"published"`
-	Attachments   string    `json:"attachments" table:"-"`
-	FetchedAt     time.Time `json:"fetched_at" table:"-"`
+	PostID        string `json:"post_id" kit:"id" table:"id"`
+	ChannelID     string `json:"channel_id" kit:"link,kind=youtube/channel" table:"-"`
+	AuthorName    string `json:"author_name" table:"author,truncate"`
+	AuthorAvatar  string `json:"author_avatar_url" table:"-"`
+	ContentText   string `json:"content_text" kit:"body" table:"text,truncate"`
+	LikeCount     int64  `json:"like_count" table:"likes"`
+	ReplyCount    int    `json:"reply_count" table:"-"`
+	VoteCount     string `json:"vote_count_text" table:"-"`
+	PublishedText string `json:"published_text" table:"published"`
+	Attachments   string `json:"attachments" table:"-"`
+
+	Envelope
 }
 
 // VideoFormat is one streaming format (muxed or adaptive) of a video.

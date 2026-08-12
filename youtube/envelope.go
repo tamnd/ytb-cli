@@ -181,6 +181,11 @@ func (e *Envelope) raiseTier(n int) {
 	}
 }
 
+// envelope returns the envelope itself, which is how a record hands its own
+// out. Every record embeds Envelope, so every record's pointer has this method
+// and the reads can stamp one without knowing which type it is holding.
+func (e *Envelope) envelope() *Envelope { return e }
+
 // appendOnce appends s to list unless it is already there, keeping order.
 func appendOnce(list []string, s string) []string {
 	for _, existing := range list {

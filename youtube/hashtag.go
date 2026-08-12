@@ -9,6 +9,7 @@ import (
 // tag may include or omit the leading "#".
 // Returning ErrStop from emit halts iteration cleanly.
 func (c *Client) StreamHashtag(ctx context.Context, tag string, opt PageOptions, emit func(Video) error) error {
+	emit = stampEmit(c, emit)
 	it := NewInnerTube(c)
 
 	browseID, params, err := it.ResolveHashtag(ctx, tag)

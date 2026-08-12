@@ -16,6 +16,7 @@ import (
 //
 // Returning ErrStop from emit halts iteration cleanly.
 func (c *Client) Search(ctx context.Context, query string, f SearchFilters, opt PageOptions, emit func(any) error) error {
+	emit = c.stampEmitAny(emit)
 	it := NewInnerTube(c)
 	resp, err := it.Search(ctx, query, f, "")
 	if err != nil {
@@ -121,6 +122,7 @@ func searchKey(item any) string {
 // category may be "music", "gaming", "news", "movies", or "" for general trending.
 // Returning ErrStop from emit halts iteration cleanly.
 func (c *Client) Trending(ctx context.Context, category string, opt PageOptions, emit func(Video) error) error {
+	emit = stampEmit(c, emit)
 	query := trendingQuery(category)
 	filters := SearchFilters{
 		Sort:       "views",
