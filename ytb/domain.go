@@ -326,6 +326,14 @@ func pageOpts(maxPages int, enrich bool) PageOptions {
 
 func getVideo(ctx context.Context, in videoRef, emit func(*Video) error) error {
 	refs := expandStdin(in.Refs)
+	// The arg is variadic so `ytb video a b c` works and so `-` can stand in for a
+	// list on stdin, and variadic means kit will not insist on one. Without this
+	// check `ytb video` with nothing after it emits nothing and exits 3, which
+	// reads as "that video does not exist" when what happened is that no video was
+	// named. An empty stdin lands here too, and it is the same answer.
+	if len(refs) == 0 {
+		return errs.Usage("name a video id or URL, or pass - to read them from stdin")
+	}
 	opt := VideoOptions{
 		Formats:    in.Formats,
 		Captions:   in.Captions,
@@ -350,11 +358,34 @@ func getVideo(ctx context.Context, in videoRef, emit func(*Video) error) error {
 			}
 			continue
 		}
+		// A watch page for an id that was never a video still answers 200, with a
+		// playability of ERROR and nothing else on it. `ytb channel` and `ytb
+		// playlist` both exit 6 on the same kind of miss, and this used to print a
+		// record with a null title and exit 0.
+		//
+		// The test is the missing title and not the status on its own. A private,
+		// age-gated or geo-blocked video is also not playable and is a real video
+		// with a real title, and its record is worth having.
+		if v := &res.Video; v.Title == "" && v.Playability != nil && v.Playability.Status == "ERROR" {
+			if single {
+				return errs.NotFound("video %q: %s", ref, notFoundReason(v.Playability))
+			}
+			continue
+		}
 		if err := emit(&res.Video); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+// notFoundReason prefers YouTube's own sentence over one of ours, since it is
+// the one that says which of the several ways this id is gone.
+func notFoundReason(p *Playability) string {
+	if p.Reason != "" {
+		return strings.ToLower(strings.TrimSuffix(p.Reason, "."))
+	}
+	return "no video at that address"
 }
 
 func getChannel(ctx context.Context, in channelReadRef, emit func(*Channel) error) error {
@@ -479,6 +510,10 @@ func listTrending(ctx context.Context, in trendingRef, emit func(Video) error) e
 }
 
 func search(ctx context.Context, in searchRef, emit func(any) error) error {
+	query := strings.TrimSpace(strings.Join(in.Query, " "))
+	if query == "" {
+		return errs.Usage("give search terms, e.g. ytb search \"lofi hip hop\"")
+	}
 	filters := SearchFilters{
 		Sort:           in.Sort,
 		Type:           in.Type,
@@ -494,11 +529,15 @@ func search(ctx context.Context, in searchRef, emit func(any) error) error {
 		HDR:            in.HDR,
 		VR180:          in.VR180,
 	}
-	return ExitError(in.Client.Search(ctx, strings.Join(in.Query, " "), filters, pageOpts(in.MaxPages, false), emit))
+	return ExitError(in.Client.Search(ctx, query, filters, pageOpts(in.MaxPages, false), emit))
 }
 
 func suggest(ctx context.Context, in suggestRef, emit func(Suggestion) error) error {
-	suggestions, err := in.Client.Suggest(ctx, strings.Join(in.Query, " "))
+	query := strings.TrimSpace(strings.Join(in.Query, " "))
+	if query == "" {
+		return errs.Usage("give a partial query, e.g. ytb suggest \"lofi\"")
+	}
+	suggestions, err := in.Client.Suggest(ctx, query)
 	if err != nil {
 		return ExitError(err)
 	}
