@@ -92,6 +92,7 @@ A cache hit never prints, because the trace sits in the HTTP transport and a cac
 | `query` | Run SQL over the store, read-only |
 | `export` | Render the store as interlinked Markdown |
 | `db` | The local SQLite store |
+| `cache` | The on-disk response cache: where it is, what is in it, and how to empty it |
 | `auth` | Manage the optional YouTube session |
 | `config` | View and manage configuration |
 | `version` | Print version information |
@@ -596,6 +597,43 @@ Notable subcommand flags:
 | Flag | Subcommand | Meaning |
 | --- | --- | --- |
 | `--channels` | `db search` | Search channels instead of videos |
+
+## cache
+
+`ytb cache [command]`. Inspect or empty the response cache at `<data-dir>/cache/innertube`.
+
+Every read goes through it, keyed by the URL plus the client that claimed it, so a WEB player response is never served to a caption read that asked as ANDROID.
+An entry older than `--cache-ttl` is not served and is not deleted either, so a cache can be almost entirely stale and still take up the whole of its space.
+
+| Subcommand | What it does |
+| --- | --- |
+| `path` | Print the cache directory |
+| `info` | Entries, how much space they take, how many are still fresh, and the age range |
+| `clear` | Delete every entry, fresh or stale |
+
+```console
+$ ytb cache info
+╭─────────┬───────────────────────────────────────────────╮
+│ KEY     │ VALUE                                         │
+├─────────┼───────────────────────────────────────────────┤
+│ dir     │ /Users/apple/.local/share/ytb/cache/innertube │
+│ ttl     │ 15m0s                                         │
+│ entries │ 350                                           │
+│ fresh   │ 4                                             │
+│ stale   │ 346                                           │
+│ size    │ 263.7 MiB                                     │
+│ oldest  │ 2026-07-30T09:23:06+07:00                     │
+│ newest  │ 2026-08-12T10:40:09+07:00                     │
+╰─────────┴───────────────────────────────────────────────╯
+```
+
+Fresh and stale are counted against the `--cache-ttl` in effect for this run rather than stored, so the same 350 files come back 109 fresh under `ytb cache info --cache-ttl 24h`.
+
+`clear` takes `--dry-run`, which reports the count and the size it would free and deletes nothing.
+Nothing in here is a record: the store keeps what was parsed and this keeps the bytes a request answered with, so clearing it costs time on the next run and loses nothing.
+`ytb archive` writes outside this cache and is never touched by `clear`.
+
+All three exit 2 with a usage error under `--no-cache`, rather than printing an empty path or a count of zero and letting you read that as an empty cache.
 
 ## auth
 
