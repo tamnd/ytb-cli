@@ -717,11 +717,16 @@ func parseByteRange(v any) *ByteRange {
 
 // microTime reads lastModified, which is microseconds since the epoch. Seconds
 // would put it in 57 million AD and milliseconds in 57000 AD, so the unit matters.
+//
+// UTC, because a unix timestamp carries no zone and time.UnixMicro hands back
+// the local one. Without it the same response parses to a different record on
+// two machines, which is not a hypothetical: the golden suite passed here and
+// failed on CI, where the offset is +00:00 rather than +07:00.
 func microTime(micro int64) time.Time {
 	if micro <= 0 {
 		return time.Time{}
 	}
-	return time.UnixMicro(micro)
+	return time.UnixMicro(micro).UTC()
 }
 
 // urlExpiry reads the expire parameter off a stream URL, which is the deadline the
@@ -736,7 +741,7 @@ func urlExpiry(raw string) time.Time {
 		return time.Time{}
 	}
 	if sec, err := strconv.ParseInt(u.Query().Get("expire"), 10, 64); err == nil && sec > 0 {
-		return time.Unix(sec, 0)
+		return time.Unix(sec, 0).UTC()
 	}
 	// Some googlevideo URLs carry it as a path segment instead: /expire/1786013780/.
 	// Same number, same meaning, and missing it would mean the downloader never
@@ -754,7 +759,7 @@ func urlExpiry(raw string) time.Time {
 	if err != nil || sec <= 0 {
 		return time.Time{}
 	}
-	return time.Unix(sec, 0)
+	return time.Unix(sec, 0).UTC()
 }
 
 // ParseCommentRenderer parses a single commentRenderer or replyRenderer map.

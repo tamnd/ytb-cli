@@ -3,6 +3,7 @@ package ytb
 import (
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestLooksLikeCount(t *testing.T) {
@@ -272,5 +273,35 @@ func TestExtractLines(t *testing.T) {
 	}
 	if got := extractText(v); strings.Contains(got, "\n") {
 		t.Errorf("extractText kept a line break: %q", got)
+	}
+}
+
+// A timestamp off a YouTube response is a fact about YouTube and not about the
+// machine reading it, so it comes back in UTC.
+//
+// time.UnixMicro and time.Unix both hand back the local zone, and a unix
+// timestamp carries no zone to hand back, so the offset came from whoever ran
+// the tool. The same player response then parsed to a different record here and
+// on CI, which is how this was found: the golden suite passed at +07:00 and
+// failed at +00:00, and the two records were the same instant written twice.
+func TestTimestampsComeBackInUTC(t *testing.T) {
+	// 2025-12-28T21:04:43.595299Z, the lastModified off the golden player response.
+	if got := microTime(1766955883595299); got.Location() != time.UTC {
+		t.Errorf("microTime returned %v in %v, want UTC", got, got.Location())
+	}
+	for _, raw := range []string{
+		"https://rr3---sn-x.googlevideo.com/videoplayback?expire=1786013780&itag=140",
+		"https://rr3---sn-x.googlevideo.com/videoplayback/expire/1786013780/itag/140/",
+	} {
+		got := urlExpiry(raw)
+		if got.IsZero() {
+			t.Fatalf("no expiry read out of %s", raw)
+		}
+		if got.Location() != time.UTC {
+			t.Errorf("urlExpiry returned %v in %v, want UTC", got, got.Location())
+		}
+		if got.Unix() != 1786013780 {
+			t.Errorf("urlExpiry = %d, want 1786013780", got.Unix())
+		}
 	}
 }
