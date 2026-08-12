@@ -104,9 +104,6 @@ type ChannelPlaylists struct {
 	Feed string
 }
 
-// The suffix every channel-derived id shares: a channel id minus its UC.
-const suffixLen = 22
-
 var (
 	videoRe    = regexp.MustCompile(`^[A-Za-z0-9_-]{11}$`)
 	channelRe  = regexp.MustCompile(`^UC[A-Za-z0-9_-]{22}$`)

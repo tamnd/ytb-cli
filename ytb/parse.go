@@ -475,30 +475,6 @@ func pageHeaderMetadataParts(ph map[string]any) []string {
 	return parts
 }
 
-// pageHeaderAvatarName returns the channel name from the metadata part backed by
-// the owner's avatar stack, the reliable owner signal in a pageHeaderViewModel
-// (the bare "Playlist"/"5 videos" labels carry no owner).
-func pageHeaderAvatarName(ph map[string]any) string {
-	cmv := mapValue(mapValue(ph, "metadata"), "contentMetadataViewModel")
-	if cmv == nil {
-		return ""
-	}
-	for _, row := range arrayValue(cmv["metadataRows"]) {
-		for _, mp := range arrayValue(mapValue(row, "")["metadataParts"]) {
-			mpm := mapValue(mp, "")
-			if mpm["avatarStack"] == nil {
-				continue
-			}
-			if txt := mapValue(mpm, "text"); txt != nil {
-				if s := stringValue(txt["content"]); s != "" {
-					return s
-				}
-			}
-		}
-	}
-	return ""
-}
-
 // ParseChannelPage parses a channel HTML page into the channel and whatever
 // listing was on it. The record itself is built by ParseChannelRecord; this adds
 // the videos and the continuation token, which is what a tab read needs.
@@ -1381,19 +1357,6 @@ func parseCommentCountText(root any) string {
 		}
 		if r, ok := m["commentsEntryPointHeaderRenderer"].(map[string]any); ok {
 			out = extractText(r["commentCount"])
-		}
-	})
-	return out
-}
-
-func parsePublishedText(root any) string {
-	var out string
-	walkJSON(root, func(m map[string]any) {
-		if out != "" {
-			return
-		}
-		if r, ok := m["dateText"].(map[string]any); ok {
-			out = extractText(r)
 		}
 	})
 	return out

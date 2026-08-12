@@ -1,14 +1,45 @@
 package ytb
 
 import (
-	"io/fs"
-
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"os"
 	"strings"
 	"testing"
 )
+
+// parseNonTestFiles parses the package's own source, tests excluded.
+//
+// go/parser has a ParseDir that would do this in one call and it is deprecated,
+// because it associates files with packages without looking at build tags. That
+// does not matter here, since every file in this directory is package ytb and
+// the only tagged one is a test, but reading the directory is three lines and
+// leaves nothing for a future reader to have to check.
+func parseNonTestFiles(t *testing.T) []*ast.File {
+	t.Helper()
+	entries, err := os.ReadDir(".")
+	if err != nil {
+		t.Fatalf("read the package directory: %v", err)
+	}
+	fset := token.NewFileSet()
+	var files []*ast.File
+	for _, e := range entries {
+		name := e.Name()
+		if e.IsDir() || !strings.HasSuffix(name, ".go") || strings.HasSuffix(name, "_test.go") {
+			continue
+		}
+		f, err := parser.ParseFile(fset, name, nil, 0)
+		if err != nil {
+			t.Fatalf("parse %s: %v", name, err)
+		}
+		files = append(files, f)
+	}
+	if len(files) == 0 {
+		t.Fatal("no source files parsed, so this test would pass by finding nothing")
+	}
+	return files
+}
 
 // stamp_test.go walks the source and asks every read the same question: when a
 // session is attached, does the record you hand back say so?
@@ -42,25 +73,14 @@ var unstamped = map[string]string{
 }
 
 func TestEveryReadStampsItsTier(t *testing.T) {
-	fset := token.NewFileSet()
-	pkgs, err := parser.ParseDir(fset, ".", func(fi fs.FileInfo) bool {
-		return !strings.HasSuffix(fi.Name(), "_test.go")
-	}, 0)
-	if err != nil {
-		t.Fatalf("parse the package: %v", err)
-	}
-	pkg := pkgs["ytb"]
-	if pkg == nil {
-		t.Fatal("the ytb package did not parse")
-	}
-
-	carriers := recordTypes(pkg)
+	files := parseNonTestFiles(t)
+	carriers := recordTypes(files)
 	if len(carriers) < 7 {
 		t.Fatalf("found %d record types, which is fewer than the model has: %v", len(carriers), carriers)
 	}
 
 	seen := map[string]bool{}
-	for _, file := range pkg.Files {
+	for _, file := range files {
 		for _, decl := range file.Decls {
 			fn, ok := decl.(*ast.FuncDecl)
 			if !ok || !isClientMethod(fn) {
@@ -93,10 +113,10 @@ func TestEveryReadStampsItsTier(t *testing.T) {
 // recordTypes is every type that carries an envelope, directly or by holding one
 // that does. The second half is what catches VideoResult, which is not a record
 // itself and is the thing `ytb video` actually hands back.
-func recordTypes(pkg *ast.Package) map[string]bool {
+func recordTypes(files []*ast.File) map[string]bool {
 	direct := map[string]bool{}
 	fields := map[string][]string{}
-	for _, file := range pkg.Files {
+	for _, file := range files {
 		ast.Inspect(file, func(n ast.Node) bool {
 			ts, ok := n.(*ast.TypeSpec)
 			if !ok {

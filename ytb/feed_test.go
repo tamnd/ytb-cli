@@ -38,7 +38,7 @@ func TestParseChannelFeedShape(t *testing.T) {
 			// yt:channelId does not. This reads the entry's.
 			t.Errorf("channel id = %q, the per entry yt:channelId is the full one", v.ChannelID)
 		}
-		if v.Envelope.Kind != "video" || !v.Surfaces.Has(SurfaceFeed) {
+		if v.Kind != "video" || !v.Surfaces.Has(SurfaceFeed) {
 			t.Errorf("envelope = %+v", v.Envelope)
 		}
 		if len(v.Missed) == 0 {

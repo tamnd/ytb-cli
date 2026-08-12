@@ -217,15 +217,10 @@ func Parse(data []byte) (*Document, error) {
 
 	doc := &Document{Format: x.Format}
 	for _, ws := range x.Head.WindowStyles {
-		doc.WindowStyles = append(doc.WindowStyles, WindowStyle{
-			ID: ws.ID, ModeHint: ws.ModeHint, Justify: ws.Justify, ScrollDir: ws.ScrollDir,
-		})
+		doc.WindowStyles = append(doc.WindowStyles, WindowStyle(ws))
 	}
 	for _, wp := range x.Head.WindowPositions {
-		doc.WindowPositions = append(doc.WindowPositions, WindowPosition{
-			ID: wp.ID, Point: wp.Point, HorPos: wp.HorPos, VerPos: wp.VerPos,
-			Rows: wp.Rows, Columns: wp.Columns,
-		})
+		doc.WindowPositions = append(doc.WindowPositions, WindowPosition(wp))
 	}
 	for _, p := range x.Head.Pens {
 		doc.Pens = append(doc.Pens, Pen{
