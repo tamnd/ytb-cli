@@ -29,6 +29,7 @@ var notServed = map[string]string{
 	"crawl":    "writes the local store, which is this machine's and not YouTube's",
 	"archive":  "writes a directory of raw payloads",
 	"db":       "manages the local store: stats, vacuum, reset",
+	"cache":    "inspects and deletes this machine's response cache; a route that emptied the server's own cache would be a way for a caller to make every later request slow",
 	"query":    "runs SQL over the local store",
 	"export":   "renders the local store as Markdown into a directory",
 	"config":   "shows and writes this machine's config file",

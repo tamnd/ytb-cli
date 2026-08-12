@@ -183,28 +183,134 @@ func (c *Cache) Put(k CacheKey, status int, body []byte) {
 	}
 }
 
+// Dir is where entries are written, or "" when the cache is off.
+func (c *Cache) Dir() string {
+	if c == nil {
+		return ""
+	}
+	return c.dir
+}
+
+// TTL is how long an entry is served before it is refetched.
+func (c *Cache) TTL() time.Duration {
+	if c == nil {
+		return 0
+	}
+	return c.ttl
+}
+
+// CacheInfo is what is on disk right now, as `ytb cache info` reports it.
+type CacheInfo struct {
+	Dir     string        `json:"dir"`
+	TTL     time.Duration `json:"ttl"`
+	Entries int           `json:"entries"`
+	Fresh   int           `json:"fresh"`
+	Stale   int           `json:"stale"`
+	Bytes   int64         `json:"bytes"`
+	Oldest  time.Time     `json:"oldest,omitzero"`
+	Newest  time.Time     `json:"newest,omitzero"`
+}
+
+// Info walks the cache and reports what is in it.
+//
+// Fresh and stale are counted against the current TTL rather than stored, since
+// the TTL is a flag and the same file is fresh at --cache-ttl 1h and stale at
+// the default. A stale entry is not deleted when it expires, it is just not
+// served, so a cache can be almost entirely stale and still take up the space.
+func (c *Cache) Info() (CacheInfo, error) {
+	info := CacheInfo{Dir: c.Dir(), TTL: c.TTL()}
+	if info.Dir == "" {
+		return info, nil
+	}
+	now := time.Now()
+	err := c.walk(func(path string, size int64) {
+		info.Entries++
+		info.Bytes += size
+		stored := storedAt(path)
+		if stored.IsZero() {
+			return
+		}
+		if now.Sub(stored) < c.ttl {
+			info.Fresh++
+		} else {
+			info.Stale++
+		}
+		if info.Oldest.IsZero() || stored.Before(info.Oldest) {
+			info.Oldest = stored
+		}
+		if stored.After(info.Newest) {
+			info.Newest = stored
+		}
+	})
+	return info, err
+}
+
+// storedAt reads just the timestamp out of an entry. A file that will not parse
+// counts toward the total and toward neither fresh nor stale, because it is
+// taking up space and will never be served either way.
+func storedAt(path string) time.Time {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return time.Time{}
+	}
+	var e struct {
+		StoredAt time.Time `json:"stored_at"`
+	}
+	if json.Unmarshal(b, &e) != nil {
+		return time.Time{}
+	}
+	return e.StoredAt
+}
+
 // Purge removes every entry, expired or not, and reports how many went.
 func (c *Cache) Purge() (int, error) {
-	if c == nil || c.dir == "" {
-		return 0, nil
-	}
-	entries, err := os.ReadDir(c.dir)
-	if errors.Is(err, os.ErrNotExist) {
-		return 0, nil
-	}
-	if err != nil {
-		return 0, err
-	}
 	n := 0
-	for _, e := range entries {
-		if e.IsDir() {
-			continue
-		}
-		if err := os.Remove(filepath.Join(c.dir, e.Name())); err == nil {
+	err := c.walk(func(path string, _ int64) {
+		if os.Remove(path) == nil {
 			n++
 		}
+	})
+	return n, err
+}
+
+// walk visits every entry file. It recurses, because path shards on the first
+// two hex characters and a walk of the top level alone finds nothing but the
+// 256 shard directories. Purge used to do exactly that and reported deleting
+// zero files from a full cache, which is the kind of bug a command has to exist
+// before anybody notices.
+func (c *Cache) walk(fn func(path string, size int64)) error {
+	if c == nil || c.dir == "" {
+		return nil
 	}
-	return n, nil
+	shards, err := os.ReadDir(c.dir)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	for _, shard := range shards {
+		p := filepath.Join(c.dir, shard.Name())
+		if !shard.IsDir() {
+			if fi, err := shard.Info(); err == nil {
+				fn(p, fi.Size())
+			}
+			continue
+		}
+		files, err := os.ReadDir(p)
+		if err != nil {
+			continue
+		}
+		for _, f := range files {
+			if f.IsDir() {
+				continue
+			}
+			if fi, err := f.Info(); err == nil {
+				fn(filepath.Join(p, f.Name()), fi.Size())
+			}
+		}
+	}
+	return nil
 }
 
 // path shards on the first two hex characters, so a long crawl does not put a

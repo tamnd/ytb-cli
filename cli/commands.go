@@ -31,6 +31,7 @@ func escapeHatches() []kit.Command {
 		newCrawlCmd(),
 		newArchiveCmd(),
 		newDBCmd(),
+		newCacheCmd(),
 		newQueryCmd(),
 		newExportCmd(),
 		newConfigCmd(),
