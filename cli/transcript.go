@@ -60,6 +60,21 @@ Use "ytb captions" to see what a video has.`,
 			if !srv3.Format(format).Valid() {
 				return usageErr("unknown --format " + format + ": want text, srt, vtt or json")
 			}
+			// A transcript is a document, not a stream of records, so -o has nothing
+			// to render here and every other command in the tool honours it. Silently
+			// printing text when someone asked for -o csv is the worst of the three
+			// answers, so json is taken as the --format of the same name and the rest
+			// say what to reach for instead.
+			switch f := app.st.Output.Format; f {
+			case "", "auto", "raw", "text":
+			case "json":
+				if format == "text" {
+					format = "json"
+				}
+			default:
+				return usageErr("a transcript is one document rather than a stream of records, so -o " + f +
+					" has nothing to lay out: pick the serialization with --format text|srt|vtt|json")
+			}
 			doc, _, err := app.Client.Transcript(ctx, args[0], ytb.TranscriptOptions{
 				Lang: lang, Auto: auto, TranslateTo: translate,
 			})
