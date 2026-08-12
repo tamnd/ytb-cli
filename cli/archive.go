@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/tamnd/any-cli/kit"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 // newArchiveCmd is doc 04 section 4.1: one read written down in full.
@@ -53,7 +53,7 @@ beside the bytes. That is the case this command is for.`,
 				app.logf("would archive %s into %s", ref, dir)
 				return nil
 			}
-			cap, err := youtube.Archive(ctx, app.Client, ref, dir, youtube.ClaimOptions{
+			cap, err := ytb.Archive(ctx, app.Client, ref, dir, ytb.ClaimOptions{
 				Items:     items,
 				Comments:  comments,
 				Captions:  captions,

@@ -8,7 +8,7 @@ package cli
 
 import (
 	"github.com/tamnd/any-cli/kit"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 // Build metadata, set via -ldflags at release time.
@@ -23,7 +23,7 @@ var (
 // them back onto the resolved Config so the client factory and escape hatches
 // see them.
 type builder struct {
-	def      youtube.Config
+	def      ytb.Config
 	workers  int
 	maxPages int
 	hl       string
@@ -38,7 +38,7 @@ type builder struct {
 // record operations and client factory (installed by the domain, the same as an
 // ant host gets), and the escape-hatch commands.
 func NewApp() *kit.App {
-	b := &builder{def: youtube.DefaultConfig()}
+	b := &builder{def: ytb.DefaultConfig()}
 
 	app := kit.New(kit.Identity{
 		Binary:  "ytb",
@@ -66,7 +66,7 @@ Quick start:
 
 	// The domain installs the client factory and every record operation, exactly
 	// as it does inside an ant host. The escape hatches are the binary's own.
-	(youtube.Domain{}).Register(app)
+	(ytb.Domain{}).Register(app)
 	registerEscapeHatches(app)
 	return app
 }

@@ -237,7 +237,7 @@ Nothing that writes is served, so `download`, `crawl`, `export`, `db`, `config` 
 ```
 cmd/ytb/     thin main entry point
 cli/         commands and output rendering
-youtube/     HTTP client, InnerTube transport, parsers, models, crawl, store
+ytb/         HTTP client, InnerTube transport, parsers, models, crawl, store
 pkg/ytid/    id and URL classification
 pkg/graph/   URIs, predicates, and the claim vocabulary
 pkg/rdf/     n-triples, turtle, and json-ld writers

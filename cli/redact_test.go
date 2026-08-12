@@ -6,11 +6,11 @@ import (
 	"testing"
 
 	"github.com/tamnd/any-cli/kit/render"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 // redact_test.go is the output half of one rule: a cookie value never leaves the
-// session file. The disk half is in youtube/session_test.go, which walks the data
+// session file. The disk half is in ytb/session_test.go, which walks the data
 // directory after a signed-in read.
 //
 // It is worth a test rather than a review because the leak is one careless field
@@ -48,15 +48,15 @@ func renderRow(t *testing.T, f render.Format, r Row) string {
 
 func TestAuthStatusNeverPrintsACookie(t *testing.T) {
 	dir := t.TempDir()
-	s := youtube.ParseCookies("SID=sid-value; HSID=hsid-value; SAPISID=" + secret)
-	if err := youtube.SaveSession(dir, s); err != nil {
+	s := ytb.ParseCookies("SID=sid-value; HSID=hsid-value; SAPISID=" + secret)
+	if err := ytb.SaveSession(dir, s); err != nil {
 		t.Fatalf("save: %v", err)
 	}
-	loaded, err := youtube.LoadSession(dir)
+	loaded, err := ytb.LoadSession(dir)
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
-	row := sessionRow(loaded.Status(youtube.SessionPath(dir)))
+	row := sessionRow(loaded.Status(ytb.SessionPath(dir)))
 
 	for _, f := range formats {
 		got := renderRow(t, f, row)

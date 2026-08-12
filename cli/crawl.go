@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/tamnd/any-cli/kit"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 // newCrawlCmd is the budgeted walk of doc 04 section 3.3.
@@ -86,12 +86,12 @@ different manifests.`,
 			if err != nil {
 				return err
 			}
-			opt := youtube.CrawlOptions{
+			opt := ytb.CrawlOptions{
 				Depth:   depth,
 				Budget:  budget,
 				Uploads: uploads,
 				Resume:  resume,
-				Claims: youtube.ClaimOptions{
+				Claims: ytb.ClaimOptions{
 					Items:    items,
 					Comments: comments,
 					Posts:    posts,
@@ -108,7 +108,7 @@ different manifests.`,
 			if !app.quiet {
 				logf = func(s string) { app.logf("%s", s) }
 			}
-			m, crawlErr := youtube.Crawl(ctx, app.Client, store, args, opt, logf)
+			m, crawlErr := ytb.Crawl(ctx, app.Client, store, args, opt, logf)
 			// The manifest is written even when the crawl was cancelled, because a
 			// store with rows in it and nothing to say where they came from is the
 			// thing the manifest exists to prevent.
@@ -130,7 +130,7 @@ different manifests.`,
 // writeManifest puts the manifest next to the store, under crawls/, named by the
 // second it started. Nothing overwrites anything: two crawls of the same seeds
 // are two records of two different days.
-func writeManifest(app *App, path string, m *youtube.Manifest) (string, error) {
+func writeManifest(app *App, path string, m *ytb.Manifest) (string, error) {
 	if m == nil {
 		return "", nil
 	}
@@ -151,7 +151,7 @@ func writeManifest(app *App, path string, m *youtube.Manifest) (string, error) {
 	return path, nil
 }
 
-func manifestRow(m *youtube.Manifest, path string) Row {
+func manifestRow(m *ytb.Manifest, path string) Row {
 	if m == nil {
 		return Row{Cols: []string{"manifest"}, Vals: []string{path}}
 	}
@@ -164,7 +164,7 @@ func manifestRow(m *youtube.Manifest, path string) Row {
 			took.String(), m.StoppedBy, path,
 		},
 		Value: struct {
-			*youtube.Manifest
+			*ytb.Manifest
 			Path string `json:"manifest_path"`
 		}{m, path},
 	}

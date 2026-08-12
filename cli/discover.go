@@ -5,7 +5,7 @@ import (
 
 	"github.com/tamnd/any-cli/kit"
 	"github.com/tamnd/ytb-cli/pkg/graph"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 // newDiscoverCmd is the breadth-first graph walk. Where the record reads each
@@ -61,13 +61,13 @@ Query either afterwards with ytb query.`,
 		Flags: func(f *kit.FlagSet) {
 			f.IntVar(&depth, "depth", 1, "hops to follow from each seed (0 = seeds only)")
 			f.IntVar(&fanout, "fanout", 25, "max neighbors to follow per edge (0 = unlimited)")
-			f.StringVar(&follow, "follow", "content", "edges to follow ("+youtube.EdgeHelp()+")")
+			f.StringVar(&follow, "follow", "content", "edges to follow ("+ytb.EdgeHelp()+")")
 			f.BoolVar(&store, "store", false, "write every node reached into the local store")
 		},
 		Run: func(ctx context.Context, args []string) error {
 			app := appFromCtx(ctx)
 
-			edges, err := youtube.ParseEdges(follow)
+			edges, err := ytb.ParseEdges(follow)
 			if err != nil {
 				return usageErr(err.Error())
 			}
@@ -76,7 +76,7 @@ Query either afterwards with ytb query.`,
 				return err
 			}
 
-			var st *youtube.Store
+			var st *ytb.Store
 			if store {
 				st, err = app.RequireStore()
 				if err != nil {
@@ -86,10 +86,10 @@ Query either afterwards with ytb query.`,
 
 			budget := app.Limit
 			if budget <= 0 {
-				budget = youtube.DefaultWalkBudget
+				budget = ytb.DefaultWalkBudget
 			}
 
-			opts := youtube.WalkOptions{
+			opts := ytb.WalkOptions{
 				Depth:  depth,
 				Max:    budget,
 				Fanout: fanout,
@@ -98,7 +98,7 @@ Query either afterwards with ytb query.`,
 			}
 
 			n := 0
-			err = app.Client.Walk(ctx, seeds, opts, func(nd *youtube.Node) error {
+			err = app.Client.Walk(ctx, seeds, opts, func(nd *ytb.Node) error {
 				if st != nil {
 					storeWalkNode(st, nd)
 				}
@@ -137,27 +137,27 @@ Query either afterwards with ytb query.`,
 // A node the walk only saw in somebody else's shelf is written down as a
 // sighting with no record, which is what leaves it on the next crawl's frontier
 // instead of marking it read on the strength of a title.
-func storeWalkNode(st *youtube.Store, nd *youtube.Node) {
+func storeWalkNode(st *ytb.Store, nd *ytb.Node) {
 	var rec any
 	var uri graph.URI
 	switch nd.Kind {
-	case youtube.KindVideo:
+	case ytb.KindVideo:
 		if nd.Video != nil {
 			rec, uri = *nd.Video, graph.VideoURI(nd.Video.VideoID)
 		}
-	case youtube.KindChannel:
+	case ytb.KindChannel:
 		if nd.Channel != nil {
 			rec, uri = *nd.Channel, graph.ChannelURI(nd.Channel.ChannelID)
 		}
-	case youtube.KindPlaylist:
+	case ytb.KindPlaylist:
 		if nd.Playlist != nil {
 			rec, uri = *nd.Playlist, graph.PlaylistURI(nd.Playlist.PlaylistID)
 		}
-	case youtube.KindComment:
+	case ytb.KindComment:
 		if nd.Comment != nil {
 			rec, uri = *nd.Comment, graph.CommentURI(nd.Comment.ID)
 		}
-	case youtube.KindPost:
+	case ytb.KindPost:
 		if nd.Post != nil {
 			rec, uri = *nd.Post, graph.PostURI(nd.Post.PostID)
 		}
@@ -174,10 +174,10 @@ func storeWalkNode(st *youtube.Store, nd *youtube.Node) {
 
 // parseSeeds turns the positional arguments into walk seeds, reporting an
 // unrecognized reference as a usage error rather than a plain failure.
-func parseSeeds(args []string) ([]youtube.Seed, error) {
-	seeds := make([]youtube.Seed, 0, len(args))
+func parseSeeds(args []string) ([]ytb.Seed, error) {
+	seeds := make([]ytb.Seed, 0, len(args))
 	for _, a := range args {
-		s, err := youtube.ParseSeed(a)
+		s, err := ytb.ParseSeed(a)
 		if err != nil {
 			return nil, usageErr(err.Error())
 		}

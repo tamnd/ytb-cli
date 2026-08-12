@@ -11,7 +11,7 @@ import (
 	"github.com/tamnd/any-cli/kit"
 	"github.com/tamnd/any-cli/kit/errs"
 	"github.com/tamnd/any-cli/kit/render"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 // Row is one output record: an ordered set of named columns plus the original
@@ -20,17 +20,17 @@ import (
 type Row = render.Record
 
 // App is the run state an escape-hatch command works through. The record
-// operations live in the youtube domain and receive the *youtube.Client by
+// operations live in the youtube domain and receive the *ytb.Client by
 // injection; the escape-hatch commands (download, transcript text, the local
 // store, config) need more than the client, so they rebuild this state from the
 // run context with appFromCtx and share the same renderer, limit, and pacing.
 type App struct {
-	Cfg       youtube.Config
-	Client    *youtube.Client
+	Cfg       ytb.Config
+	Client    *ytb.Client
 	Out       *render.Renderer
 	st        *kit.State
 	DataDir   string
-	store     *youtube.Store // the typed crawl store, opened once on demand
+	store     *ytb.Store // the typed crawl store, opened once on demand
 	Limit     int
 	MaxPages  int
 	Workers   int
@@ -50,7 +50,7 @@ type App struct {
 // bug, surfaced as a panic rather than threaded through every command.
 func appFromCtx(ctx context.Context) *App {
 	st := kit.FromContext(ctx)
-	yc := kit.MustClient[*youtube.Client](ctx)
+	yc := kit.MustClient[*ytb.Client](ctx)
 	kc := st.Config
 	a := &App{
 		Cfg:       ytConfig(kc),
@@ -71,10 +71,10 @@ func appFromCtx(ctx context.Context) *App {
 }
 
 // ytConfig folds the resolved framework config and the youtube globals (carried
-// in Config.Extra) into a youtube.Config. It mirrors the domain client factory,
+// in Config.Extra) into a ytb.Config. It mirrors the domain client factory,
 // so the standalone binary and an ant host build the same client.
-func ytConfig(kc kit.Config) youtube.Config {
-	yc := youtube.DefaultConfig()
+func ytConfig(kc kit.Config) ytb.Config {
+	yc := ytb.DefaultConfig()
 	if kc.Workers > 0 {
 		yc.Workers = kc.Workers
 	}
@@ -126,7 +126,7 @@ func (a *App) StorePath() string {
 }
 
 // Store opens (once) and returns the typed crawl store, creating the data dir.
-func (a *App) Store() (*youtube.Store, error) {
+func (a *App) Store() (*ytb.Store, error) {
 	if a.store != nil {
 		return a.store, nil
 	}
@@ -134,7 +134,7 @@ func (a *App) Store() (*youtube.Store, error) {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return nil, err
 	}
-	s, err := youtube.OpenStore(path)
+	s, err := ytb.OpenStore(path)
 	if err != nil {
 		return nil, fmt.Errorf("open store %q: %w", path, err)
 	}
@@ -145,11 +145,11 @@ func (a *App) Store() (*youtube.Store, error) {
 // RequireStore returns the typed crawl store. It exists for the commands whose
 // whole job is the store; the store always opens at the fixed path, so this no
 // longer fails for a missing flag.
-func (a *App) RequireStore() (*youtube.Store, error) { return a.Store() }
+func (a *App) RequireStore() (*ytb.Store, error) { return a.Store() }
 
 // PageOptions builds a PageOptions from the resolved -n / --max-pages values.
-func (a *App) PageOptions(enrich bool) youtube.PageOptions {
-	return youtube.PageOptions{Max: a.Limit, MaxPages: a.MaxPages, Enrich: enrich}
+func (a *App) PageOptions(enrich bool) ytb.PageOptions {
+	return ytb.PageOptions{Max: a.Limit, MaxPages: a.MaxPages, Enrich: enrich}
 }
 
 // logf writes a progress line to stderr unless --quiet.

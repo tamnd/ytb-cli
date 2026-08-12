@@ -8,7 +8,7 @@ import (
 
 	"github.com/tamnd/any-cli/kit"
 	"github.com/tamnd/ytb-cli/pkg/graph"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 // edges.go is the graph plane's three commands. Spec 3005 doc 04.
@@ -115,7 +115,7 @@ fetched.
 			defer app.Client.SetOnRequest(nil)
 
 			set := graph.NewSet()
-			walk := youtube.ClaimWalk{
+			walk := ytb.ClaimWalk{
 				Depth:  depth,
 				Budget: budget,
 				Note:   func(s string) { app.logf("note: %s", s) },
@@ -218,8 +218,8 @@ func (o *claimFlags) bind(f *kit.FlagSet) {
 	f.BoolVar(&o.music, "music", false, "read the same id through YouTube Music (1 request)")
 }
 
-func (o *claimFlags) options() youtube.ClaimOptions {
-	return youtube.ClaimOptions{
+func (o *claimFlags) options() ytb.ClaimOptions {
+	return ytb.ClaimOptions{
 		Captions: o.captions,
 		Comments: o.comments,
 		Items:    o.items,

@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/tamnd/any-cli/kit"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 func newMusicCmd() kit.Command {
@@ -54,7 +54,7 @@ the site returns them.`,
 				n++
 				return app.Out.Emit(musicResultRow(v))
 			})
-			if err != nil && err != youtube.ErrStop {
+			if err != nil && err != ytb.ErrStop {
 				return err
 			}
 			if n == 0 {
@@ -93,7 +93,7 @@ nested.`,
 					return err
 				}
 			}
-			for _, list := range [][]youtube.MusicItem{
+			for _, list := range [][]ytb.MusicItem{
 				artist.Albums, artist.Singles, artist.Videos, artist.Playlists, artist.RelatedArtists,
 			} {
 				for _, item := range list {

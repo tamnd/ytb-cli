@@ -11,7 +11,7 @@ import (
 
 	"github.com/tamnd/any-cli/kit"
 	"github.com/tamnd/ytb-cli/pkg/srv3"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 // resolveYtDlp returns the yt-dlp binary path or a coded error (exit 7) if absent.
@@ -140,7 +140,7 @@ Pass --use-yt-dlp to delegate to a yt-dlp binary instead.`,
 			if _, err := parseByteSize(o.chunk); err != nil {
 				return usageErr(err.Error())
 			}
-			if o.mux && youtube.FFmpeg(app.FFmpegBin) == "" {
+			if o.mux && ytb.FFmpeg(app.FFmpegBin) == "" {
 				// Said plainly and said first. --mux is a request for two streams joined
 				// into one file, and nothing in this binary can join them.
 				return missingTool("merging a video stream and an audio stream is what --mux asks for, and that needs ffmpeg, which is not on PATH. " +
@@ -155,18 +155,18 @@ Pass --use-yt-dlp to delegate to a yt-dlp binary instead.`,
 func (a *App) runNativeDownload(ctx context.Context, o downloadOpts, args []string) error {
 	_, _ = fmt.Fprintln(cmdErr, "note: media download is your responsibility; respect YouTube's Terms of Service and copyright.")
 
-	archive, err := youtube.OpenArchive(o.archivePath)
+	archive, err := ytb.OpenArchive(o.archivePath)
 	if err != nil {
 		return fmt.Errorf("open archive: %w", err)
 	}
-	sel, err := youtube.ParseItemSelector(o.items)
+	sel, err := ytb.ParseItemSelector(o.items)
 	if err != nil {
 		return usageErr(err.Error())
 	}
 
 	var targets []downloadTarget
 	for _, arg := range args {
-		if pid := youtube.ExtractPlaylistID(arg); pid != "" && youtube.ExtractVideoID(arg) == "" {
+		if pid := ytb.ExtractPlaylistID(arg); pid != "" && ytb.ExtractVideoID(arg) == "" {
 			items, err := a.expandPlaylist(ctx, arg, sel)
 			if err != nil {
 				return err
@@ -179,7 +179,7 @@ func (a *App) runNativeDownload(ctx context.Context, o downloadOpts, args []stri
 
 	var failures int
 	for _, t := range targets {
-		if vid := youtube.ExtractVideoID(t.idOrURL); vid != "" && archive.Has(vid) {
+		if vid := ytb.ExtractVideoID(t.idOrURL); vid != "" && archive.Has(vid) {
 			a.logf("skip %s: already in archive", vid)
 			continue
 		}
@@ -200,7 +200,7 @@ type downloadTarget struct {
 	playlistIndex int
 }
 
-func (a *App) expandPlaylist(ctx context.Context, arg string, sel *youtube.ItemSelector) ([]downloadTarget, error) {
+func (a *App) expandPlaylist(ctx context.Context, arg string, sel *ytb.ItemSelector) ([]downloadTarget, error) {
 	pl, err := a.Client.FetchPlaylist(ctx, arg)
 	if err != nil {
 		return nil, fmt.Errorf("fetch playlist: %w", err)
@@ -208,7 +208,7 @@ func (a *App) expandPlaylist(ctx context.Context, arg string, sel *youtube.ItemS
 	var out []downloadTarget
 	index := 0
 	opt := a.PageOptions(false)
-	err = a.Client.StreamPlaylistItems(ctx, arg, opt, func(pv youtube.PlaylistVideo, _ youtube.Video) error {
+	err = a.Client.StreamPlaylistItems(ctx, arg, opt, func(pv ytb.PlaylistVideo, _ ytb.Video) error {
 		index++
 		if !sel.Selects(index, int(pl.VideoCount)) {
 			return nil
@@ -227,7 +227,7 @@ func (a *App) expandPlaylist(ctx context.Context, arg string, sel *youtube.ItemS
 }
 
 // downloadOne resolves, selects, downloads, and post-processes a single video.
-func (a *App) downloadOne(ctx context.Context, o downloadOpts, t downloadTarget, archive *youtube.DownloadArchive) error {
+func (a *App) downloadOne(ctx context.Context, o downloadOpts, t downloadTarget, archive *ytb.DownloadArchive) error {
 	manifest, err := a.Client.StreamManifest(ctx, t.idOrURL)
 	if err != nil {
 		return err
@@ -236,17 +236,17 @@ func (a *App) downloadOne(ctx context.Context, o downloadOpts, t downloadTarget,
 		return noResults("no downloadable streams")
 	}
 
-	ffmpeg := youtube.FFmpeg(a.FFmpegBin)
+	ffmpeg := ytb.FFmpeg(a.FFmpegBin)
 	spec := a.formatSpec(o, ffmpeg != "")
-	selection, err := youtube.SelectFormat(manifest.Streams, spec)
+	selection, err := ytb.SelectFormat(manifest.Streams, spec)
 	if err != nil {
 		return err
 	}
 	if selection.NeedsMerge() && ffmpeg == "" {
-		return missingTool(youtube.ErrFFmpegMissing.Error())
+		return missingTool(ytb.ErrFFmpegMissing.Error())
 	}
 
-	fields := youtube.OutputFields{
+	fields := ytb.OutputFields{
 		ID:            manifest.VideoID,
 		Title:         manifest.Title,
 		Author:        manifest.Author,
@@ -279,7 +279,7 @@ func (a *App) downloadOne(ctx context.Context, o downloadOpts, t downloadTarget,
 			a.logf("subtitles: %v", err)
 		}
 	}
-	if vid := youtube.ExtractVideoID(t.idOrURL); vid != "" {
+	if vid := ytb.ExtractVideoID(t.idOrURL); vid != "" {
 		_ = archive.Add(vid)
 	} else {
 		_ = archive.Add(manifest.VideoID)
@@ -348,7 +348,7 @@ func qualityHeight(q string) string {
 
 // fetchAndAssemble downloads the selected streams to the output directory and,
 // when two adaptive tracks were chosen, merges them with ffmpeg.
-func (a *App) fetchAndAssemble(ctx context.Context, o downloadOpts, m *youtube.StreamManifest, sel youtube.Selection, fields youtube.OutputFields, ffmpeg string) (string, error) {
+func (a *App) fetchAndAssemble(ctx context.Context, o downloadOpts, m *ytb.StreamManifest, sel ytb.Selection, fields ytb.OutputFields, ffmpeg string) (string, error) {
 	if err := os.MkdirAll(o.out, 0o755); err != nil {
 		return "", err
 	}
@@ -361,7 +361,7 @@ func (a *App) fetchAndAssemble(ctx context.Context, o downloadOpts, m *youtube.S
 		}
 		fields.Ext = ext
 		fields.Resolution = resolutionLabel(s)
-		dst := filepath.Join(o.out, youtube.RenderOutputTemplate(o.tmpl, fields))
+		dst := filepath.Join(o.out, ytb.RenderOutputTemplate(o.tmpl, fields))
 
 		if o.audio && o.audioFormat != "" {
 			raw := dst + ".src"
@@ -369,7 +369,7 @@ func (a *App) fetchAndAssemble(ctx context.Context, o downloadOpts, m *youtube.S
 				return "", err
 			}
 			defer func() { _ = os.Remove(raw) }()
-			if err := youtube.ExtractAudio(ctx, ffmpeg, raw, dst, o.audioFormat, ""); err != nil {
+			if err := ytb.ExtractAudio(ctx, ffmpeg, raw, dst, o.audioFormat, ""); err != nil {
 				return "", err
 			}
 			return dst, nil
@@ -384,7 +384,7 @@ func (a *App) fetchAndAssemble(ctx context.Context, o downloadOpts, m *youtube.S
 	fields.Resolution = resolutionLabel(*v)
 	container := mergeContainer(*v)
 	fields.Ext = container
-	dst := filepath.Join(o.out, youtube.RenderOutputTemplate(o.tmpl, fields))
+	dst := filepath.Join(o.out, ytb.RenderOutputTemplate(o.tmpl, fields))
 
 	vpath := dst + ".video"
 	apath := dst + ".audio"
@@ -395,14 +395,14 @@ func (a *App) fetchAndAssemble(ctx context.Context, o downloadOpts, m *youtube.S
 	if err := a.downloadStream(ctx, o, m, au, apath, fields.Title+" (audio)"); err != nil {
 		return "", err
 	}
-	if err := youtube.MergeAV(ctx, ffmpeg, vpath, apath, dst); err != nil {
+	if err := ytb.MergeAV(ctx, ffmpeg, vpath, apath, dst); err != nil {
 		return "", fmt.Errorf("merge: %w", err)
 	}
 	return dst, nil
 }
 
 // downloadStream resolves a stream's URL and downloads it with a progress bar.
-func (a *App) downloadStream(ctx context.Context, o downloadOpts, m *youtube.StreamManifest, s *youtube.Stream, dst, label string) error {
+func (a *App) downloadStream(ctx context.Context, o downloadOpts, m *ytb.StreamManifest, s *ytb.Stream, dst, label string) error {
 	url, err := a.Client.ResolveStreamURL(ctx, m, s)
 	if err != nil {
 		return err
@@ -411,7 +411,7 @@ func (a *App) downloadStream(ctx context.Context, o downloadOpts, m *youtube.Str
 	if err != nil {
 		return usageErr(err.Error())
 	}
-	return a.Client.DownloadToFile(ctx, url, dst, youtube.DownloadOptions{
+	return a.Client.DownloadToFile(ctx, url, dst, ytb.DownloadOptions{
 		Total:      s.ContentLength,
 		ChunkSize:  chunk,
 		Workers:    o.concurrency,
@@ -441,7 +441,7 @@ func (a *App) downloadStream(ctx context.Context, o downloadOpts, m *youtube.Str
 func parseByteSize(s string) (int64, error) {
 	s = strings.TrimSpace(s)
 	if s == "" {
-		return youtube.DefaultChunkSize, nil
+		return ytb.DefaultChunkSize, nil
 	}
 	// The unit comes off first, so 1M, 1MB and 1MiB are the same size written
 	// three ways. They all mean 1<<20 here; nothing on this side of the wire
@@ -477,12 +477,12 @@ func countTrue(bs ...bool) int {
 
 // progressReporter returns a throttled stderr progress callback, or nil when
 // output is quiet.
-func (a *App) progressReporter(label string) func(youtube.DownloadProgress) {
+func (a *App) progressReporter(label string) func(ytb.DownloadProgress) {
 	if a.quiet {
 		return nil
 	}
 	lastPct := -1
-	return func(p youtube.DownloadProgress) {
+	return func(p ytb.DownloadProgress) {
 		if p.Total <= 0 {
 			return
 		}
@@ -512,14 +512,14 @@ func (a *App) embedThumbnail(ctx context.Context, videoID, mediaPath, ffmpeg str
 	}
 	defer func() { _ = os.Remove(thumb) }()
 	tmp := mediaPath + ".thumbed" + ext
-	if err := youtube.EmbedThumbnail(ctx, ffmpeg, mediaPath, thumb, tmp); err != nil {
+	if err := ytb.EmbedThumbnail(ctx, ffmpeg, mediaPath, thumb, tmp); err != nil {
 		return err
 	}
 	return os.Rename(tmp, mediaPath)
 }
 
-func (a *App) writeSubtitle(ctx context.Context, videoID string, o downloadOpts, fields youtube.OutputFields, mediaPath string) error {
-	doc, track, err := a.Client.Transcript(ctx, videoID, youtube.TranscriptOptions{Lang: o.subLangs})
+func (a *App) writeSubtitle(ctx context.Context, videoID string, o downloadOpts, fields ytb.OutputFields, mediaPath string) error {
+	doc, track, err := a.Client.Transcript(ctx, videoID, ytb.TranscriptOptions{Lang: o.subLangs})
 	if err != nil {
 		return err
 	}
@@ -625,7 +625,7 @@ func newExtractCmd() kit.Command {
 	}
 }
 
-func resolutionLabel(s youtube.Stream) string {
+func resolutionLabel(s ytb.Stream) string {
 	if s.QualityLabel != "" {
 		return s.QualityLabel
 	}
@@ -637,7 +637,7 @@ func resolutionLabel(s youtube.Stream) string {
 
 // mergeContainer picks an output container for a merged file: mp4 unless the
 // video track is webm/VP9/AV1, which lives more naturally in mkv/webm.
-func mergeContainer(v youtube.Stream) string {
+func mergeContainer(v ytb.Stream) string {
 	if v.Container == "webm" {
 		return "webm"
 	}

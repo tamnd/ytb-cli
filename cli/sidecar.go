@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/tamnd/any-cli/kit"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 func newSponsorBlockCmd() kit.Command {
@@ -22,7 +22,7 @@ func newSponsorBlockCmd() kit.Command {
 		},
 		Run: func(ctx context.Context, args []string) error {
 			app := appFromCtx(ctx)
-			videoID := youtube.ExtractVideoID(args[0])
+			videoID := ytb.ExtractVideoID(args[0])
 			if videoID == "" {
 				videoID = args[0]
 			}
@@ -78,7 +78,7 @@ func newThumbnailCmd() kit.Command {
 		},
 		Run: func(ctx context.Context, args []string) error {
 			app := appFromCtx(ctx)
-			videoID := youtube.ExtractVideoID(args[0])
+			videoID := ytb.ExtractVideoID(args[0])
 			if videoID == "" {
 				videoID = args[0]
 			}
@@ -98,7 +98,7 @@ func newThumbnailCmd() kit.Command {
 				_, _ = fmt.Fprintf(cmdErr, "saved %s (%s, %dx%d)\n", dst, t.Name, t.Width, t.Height)
 				return nil
 			}
-			thumbs := youtube.Thumbnails(videoID)
+			thumbs := ytb.Thumbnails(videoID)
 			if !unconfirmed {
 				thumbs = app.Client.ConfirmThumbnails(ctx, thumbs)
 			}
@@ -138,7 +138,7 @@ func newChaptersCmd() kit.Command {
 		Args:  kit.ExactArgs(1),
 		Run: func(ctx context.Context, args []string) error {
 			app := appFromCtx(ctx)
-			res, err := app.Client.FetchVideo(ctx, args[0], youtube.VideoOptions{Next: true})
+			res, err := app.Client.FetchVideo(ctx, args[0], ytb.VideoOptions{Next: true})
 			if err != nil {
 				return err
 			}

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/tamnd/any-cli/kit"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 // surfaces_test.go holds the promise of doc 06 section 4 to the one thing that
@@ -14,7 +14,7 @@ import (
 //
 // It is a test rather than a rule because the two halves are written in two
 // packages. The commands are hand-written in cli/ so a table can be laid out;
-// the operations are registered in youtube/ so a host that never links cli/ has
+// the operations are registered in ytb/ so a host that never links cli/ has
 // them. Nothing but this pairs the two, and the failure it catches is silent:
 // the command works, the tests pass, and only somebody curling the server finds
 // out that half the tool is not there.
@@ -47,7 +47,7 @@ func TestEveryReadIsServed(t *testing.T) {
 			t.Errorf("%q is both served and excused as %q: delete the excuse", name, reason)
 		case !served && !excused:
 			t.Errorf("`ytb %s` reads and no operation serves it, so it is missing from ytb serve and ytb mcp.\n"+
-				"Register it in youtube/ops.go with NoCLI set, or add it to notServed with the reason.", name)
+				"Register it in ytb/ops.go with NoCLI set, or add it to notServed with the reason.", name)
 		}
 	}
 }
@@ -95,7 +95,7 @@ func TestHandWrittenCommandsKeepTheirCommandLine(t *testing.T) {
 // unattended. Nothing in this tool changes anything on YouTube, so every op is a
 // read and the day one is not, it is a decision somebody makes on purpose here
 // rather than a flag that got copied along with the line above it. Doc 06
-// section 5, and youtube/ops.go registers all of them in the read group.
+// section 5, and ytb/ops.go registers all of them in the read group.
 func TestEveryOpIsARead(t *testing.T) {
 	for key, m := range opKeys(t) {
 		if m.Write {
@@ -207,7 +207,7 @@ func opKeys(t *testing.T) map[string]kit.OpMeta {
 func appOps(t *testing.T) []kit.Operation {
 	t.Helper()
 	app := kit.New(kit.Identity{Binary: "ytb", Short: "test"})
-	(youtube.Domain{}).Register(app)
+	(ytb.Domain{}).Register(app)
 	ops := app.Ops()
 	if len(ops) == 0 {
 		t.Fatal("the domain registered no operations")

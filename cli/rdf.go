@@ -6,7 +6,7 @@ import (
 
 	"github.com/tamnd/any-cli/kit"
 	"github.com/tamnd/ytb-cli/pkg/rdf"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 // rdf.go writes the graph plane in a vocabulary something else can read, and
@@ -66,7 +66,7 @@ that YouTube started saying something different.`,
 			opt := o.options()
 			opt.Microdata = check
 
-			col := youtube.NewCollector()
+			col := ytb.NewCollector()
 			var failed error
 			for _, ref := range args {
 				if err := app.Client.Collect(ctx, ref, opt, col); err != nil {
@@ -98,7 +98,7 @@ that YouTube started saying something different.`,
 }
 
 // runRDFCheck prints the per-predicate comparison rather than the triples.
-func runRDFCheck(app *App, col *youtube.Collector) error {
+func runRDFCheck(app *App, col *ytb.Collector) error {
 	if len(col.Page) == 0 {
 		return fmt.Errorf("no schema.org markup on the page, so there is nothing to check against: an embed page and a consent interstitial both do this")
 	}

@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/tamnd/any-cli/kit"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 // auth.go is tier 1: the cookies your browser already has, copied over.
@@ -56,14 +56,14 @@ func newAuthImportCmd() kit.Command {
 			if strings.TrimSpace(cookies) == "" {
 				return usageErr("--cookies takes a cookies.txt path, a pasted Cookie header, or - for stdin")
 			}
-			s, err := youtube.ReadSession(cookies)
+			s, err := ytb.ReadSession(cookies)
 			if err != nil {
 				return err
 			}
-			if err := youtube.SaveSession(app.DataDir, s); err != nil {
+			if err := ytb.SaveSession(app.DataDir, s); err != nil {
 				return err
 			}
-			if err := app.Out.Emit(sessionRow(s.Status(youtube.SessionPath(app.DataDir)))); err != nil {
+			if err := app.Out.Emit(sessionRow(s.Status(ytb.SessionPath(app.DataDir)))); err != nil {
 				return err
 			}
 			return app.Out.Flush()
@@ -80,8 +80,8 @@ func newAuthStatusCmd() kit.Command {
 		Args: kit.NoArgs,
 		Run: func(ctx context.Context, _ []string) error {
 			app := appFromCtx(ctx)
-			path := youtube.SessionPath(app.DataDir)
-			s, err := youtube.LoadSession(app.DataDir)
+			path := ytb.SessionPath(app.DataDir)
+			s, err := ytb.LoadSession(app.DataDir)
 			if err != nil {
 				// A file that will not parse is the one case the client swallows,
 				// so this is where it gets said out loud.
@@ -106,11 +106,11 @@ func newAuthClearCmd() kit.Command {
 		Write: true,
 		Run: func(ctx context.Context, _ []string) error {
 			app := appFromCtx(ctx)
-			if err := youtube.ClearSession(app.DataDir); err != nil {
+			if err := ytb.ClearSession(app.DataDir); err != nil {
 				return err
 			}
-			var gone youtube.Session
-			if err := app.Out.Emit(sessionRow(gone.Status(youtube.SessionPath(app.DataDir)))); err != nil {
+			var gone ytb.Session
+			if err := app.Out.Emit(sessionRow(gone.Status(ytb.SessionPath(app.DataDir)))); err != nil {
 				return err
 			}
 			return app.Out.Flush()
@@ -121,7 +121,7 @@ func newAuthClearCmd() kit.Command {
 // sessionRow renders the status. The columns are names, a count and a tier, and
 // there is no branch of this function that can reach a cookie value: the row is
 // built from a SessionStatus, which does not have one to give.
-func sessionRow(st youtube.SessionStatus) Row {
+func sessionRow(st ytb.SessionStatus) Row {
 	return Row{
 		Cols: []string{"present", "tier", "cookies", "missing", "source", "imported"},
 		Vals: []string{
@@ -136,7 +136,7 @@ func sessionRow(st youtube.SessionStatus) Row {
 	}
 }
 
-func importedText(st youtube.SessionStatus) string {
+func importedText(st ytb.SessionStatus) string {
 	if st.ImportedAt.IsZero() {
 		return ""
 	}

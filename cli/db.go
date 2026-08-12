@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/tamnd/any-cli/kit"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 func newDBCmd() kit.Command {
@@ -92,7 +92,7 @@ SQLite itself rather than by a check here.
 			if _, err := os.Stat(path); err != nil {
 				return fmt.Errorf("no store at %s yet: ytb crawl writes one", path)
 			}
-			store, err := youtube.OpenStoreReadOnly(path)
+			store, err := ytb.OpenStoreReadOnly(path)
 			if err != nil {
 				return err
 			}

@@ -6,7 +6,7 @@ import (
 
 	"github.com/tamnd/any-cli/kit"
 	"github.com/tamnd/ytb-cli/pkg/srv3"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 // transcript.go is the text read. Doc 05 section 4.
@@ -60,13 +60,13 @@ Use "ytb captions" to see what a video has.`,
 			if !srv3.Format(format).Valid() {
 				return usageErr("unknown --format " + format + ": want text, srt, vtt or json")
 			}
-			doc, _, err := app.Client.Transcript(ctx, args[0], youtube.TranscriptOptions{
+			doc, _, err := app.Client.Transcript(ctx, args[0], ytb.TranscriptOptions{
 				Lang: lang, Auto: auto, TranslateTo: translate,
 			})
 			if err != nil {
 				// This command holds the client itself, so nothing has classified the
 				// error yet. Without this a video with no captions exits 1.
-				return youtube.ExitError(err)
+				return ytb.ExitError(err)
 			}
 			if len(doc.Cues) == 0 {
 				return noResults("the track parsed to no lines")
@@ -103,7 +103,7 @@ vss_id is the track's own name for itself: ".en" is the human English track and
 			app := appFromCtx(ctx)
 			tracks, err := app.Client.Captions(ctx, args[0])
 			if err != nil {
-				return youtube.ExitError(err)
+				return ytb.ExitError(err)
 			}
 			if len(tracks) == 0 {
 				return noResults("this video has no caption track")

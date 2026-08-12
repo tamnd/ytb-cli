@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/tamnd/any-cli/kit"
-	"github.com/tamnd/ytb-cli/youtube"
+	"github.com/tamnd/ytb-cli/ytb"
 )
 
 func newFormatsCmd() kit.Command {
@@ -50,7 +50,7 @@ runs at 4 MiB/s.`,
 			}
 			var n int
 			for _, f := range list.Formats {
-				if !youtube.FormatMatches(f, audio, video, muxed) {
+				if !ytb.FormatMatches(f, audio, video, muxed) {
 					continue
 				}
 				if err := app.Out.Emit(formatRow(f)); err != nil {
@@ -79,7 +79,7 @@ runs at 4 MiB/s.`,
 // the whole list rather than a column, because the two facts on it are facts about
 // the read and not about any one format: which client answered, and when the URLs
 // it handed out stop working.
-func formatsNote(list *youtube.FormatList) string {
+func formatsNote(list *ytb.FormatList) string {
 	var b strings.Builder
 	b.WriteString("note  fetching any of these without a Range header runs at 32 KiB/s; ytb download\n")
 	b.WriteString("      always ranges.")
@@ -122,7 +122,7 @@ func emitStreamURLs(ctx context.Context, app *App, idOrURL string, audio, video,
 			Cols: []string{"itag", "ext", "resolution", "url"},
 			Vals: []string{fmt.Sprint(s.ITag), s.Ext(), resolutionLabel(s), url},
 			Value: struct {
-				youtube.Stream
+				ytb.Stream
 				URL string `json:"url"`
 			}{s, url},
 		}); err != nil {
@@ -139,7 +139,7 @@ func emitStreamURLs(ctx context.Context, app *App, idOrURL string, audio, video,
 	return app.Out.Flush()
 }
 
-func streamMatches(s youtube.Stream, audio, video, muxed bool) bool {
+func streamMatches(s ytb.Stream, audio, video, muxed bool) bool {
 	switch {
 	case muxed:
 		return s.Muxed()
