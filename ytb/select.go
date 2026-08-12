@@ -5,6 +5,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/tamnd/any-cli/kit/errs"
 )
 
 // Selection is the outcome of resolving a -f format string against a manifest.
@@ -63,7 +65,7 @@ func SelectFormat(streams []Stream, spec string) (Selection, error) {
 	if lastErr != nil {
 		return Selection{}, lastErr
 	}
-	return Selection{}, fmt.Errorf("no format matched %q", spec)
+	return Selection{}, errs.NoResults("no format matched %q", spec)
 }
 
 func selectGroup(streams []Stream, group string) (Selection, error) {
@@ -146,7 +148,7 @@ func selectOne(streams []Stream, token string) (*Stream, error) {
 		cands = filterFunc(cands, func(s Stream) bool { return matchFilter(s, f) })
 	}
 	if len(cands) == 0 {
-		return nil, fmt.Errorf("no stream matched %q", token)
+		return nil, errs.NoResults("no stream matched %q", token)
 	}
 	sortStreams(cands)
 	chosen := cands[len(cands)-1]

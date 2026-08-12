@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/tamnd/any-cli/kit/errs"
 	"github.com/tamnd/ytb-cli/pkg/graph"
 	"github.com/tamnd/ytb-cli/pkg/ytid"
 
@@ -130,7 +131,7 @@ func OpenStore(path string) (*Store, error) {
 // away from being wrong, and the database has the answer already.
 func OpenStoreReadOnly(path string) (*Store, error) {
 	if _, err := os.Stat(path); err != nil {
-		return nil, fmt.Errorf("no store at %s: %w", path, err)
+		return nil, errs.Wrap(errs.KindNotFound, err, "no store at %s", path)
 	}
 	db, err := sql.Open("sqlite", "file:"+path+"?mode=ro")
 	if err != nil {

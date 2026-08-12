@@ -279,7 +279,7 @@ func (c *Client) StreamChannelTab(ctx context.Context, idOrURL, tab string, opt 
 		return fmt.Errorf("fetch channel tab %q: %w", channelURL, err)
 	}
 	if code == 404 || data == nil {
-		return fmt.Errorf("channel tab not found: %s", channelURL)
+		return errs.NotFound("channel tab not found: %s", channelURL)
 	}
 
 	// The page arrived, which says nothing about which tab is on it. A channel with
@@ -396,7 +396,7 @@ func (c *Client) StreamChannelPlaylists(ctx context.Context, idOrURL string, opt
 		return fmt.Errorf("fetch channel playlists %q: %w", idOrURL, err)
 	}
 	if code == 404 || data == nil {
-		return fmt.Errorf("channel playlists not found: %s", idOrURL)
+		return errs.NotFound("channel playlists not found: %s", idOrURL)
 	}
 	if initial, ok := data.InitialData.(map[string]any); ok {
 		if err := AssertTab(initial, "playlists"); err != nil {

@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"strings"
+
+	"github.com/tamnd/any-cli/kit/errs"
 )
 
 // featured.go reads the featured tab's channel shelves.
@@ -30,7 +32,7 @@ func (c *Client) FeaturedChannels(ctx context.Context, idOrURL string) (*Channel
 		return nil, nil, fmt.Errorf("fetch featured tab %q: %w", pageURL, err)
 	}
 	if code == 404 || data == nil {
-		return nil, nil, fmt.Errorf("channel not found: %s", idOrURL)
+		return nil, nil, errs.NotFound("channel not found: %s", idOrURL)
 	}
 
 	ch, _, _, err := ParseChannelPage(data, pageURL)

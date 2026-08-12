@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+
+	"github.com/tamnd/any-cli/kit/errs"
 )
 
 // Search runs a search and streams the rows to emit in the order the site
@@ -35,7 +37,7 @@ func (c *Client) Search(ctx context.Context, query string, f SearchFilters, opt 
 		}
 		items, next := ParseSearchResults(resp)
 		if pages == 0 && len(items) == 0 {
-			return fmt.Errorf("no search results found for %q", query)
+			return errs.NoResults("no search results found for %q", query)
 		}
 		for _, item := range items {
 			key := searchKey(item)

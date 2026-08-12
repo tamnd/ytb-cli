@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/tamnd/any-cli/kit/errs"
 )
 
 // Stream is one downloadable format with the data needed to resolve its URL.
@@ -112,15 +114,15 @@ func (c *Client) StreamManifest(ctx context.Context, idOrURL string) (*StreamMan
 	chosen := firstPlayerWithStreams(responses...)
 	if chosen == nil {
 		if reason := playabilityReason(avr); reason != "" {
-			return nil, fmt.Errorf("video unavailable: %s", reason)
+			return nil, errs.NotFound("video unavailable: %s", reason)
 		}
 		if reason := playabilityReason(webPR); reason != "" {
-			return nil, fmt.Errorf("video unavailable: %s", reason)
+			return nil, errs.NotFound("video unavailable: %s", reason)
 		}
 		if reason := playabilityReason(safariPR); reason != "" {
-			return nil, fmt.Errorf("video unavailable: %s", reason)
+			return nil, errs.NotFound("video unavailable: %s", reason)
 		}
-		return nil, fmt.Errorf("no downloadable streams for %s (formats may be SABR-only or require a token)", videoID)
+		return nil, errs.Unsupported("no downloadable streams for %s (formats may be SABR-only or require a token)", videoID)
 	}
 
 	m := &StreamManifest{VideoID: videoID, playerURL: playerURL}

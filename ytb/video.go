@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	"github.com/tamnd/any-cli/kit/errs"
 )
 
 // ErrStop is returned by a streaming emit function to signal that no more items
@@ -37,7 +39,7 @@ func (c *Client) FetchVideo(ctx context.Context, idOrURL string, opt VideoOption
 		return nil, fmt.Errorf("fetch video page %q: %w", videoURL, err)
 	}
 	if code == 404 || data == nil {
-		return nil, fmt.Errorf("video not found: %s", videoURL)
+		return nil, errs.NotFound("video not found: %s", videoURL)
 	}
 
 	video, related, contToken, err := ParseVideoPage(data, videoURL)

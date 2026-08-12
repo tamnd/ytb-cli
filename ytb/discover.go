@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"strings"
+
+	"github.com/tamnd/any-cli/kit/errs"
 )
 
 // discover.go is the breadth-first graph walker. Every read in this package
@@ -187,7 +189,7 @@ func ParseEdges(spec string) (EdgeSet, error) {
 		set[e] = true
 	}
 	if len(set) == 0 {
-		return nil, fmt.Errorf("no edges selected (%s)", EdgeHelp())
+		return nil, errs.Usage("no edges selected (%s)", EdgeHelp())
 	}
 	return set, nil
 }
@@ -483,7 +485,7 @@ func (w *Walker) hydrate(ctx context.Context, f frontier, expand bool, edges Edg
 				return nil, nil, err
 			}
 			if res == nil {
-				return nil, nil, fmt.Errorf("video not found: %s", f.ref)
+				return nil, nil, errs.NotFound("video not found: %s", f.ref)
 			}
 			n.Video = &res.Video
 			n.Fetched = true
@@ -508,7 +510,7 @@ func (w *Walker) hydrate(ctx context.Context, f frontier, expand bool, edges Edg
 				return nil, nil, err
 			}
 			if ch == nil {
-				return nil, nil, fmt.Errorf("channel not found: %s", f.ref)
+				return nil, nil, errs.NotFound("channel not found: %s", f.ref)
 			}
 			n.Channel = ch
 			n.Fetched = true
@@ -523,7 +525,7 @@ func (w *Walker) hydrate(ctx context.Context, f frontier, expand bool, edges Edg
 				return nil, nil, err
 			}
 			if pl == nil {
-				return nil, nil, fmt.Errorf("playlist not found: %s", f.ref)
+				return nil, nil, errs.NotFound("playlist not found: %s", f.ref)
 			}
 			n.Playlist = pl
 			n.Fetched = true

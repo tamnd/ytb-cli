@@ -178,6 +178,7 @@ func (a *App) runNativeDownload(ctx context.Context, o downloadOpts, args []stri
 	}
 
 	var failures int
+	var only error // the failure, when there was exactly one thing to do
 	for _, t := range targets {
 		if vid := ytb.ExtractVideoID(t.idOrURL); vid != "" && archive.Has(vid) {
 			a.logf("skip %s: already in archive", vid)
@@ -185,8 +186,19 @@ func (a *App) runNativeDownload(ctx context.Context, o downloadOpts, args []stri
 		}
 		if err := a.downloadOne(ctx, o, t, archive); err != nil {
 			failures++
+			only = err
 			_, _ = fmt.Fprintf(cmdErr, "error: %s: %v\n", t.idOrURL, err)
 		}
+	}
+	// One target that failed returns its own error, so the exit code says what
+	// went wrong rather than that something did. Asking for one video that does
+	// not exist should exit 6, and collapsing it into a count made it exit 1.
+	//
+	// A batch keeps the count, because a run where one video was unavailable and
+	// another needed ffmpeg has no single kind, and picking one of them would be
+	// a coin toss dressed up as an answer.
+	if failures == 1 && len(targets) == 1 {
+		return only
 	}
 	if failures > 0 {
 		return partialErr(fmt.Sprintf("%d of %d downloads failed", failures, len(targets)))

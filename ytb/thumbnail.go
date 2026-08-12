@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/tamnd/any-cli/kit/errs"
 )
 
 // thumbnail.go is the preview image plane: what the payload said, what the CDN can
@@ -212,5 +214,5 @@ func (c *Client) DownloadThumbnail(ctx context.Context, videoID, dst string) (Th
 		t.Bytes = written
 		return t, nil
 	}
-	return Thumbnail{}, fmt.Errorf("no thumbnail available for %s", videoID)
+	return Thumbnail{}, errs.NotFound("no thumbnail available for %s", videoID)
 }

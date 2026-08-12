@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/tamnd/any-cli/kit/errs"
 	"github.com/tamnd/ytb-cli/pkg/graph"
 	"github.com/tamnd/ytb-cli/pkg/rdf"
 	"github.com/tamnd/ytb-cli/pkg/ytid"
@@ -142,7 +143,7 @@ func (c *Client) videoClaims(ctx context.Context, id string, opt ClaimOptions, c
 		return err
 	}
 	if res == nil {
-		return fmt.Errorf("video not found: %s", id)
+		return errs.NotFound("video not found: %s", id)
 	}
 	set := col.Set
 	VideoClaims(set, res.Video)
@@ -192,7 +193,7 @@ func (c *Client) channelClaims(ctx context.Context, id string, opt ClaimOptions,
 		return err
 	}
 	if ch == nil {
-		return fmt.Errorf("channel not found: %s", id)
+		return errs.NotFound("channel not found: %s", id)
 	}
 	set := col.Set
 	ChannelClaims(set, *ch)
@@ -236,7 +237,7 @@ func (c *Client) playlistClaims(ctx context.Context, id string, opt ClaimOptions
 			return err
 		}
 		if p == nil {
-			return fmt.Errorf("playlist not found: %s", id)
+			return errs.NotFound("playlist not found: %s", id)
 		}
 		PlaylistClaims(set, *p)
 		col.record(*p)
@@ -256,7 +257,7 @@ func (c *Client) playlistClaims(ctx context.Context, id string, opt ClaimOptions
 		return err
 	}
 	if p == nil {
-		return fmt.Errorf("playlist not found: %s", id)
+		return errs.NotFound("playlist not found: %s", id)
 	}
 	PlaylistClaims(set, *p)
 	col.record(*p)
@@ -271,7 +272,7 @@ func (c *Client) albumClaims(ctx context.Context, id string, col *Collector) err
 		return err
 	}
 	if album == nil {
-		return fmt.Errorf("album not found: %s", id)
+		return errs.NotFound("album not found: %s", id)
 	}
 	AlbumClaims(col.Set, *album, tracks, graph.Provenance{Source: album.URL, Surface: SurfaceMusic, Client: "WEB_REMIX"})
 	col.record(*album)
@@ -284,7 +285,7 @@ func (c *Client) artistClaims(ctx context.Context, id string, col *Collector) er
 		return err
 	}
 	if artist == nil {
-		return fmt.Errorf("artist not found: %s", id)
+		return errs.NotFound("artist not found: %s", id)
 	}
 	ArtistClaims(col.Set, *artist, graph.Provenance{Source: artist.URL, Surface: SurfaceMusic, Client: "WEB_REMIX"})
 	// An artist with a channel is the channel node, so the record has nowhere of

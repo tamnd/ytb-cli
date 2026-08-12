@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 	"unicode"
+
+	"github.com/tamnd/any-cli/kit/errs"
 )
 
 // Export writes Markdown pages for all channels (channel=="") or a single
@@ -37,7 +39,7 @@ func Export(store *Store, channel, outDir string) error {
 	}
 	ch, err := store.storeGetChannel(channel)
 	if err != nil {
-		return fmt.Errorf("channel %q not found: %w", channel, err)
+		return errs.Wrap(errs.KindNotFound, err, "channel %q not found", channel)
 	}
 	return exportChannel(store, *ch, outDir)
 }

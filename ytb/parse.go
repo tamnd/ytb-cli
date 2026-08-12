@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/tamnd/any-cli/kit/errs"
 )
 
 // --- JSON extraction helpers ---
@@ -503,7 +505,7 @@ func pageHeaderAvatarName(ph map[string]any) string {
 func ParseChannelPage(data *PageData, pageURL string) (*Channel, []Video, string, error) {
 	ch := ParseChannelRecord(data, pageURL)
 	if ch == nil {
-		return nil, nil, "", fmt.Errorf("channel metadata not found")
+		return nil, nil, "", errs.NotFound("channel metadata not found")
 	}
 	videos := parseVideosFromTree(data.InitialData)
 	for i := range videos {
@@ -582,7 +584,7 @@ func ParseSearchPage(data *PageData, query string) ([]SearchResult, []Video, []C
 	})
 	contToken := extractContinuationToken(data.InitialData)
 	if len(results) == 0 {
-		return nil, nil, nil, nil, "", fmt.Errorf("no search results found for %q", query)
+		return nil, nil, nil, nil, "", errs.NoResults("no search results found for %q", query)
 	}
 	return results, dedupeVideos(videos), dedupeChannels(channels), dedupePlaylists(playlists), contToken, nil
 }
