@@ -53,11 +53,12 @@ runs at 4 MiB/s.`,
 				if !ytb.FormatMatches(f, audio, video, muxed) {
 					continue
 				}
-				if err := app.Out.Emit(formatRow(f)); err != nil {
+				stop, err := app.Emit(formatRow(f))
+				if err != nil {
 					return err
 				}
 				n++
-				if app.Limit > 0 && n >= app.Limit {
+				if stop {
 					break
 				}
 			}
@@ -118,18 +119,19 @@ func emitStreamURLs(ctx context.Context, app *App, idOrURL string, audio, video,
 			app.logf("itag %d: %v", s.ITag, err)
 			continue
 		}
-		if err := app.Out.Emit(Row{
+		stop, err := app.Emit(Row{
 			Cols: []string{"itag", "ext", "resolution", "url"},
 			Vals: []string{fmt.Sprint(s.ITag), s.Ext(), resolutionLabel(s), url},
 			Value: struct {
 				ytb.Stream
 				URL string `json:"url"`
 			}{s, url},
-		}); err != nil {
+		})
+		if err != nil {
 			return err
 		}
 		n++
-		if app.Limit > 0 && n >= app.Limit {
+		if stop {
 			break
 		}
 	}

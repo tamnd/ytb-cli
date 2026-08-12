@@ -51,20 +51,17 @@ func newDBStatsCmd() kit.Command {
 			if len(stats) == 0 {
 				return noResults("the store is empty")
 			}
-			for _, s := range stats {
+			return EmitAll(app, stats, func(s ytb.StatRow) Row {
 				vals := []string{s.Table, s.Key, i64a(s.Rows), ""}
 				if s.Bytes > 0 {
 					vals[3] = humanBytes(s.Bytes)
 				}
-				if err := app.Out.Emit(Row{
+				return Row{
 					Cols:  []string{"table", "key", "rows", "bytes"},
 					Vals:  vals,
 					Value: s,
-				}); err != nil {
-					return err
 				}
-			}
-			return app.Out.Flush()
+			})
 		},
 	}
 }
@@ -104,7 +101,7 @@ SQLite itself rather than by a check here.
 			if len(rows) == 0 {
 				return noResults("no rows")
 			}
-			for _, r := range rows {
+			return EmitAll(app, rows, func(r []any) Row {
 				vals := make([]string, len(r))
 				obj := make(map[string]any, len(r))
 				for i, v := range r {
@@ -113,11 +110,8 @@ SQLite itself rather than by a check here.
 						obj[cols[i]] = v
 					}
 				}
-				if err := app.Out.Emit(Row{Cols: cols, Vals: vals, Value: obj}); err != nil {
-					return err
-				}
-			}
-			return app.Out.Flush()
+				return Row{Cols: cols, Vals: vals, Value: obj}
+			})
 		},
 	}
 }
@@ -150,12 +144,7 @@ func newDBSearchCmd() kit.Command {
 				if len(rows) == 0 {
 					return noResults("no matching channels")
 				}
-				for _, c := range rows {
-					if err := app.Out.Emit(channelRow(c)); err != nil {
-						return err
-					}
-				}
-				return app.Out.Flush()
+				return EmitAll(app, rows, channelRow)
 			}
 			rows, err := store.SearchVideos(q, limit)
 			if err != nil {
@@ -164,12 +153,7 @@ func newDBSearchCmd() kit.Command {
 			if len(rows) == 0 {
 				return noResults("no matching videos")
 			}
-			for _, v := range rows {
-				if err := app.Out.Emit(videoRow(v)); err != nil {
-					return err
-				}
-			}
-			return app.Out.Flush()
+			return EmitAll(app, rows, videoRow)
 		},
 	}
 }

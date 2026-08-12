@@ -32,6 +32,7 @@ type App struct {
 	DataDir   string
 	store     *ytb.Store // the typed crawl store, opened once on demand
 	Limit     int
+	emitted   int // rows written so far, for Emit to weigh against Limit
 	MaxPages  int
 	Workers   int
 	quiet     bool
@@ -150,6 +151,45 @@ func (a *App) RequireStore() (*ytb.Store, error) { return a.Store() }
 // PageOptions builds a PageOptions from the resolved -n / --max-pages values.
 func (a *App) PageOptions(enrich bool) ytb.PageOptions {
 	return ytb.PageOptions{Max: a.Limit, MaxPages: a.MaxPages, Enrich: enrich}
+}
+
+// Emit writes one row unless -n has already been reached, and reports whether
+// the caller should stop.
+//
+// A paging read is told the limit up front, through PageOptions, so it can stop
+// asking for continuations. A read that answers in one request has nothing to
+// stop asking for, and those commands used to emit their whole list whatever -n
+// said: six caption tracks for -n 2, twenty one predicates for -n 3. A global
+// flag that works on a search and does nothing on a caption list is worse than
+// one that does not exist, because nobody checks the ones that work.
+//
+// The count is on the App rather than on the loop, so a command that emits a
+// header and then a list counts both against the same -n instead of applying it
+// once per shape.
+func (a *App) Emit(row Row) (stop bool, err error) {
+	if a.Limit > 0 && a.emitted >= a.Limit {
+		return true, nil
+	}
+	if err := a.Out.Emit(row); err != nil {
+		return true, err
+	}
+	a.emitted++
+	return a.Limit > 0 && a.emitted >= a.Limit, nil
+}
+
+// EmitAll writes a slice of already-read items as rows, stops at -n, and
+// flushes. It is Emit for the common case where the whole command is one list.
+func EmitAll[T any](a *App, items []T, row func(T) Row) error {
+	for _, item := range items {
+		stop, err := a.Emit(row(item))
+		if err != nil {
+			return err
+		}
+		if stop {
+			break
+		}
+	}
+	return a.Out.Flush()
 }
 
 // logf writes a progress line to stderr unless --quiet.

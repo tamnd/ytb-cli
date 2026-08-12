@@ -61,12 +61,7 @@ ytb predicates prints the twenty one predicates with their domains and ranges.`,
 				}
 				return noResults("no claims")
 			}
-			for _, e := range set.Edges() {
-				if err := app.Out.Emit(edgeRow(e)); err != nil {
-					return err
-				}
-			}
-			return app.Out.Flush()
+			return EmitAll(app, set.Edges(), edgeRow)
 		},
 	}
 }
@@ -124,12 +119,7 @@ fetched.
 				return err
 			}
 			if listing {
-				for _, e := range set.Edges() {
-					if err := app.Out.Emit(edgeRow(e)); err != nil {
-						return err
-					}
-				}
-				return app.Out.Flush()
+				return EmitAll(app, set.Edges(), edgeRow)
 			}
 
 			counts := set.CountByPredicate()
@@ -138,17 +128,16 @@ fetched.
 				names = append(names, string(p))
 			}
 			sort.Strings(names)
-			for _, name := range names {
-				if err := app.Out.Emit(Row{
+			// The line goes out before the rows because it counts the whole walk,
+			// and -n cuts the table rather than the walk.
+			app.logf("%d claims over %d nodes, %d requests spent", set.Len(), len(set.Nodes()), spent.Load())
+			return EmitAll(app, names, func(name string) Row {
+				return Row{
 					Cols:  []string{"predicate", "claims"},
 					Vals:  []string{name, itoa(counts[graph.Predicate(name)])},
 					Value: map[string]any{"predicate": name, "claims": counts[graph.Predicate(name)]},
-				}); err != nil {
-					return err
 				}
-			}
-			app.logf("%d claims over %d nodes, %d requests spent", set.Len(), len(set.Nodes()), spent.Load())
-			return app.Out.Flush()
+			})
 		},
 	}
 }
@@ -174,12 +163,12 @@ This command makes no request.`,
 		Args: kit.NoArgs,
 		Run: func(ctx context.Context, args []string) error {
 			app := appFromCtx(ctx)
-			for _, info := range graph.All() {
+			return EmitAll(app, graph.All(), func(info graph.PredicateInfo) Row {
 				rdf := info.RDF
 				if info.Inverse {
 					rdf += " (inverse)"
 				}
-				if err := app.Out.Emit(Row{
+				return Row{
 					Cols: []string{"predicate", "from", "to", "rdf", "origin"},
 					Vals: []string{
 						string(info.Name),
@@ -189,11 +178,8 @@ This command makes no request.`,
 						info.Origin,
 					},
 					Value: info,
-				}); err != nil {
-					return err
 				}
-			}
-			return app.Out.Flush()
+			})
 		},
 	}
 }

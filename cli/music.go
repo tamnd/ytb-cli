@@ -85,11 +85,15 @@ nested.`,
 			if artist == nil {
 				return noResults("artist not found")
 			}
-			if err := app.Out.Emit(musicShelfRow(*artist, "")); err != nil {
+			stop, err := app.Emit(musicShelfRow(*artist, ""))
+			if err != nil {
 				return err
 			}
 			for _, t := range artist.TopTracks {
-				if err := app.Out.Emit(musicShelfRow(t, "Songs")); err != nil {
+				if stop {
+					break
+				}
+				if stop, err = app.Emit(musicShelfRow(t, "Songs")); err != nil {
 					return err
 				}
 			}
@@ -97,7 +101,10 @@ nested.`,
 				artist.Albums, artist.Singles, artist.Videos, artist.Playlists, artist.RelatedArtists,
 			} {
 				for _, item := range list {
-					if err := app.Out.Emit(musicShelfRow(item, "")); err != nil {
+					if stop {
+						break
+					}
+					if stop, err = app.Emit(musicShelfRow(item, "")); err != nil {
 						return err
 					}
 				}
@@ -121,11 +128,15 @@ func newMusicAlbumCmd() kit.Command {
 			if album == nil {
 				return noResults("album not found")
 			}
-			if err := app.Out.Emit(musicResultRow(*album)); err != nil {
+			stop, err := app.Emit(musicResultRow(*album))
+			if err != nil {
 				return err
 			}
 			for _, t := range tracks {
-				if err := app.Out.Emit(musicResultRow(t)); err != nil {
+				if stop {
+					break
+				}
+				if stop, err = app.Emit(musicResultRow(t)); err != nil {
 					return err
 				}
 			}
@@ -145,8 +156,10 @@ func newMusicPlaylistCmd() kit.Command {
 			if err != nil {
 				return err
 			}
+			var stop bool
 			if header != nil {
-				if err := app.Out.Emit(musicResultRow(*header)); err != nil {
+				var err error
+				if stop, err = app.Emit(musicResultRow(*header)); err != nil {
 					return err
 				}
 			}
@@ -154,7 +167,11 @@ func newMusicPlaylistCmd() kit.Command {
 				return noResults("empty playlist")
 			}
 			for _, t := range tracks {
-				if err := app.Out.Emit(musicResultRow(t)); err != nil {
+				if stop {
+					break
+				}
+				var err error
+				if stop, err = app.Emit(musicResultRow(t)); err != nil {
 					return err
 				}
 			}

@@ -108,12 +108,7 @@ vss_id is the track's own name for itself: ".en" is the human English track and
 			if len(tracks) == 0 {
 				return noResults("this video has no caption track")
 			}
-			for _, t := range tracks {
-				if err := app.Out.Emit(captionRow(t)); err != nil {
-					return err
-				}
-			}
-			return app.Out.Flush()
+			return EmitAll(app, tracks, captionRow)
 		},
 	}
 }

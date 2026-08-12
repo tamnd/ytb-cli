@@ -33,8 +33,8 @@ func newSponsorBlockCmd() kit.Command {
 			if len(segs) == 0 {
 				return noResults("no SponsorBlock segments")
 			}
-			for _, s := range segs {
-				if err := app.Out.Emit(Row{
+			return EmitAll(app, segs, func(s ytb.SponsorSegment) Row {
+				return Row{
 					Cols: []string{"category", "start", "end", "action"},
 					Vals: []string{
 						s.Category,
@@ -43,11 +43,8 @@ func newSponsorBlockCmd() kit.Command {
 						s.Action,
 					},
 					Value: s,
-				}); err != nil {
-					return err
 				}
-			}
-			return app.Out.Flush()
+			})
 		},
 	}
 }
@@ -105,19 +102,16 @@ func newThumbnailCmd() kit.Command {
 			if len(thumbs) == 0 {
 				return noResults("no thumbnail renditions exist for " + videoID)
 			}
-			for _, t := range thumbs {
-				if err := app.Out.Emit(Row{
+			return EmitAll(app, thumbs, func(t ytb.Thumbnail) Row {
+				return Row{
 					Cols: []string{"name", "width", "height", "size", "source", "url"},
 					Vals: []string{
 						t.Name, fmt.Sprint(t.Width), fmt.Sprint(t.Height),
 						sizeText(t.Bytes), t.Source, t.URL,
 					},
 					Value: t,
-				}); err != nil {
-					return err
 				}
-			}
-			return app.Out.Flush()
+			})
 		},
 	}
 }
@@ -145,16 +139,13 @@ func newChaptersCmd() kit.Command {
 			if res == nil || len(res.Chapters) == 0 {
 				return noResults("no chapters")
 			}
-			for _, c := range res.Chapters {
-				if err := app.Out.Emit(Row{
+			return EmitAll(app, res.Chapters, func(c ytb.Chapter) Row {
+				return Row{
 					Cols:  []string{"position", "start", "title", "origin"},
 					Vals:  []string{fmt.Sprint(c.Position), hms(c.StartSeconds), c.Title, c.Origin},
 					Value: c,
-				}); err != nil {
-					return err
 				}
-			}
-			return app.Out.Flush()
+			})
 		},
 	}
 }

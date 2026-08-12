@@ -103,16 +103,13 @@ func runRDFCheck(app *App, col *ytb.Collector) error {
 		return fmt.Errorf("no schema.org markup on the page, so there is nothing to check against: an embed page and a consent interstitial both do this")
 	}
 	ours := rdf.Merge(rdf.FromSet(col.Set), col.Statements)
-	for _, c := range rdf.Compare(ours, col.Page, col.Aliases) {
-		if err := app.Out.Emit(Row{
+	return EmitAll(app, rdf.Compare(ours, col.Page, col.Aliases), func(c rdf.Comparison) Row {
+		return Row{
 			Cols:  []string{"predicate", "ytb", "page", "agree"},
 			Vals:  []string{c.Predicate, c.Ours, c.Page, string(c.Agree)},
 			Value: c,
-		}); err != nil {
-			return err
 		}
-	}
-	return app.Out.Flush()
+	})
 }
 
 // onlyTypes keeps the rdf:type statements, which is the smallest useful export:
