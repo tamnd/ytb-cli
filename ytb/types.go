@@ -537,12 +537,25 @@ type Playlist struct {
 // newPlaylist starts a playlist record. is_generated is set here because the id
 // is the only thing that answers it and every construction path has the id.
 func newPlaylist(id string, surfaces ...string) Playlist {
-	return Playlist{
+	p := Playlist{
 		PlaylistID:  id,
 		URL:         NormalizePlaylistURL(id),
 		IsGenerated: isGeneratedPlaylistID(id),
 		Envelope:    newEnvelope("playlist", surfaces...),
 	}
+	// An RD list has no owner and never will, so channel_id is absent on it and
+	// every other kind of gap in this tool names itself. Without the note a search
+	// that returned one mix among four videos looks like a parse that dropped a
+	// field on one row.
+	//
+	// Only RD. The other generated prefixes do have an owner: UU is a channel's
+	// uploads, OL is an album, LL and FL are the signed in user's. RD covers both
+	// the mix built for one viewer and the curated RDCLAK5uy list on Music, and
+	// neither has a channel behind it.
+	if strings.HasPrefix(id, "RD") {
+		p.miss("YouTube generated this list rather than a person, so there is no owner channel and no channel_id to read")
+	}
+	return p
 }
 
 // isGeneratedPlaylistID reports whether YouTube built this playlist rather than a

@@ -113,7 +113,9 @@
     "metadata_parts": [
       "116 songs"
     ],
-    "missed": [],
+    "missed": [
+      "YouTube generated this list rather than a person, so there is no owner channel and no channel_id to read"
+    ],
     "sources": [
       "golden"
     ],
