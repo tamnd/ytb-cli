@@ -477,8 +477,13 @@ func countTrue(bs ...bool) int {
 
 // progressReporter returns a throttled stderr progress callback, or nil when
 // output is quiet.
+//
+// -v turns it off too. The bar redraws itself with a carriage return and the
+// trace writes whole lines to the same stream, so running both leaves a screen
+// of half-overwritten percentages. The trace is the better of the two anyway:
+// it names every range as it goes out.
 func (a *App) progressReporter(label string) func(ytb.DownloadProgress) {
-	if a.quiet {
+	if a.quiet || a.Verbose > 0 {
 		return nil
 	}
 	lastPct := -1

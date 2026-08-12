@@ -156,6 +156,9 @@ func newClient(_ context.Context, cfg kit.Config) (any, error) {
 	}
 	c := NewClient(yc)
 	c.SetCache(NewCache(innertubeCacheDir(cfg), cacheTTL(cfg.Extra["cache-ttl"])))
+	// -v goes to stderr so it stays out of the records on stdout, which means you
+	// can trace a run and still pipe its json somewhere.
+	c.SetTrace(os.Stderr, cfg.Verbose)
 	// The session is loaded here and not in each surface, so the command line,
 	// ytb serve and ytb mcp all read at the same tier from the same file.
 	//

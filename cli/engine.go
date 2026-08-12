@@ -35,6 +35,7 @@ type App struct {
 	emitted   int // rows written so far, for Emit to weigh against Limit
 	MaxPages  int
 	Workers   int
+	Verbose   int
 	quiet     bool
 	dryRun    bool
 	yes       bool
@@ -61,6 +62,7 @@ func appFromCtx(ctx context.Context) *App {
 		Limit:     st.Globals.Limit,
 		MaxPages:  atoi(kc.Extra["max-pages"]),
 		Workers:   kc.Workers,
+		Verbose:   kc.Verbose,
 		quiet:     kc.Quiet,
 		dryRun:    kc.DryRun,
 		yes:       kc.Extra["yes"] == "true",
