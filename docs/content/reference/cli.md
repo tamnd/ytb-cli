@@ -76,6 +76,9 @@ A cache hit never prints, because the trace sits in the HTTP transport and a cac
 | `id` | Classify any id, handle or URL, and derive what it implies |
 | `edges` | The claims one read makes: subject, predicate, object, and who said so |
 | `predicates` | The closed vocabulary: every predicate with its domain and its range |
+| `surfaces` | The eleven surfaces a record can name, with the host each one reads |
+| `clients` | Every InnerTube client this tool claims to be, with its version |
+| `routes` | Every read, with its HTTP route and its MCP tool name |
 | `rdf` | The same claims as n-triples, turtle or json-ld, with provenance |
 | `graph` | Walk the frontier the claims name, on a budget counted in requests |
 | `suggest` | Search autocomplete suggestions |
@@ -348,6 +351,81 @@ The table is closed.
 A predicate not in it cannot be written, which is what stops a typo becoming a claim that looks fine, is never queried because nobody knows to ask for it, and is found a year later by somebody counting.
 
 Where the arrow turns round on the way to RDF the `rdf` column says `(inverse)`: ytb writes `channel published video` because that is the direction a page reads in, and `schema:author` runs from the work to its author.
+
+## surfaces
+
+`ytb surfaces`.
+The surface table every record's `surfaces` field points into.
+This command makes no request.
+No flags beyond the globals.
+
+| id  | constant            | host                                | tier |
+|-----|---------------------|-------------------------------------|------|
+| s1  | SurfaceWatchHTML    | www.youtube.com                     | 0    |
+| s2  | SurfaceInnerTube    | www.youtube.com                     | 0    |
+| s3  | SurfaceMobilePlayer | www.youtube.com                     | 0    |
+| s4  | SurfaceBrowseHTML   | www.youtube.com                     | 0    |
+| s5  | SurfaceOEmbed       | www.youtube.com                     | 0    |
+| s6  | SurfaceFeed         | www.youtube.com                     | 0    |
+| s7  | SurfaceThumbCDN     | i.ytimg.com                         | 0    |
+| s8  | SurfaceMediaCDN     | googlevideo.com                     | 0    |
+| s9  | SurfaceSuggest      | suggestqueries-clients6.youtube.com | 0    |
+| s10 | SurfaceMusic        | music.youtube.com                   | 0    |
+| s11 | SurfaceSession      | www.youtube.com                     | 1    |
+
+A surface is one way of reading YouTube rather than one endpoint.
+`s2` is the whole web InnerTube API because browse, next, search and player answer with the same shapes from the same host under the same client.
+`s3` is a separate surface from `s2` despite also being `/player`, because asking as ANDROID gets stream URLs and caption URLs that return bytes and asking as WEB does not.
+
+The tier column is the only one that is about you rather than about YouTube.
+Tier 0 is anonymous and covers everything except `s11`, which is a read that carried your cookies.
+
+## clients
+
+`ytb clients`.
+The clients ytb identifies as, which is what the `client` field on a record names.
+This command makes no request.
+No flags beyond the globals.
+
+| name       | num | version          | host              |
+|------------|-----|------------------|-------------------|
+| WEB        | 1   | 2.20260114.08.00 | www.youtube.com   |
+| MWEB       | 2   | 2.20260114.08.00 | www.youtube.com   |
+| ANDROID    | 3   | 20.10.38         | www.youtube.com   |
+| IOS        | 5   | 20.10.4          | www.youtube.com   |
+| ANDROID_VR | 28  | 1.65.10          | www.youtube.com   |
+| WEB_REMIX  | 67  | 1.20260114.03.00 | music.youtube.com |
+
+Which client asked decides what comes back, so this is not cosmetic.
+ANDROID_VR is the one anonymous client that still answers `/player` with directly fetchable stream URLs and no proof-of-origin token, which is why downloads use it.
+WEB_REMIX is the only one music.youtube.com answers.
+WEB has the richest page data and the least media.
+The JSON form carries a `user_agent` and an `extra` per client, which is the per-client block that goes into `context.client`.
+
+The version numbers are the part that goes stale.
+A read that starts failing for everybody at once is usually a version that has aged out.
+
+## routes
+
+`ytb routes`.
+Every operation under its three names: the command path, the HTTP route `ytb serve` answers on, and the tool name `ytb mcp` publishes.
+This command makes no request.
+No flags beyond the globals.
+
+```sh
+ytb routes -o table --fields command,route,tool
+```
+
+```
+| command      | route            | tool         |
+|--------------|------------------|--------------|
+| about        | /v1/about        | about        |
+| music album  | /v1/music/album  | music_album  |
+```
+
+Thirty three rows today.
+The list is every read; the commands that write something local, `download`, `crawl`, `archive`, `query`, `export`, `config` and `auth`, are not on it because none of them is a read of YouTube and none of them is served.
+`routes` itself is not served either, because the server publishes its own list at `/v1/openapi.json` and a route that named the routes would be the one route missing from it.
 
 ## rdf
 

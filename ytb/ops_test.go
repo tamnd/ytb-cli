@@ -35,9 +35,10 @@ func TestEveryOpBindsItsInput(t *testing.T) {
 	c := NewClient(cfg)
 	c.http = &http.Client{Transport: refusingTransport{}}
 
-	// The two reads that make no request. Everything else has to fail here,
-	// because there is nothing behind it to answer.
-	offline := map[string]bool{"id": true, "predicates": true}
+	// The reads that make no request: the id classifier and the three tables the
+	// tool keeps about itself. Everything else has to fail here, because there is
+	// nothing behind it to answer.
+	offline := map[string]bool{"id": true, "predicates": true, "surfaces": true, "clients": true}
 
 	for _, op := range app.Ops() {
 		m := op.Meta()

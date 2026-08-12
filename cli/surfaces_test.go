@@ -35,6 +35,7 @@ var notServed = map[string]string{
 	"config":   "shows and writes this machine's config file",
 	"auth":     "stores and removes this machine's cookies; a route that took them as a query parameter would be a way to write them into a log",
 	"version":  "prints the binary's own version, which the server already states",
+	"routes":   "lists the routes, and the server publishes its own list at /v1/openapi.json; a route that named the routes would be the one route missing from it",
 }
 
 func TestEveryReadIsServed(t *testing.T) {
@@ -97,6 +98,45 @@ func TestHandWrittenCommandsKeepTheirCommandLine(t *testing.T) {
 // read and the day one is not, it is a decision somebody makes on purpose here
 // rather than a flag that got copied along with the line above it. Doc 06
 // section 5, and ytb/ops.go registers all of them in the read group.
+// TestRoutesPrintsWhatTheServerAnswers pairs `ytb routes` with the op table it
+// claims to describe.
+//
+// The command exists so the served surface can be read without starting the
+// server, which is only worth anything if the two agree. A row here that the
+// server does not answer sends somebody to a 404, and a route missing from the
+// table hides a read that is there.
+func TestRoutesPrintsWhatTheServerAnswers(t *testing.T) {
+	printed := map[string]routeRow{}
+	for _, r := range routeTable() {
+		if prev, ok := printed[r.Command]; ok {
+			t.Errorf("ytb routes lists %q twice: %v and %v", r.Command, prev, r)
+		}
+		printed[r.Command] = r
+	}
+	for key, m := range opKeys(t) {
+		r, ok := printed[key]
+		if !ok {
+			t.Errorf("op %q is served and ytb routes does not list it", key)
+			continue
+		}
+		// kit mounts every op under /v1, which is the prefix the table hardcodes.
+		if want := "/v1/" + strings.ReplaceAll(key, " ", "/"); r.Route != want {
+			t.Errorf("op %q routes to %s and ytb routes says %s", key, want, r.Route)
+		}
+		if want := strings.ReplaceAll(key, " ", "_"); r.Tool != want {
+			t.Errorf("op %q is MCP tool %s and ytb routes says %s", key, want, r.Tool)
+		}
+		if r.Summary != m.Summary {
+			t.Errorf("op %q summarises itself as %q and ytb routes says %q", key, m.Summary, r.Summary)
+		}
+	}
+	for key := range printed {
+		if _, ok := opKeys(t)[key]; !ok {
+			t.Errorf("ytb routes lists %q and nothing serves it", key)
+		}
+	}
+}
+
 func TestEveryOpIsARead(t *testing.T) {
 	for key, m := range opKeys(t) {
 		if m.Write {

@@ -87,6 +87,14 @@ which is what a program wants, and both come off the same parse.`,
 		Args:    []kit.Arg{{Name: "seed", Help: "any id, @handle, or URL", Variadic: true}}}, walkGraph)
 	kit.Handle(app, kit.OpMeta{Name: "predicates", Group: "read", NoCLI: true,
 		Summary: "The closed vocabulary: every predicate with its domain and its range"}, listPredicates)
+
+	// The tool describing itself. A record names its surfaces as ids and its
+	// clients by name, and until these were here the only way to find out what
+	// "s3" or "ANDROID_VR" meant was to read the source.
+	kit.Handle(app, kit.OpMeta{Name: "surfaces", Group: "read", NoCLI: true,
+		Summary: "The eleven surfaces a record can name, with the host each one reads"}, listSurfaces)
+	kit.Handle(app, kit.OpMeta{Name: "clients", Group: "read", NoCLI: true,
+		Summary: "Every InnerTube client this tool claims to be, with its version"}, listClients)
 	kit.Handle(app, kit.OpMeta{Name: "discover", Group: "read", NoCLI: true,
 		Summary: "Breadth-first walk of the graph linked from a video, channel, or playlist",
 		Args:    []kit.Arg{{Name: "seed", Help: "video, channel or playlist reference", Variadic: true}}}, listDiscovered)
@@ -455,6 +463,27 @@ func walkGraph(ctx context.Context, in graphRef, emit func(graph.Edge) error) er
 func listPredicates(_ context.Context, _ struct{}, emit func(graph.PredicateInfo) error) error {
 	for _, info := range graph.All() {
 		if err := emit(info); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// The three tables the invariant tests check. None of them makes a request:
+// they are the tool describing itself, so a record carrying "s3" and "ANDROID"
+// can be read without opening the source.
+func listSurfaces(_ context.Context, _ struct{}, emit func(SurfaceInfo) error) error {
+	for _, s := range SurfaceTable() {
+		if err := emit(s); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func listClients(_ context.Context, _ struct{}, emit func(ClientSpec) error) error {
+	for _, s := range Clients() {
+		if err := emit(s); err != nil {
 			return err
 		}
 	}

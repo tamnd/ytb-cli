@@ -52,6 +52,49 @@ const (
 	SurfaceSession = "s11"
 )
 
+// SurfaceInfo is one row of doc 01's surface table: an id, the constant that
+// spells it, what the read is, and whether it needs the user's cookies.
+type SurfaceInfo struct {
+	ID       string `json:"id"`
+	Constant string `json:"constant"`
+	Host     string `json:"host"`
+	Tier     int    `json:"tier"`
+	Summary  string `json:"summary"`
+}
+
+// SurfaceTable is every surface this tool reads, in id order.
+//
+// The table lived only in the invariant test, which meant the eleven ids a
+// record can name were written down in a file the binary does not ship. A
+// person holding a record with "s3" on it had to read the source to find out
+// what answered.
+func SurfaceTable() []SurfaceInfo {
+	return []SurfaceInfo{
+		{SurfaceWatchHTML, "SurfaceWatchHTML", "www.youtube.com", 0,
+			"the watch page: ytInitialPlayerResponse, ytInitialData, ytcfg and the schema.org microdata, in one response"},
+		{SurfaceInnerTube, "SurfaceInnerTube", "www.youtube.com", 0,
+			"the web InnerTube API: browse, next, search and player"},
+		{SurfaceMobilePlayer, "SurfaceMobilePlayer", "www.youtube.com", 0,
+			"/player as ANDROID or ANDROID_VR, the only source of stream URLs and of caption URLs that return bytes"},
+		{SurfaceBrowseHTML, "SurfaceBrowseHTML", "www.youtube.com", 0,
+			"a channel or playlist page as HTML"},
+		{SurfaceOEmbed, "SurfaceOEmbed", "www.youtube.com", 0,
+			"/oembed, which answers with a handle and little else"},
+		{SurfaceFeed, "SurfaceFeed", "www.youtube.com", 0,
+			"the channel Atom feed: the fifteen newest uploads with exact timestamps"},
+		{SurfaceThumbCDN, "SurfaceThumbCDN", "i.ytimg.com", 0,
+			"the thumbnail CDN, which is asked whether a rendition exists rather than parsed"},
+		{SurfaceMediaCDN, "SurfaceMediaCDN", "googlevideo.com", 0,
+			"the media CDN, read in byte ranges and never whole"},
+		{SurfaceSuggest, "SurfaceSuggest", "suggestqueries-clients6.youtube.com", 0,
+			"the JSONP autocomplete endpoint"},
+		{SurfaceMusic, "SurfaceMusic", "music.youtube.com", 0,
+			"music.youtube.com InnerTube as WEB_REMIX"},
+		{SurfaceSession, "SurfaceSession", "www.youtube.com", 1,
+			"a read that carried the user's cookies, and the only surface that is not anonymous"},
+	}
+}
+
 // Surfaces is the envelope's surface list, named so it can say how it prints.
 //
 // kit renders a slice column as its length, which is the right default: a table

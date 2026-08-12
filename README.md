@@ -79,6 +79,9 @@ ffmpeg is optional too, and only for merging a separate video track with its aud
 | `ytb graph <seed>...` | follow the frontier those claims name; `--depth`, `--budget` |
 | `ytb discover <seed>...` | breadth-first walk from a video, channel, or playlist |
 | `ytb predicates` | the closed vocabulary: every predicate, its domain and range |
+| `ytb surfaces` | the eleven surfaces a record can name, with the host each reads |
+| `ytb clients` | every InnerTube client ytb claims to be, with its version |
+| `ytb routes` | every read, with its HTTP route and its MCP tool name |
 | `ytb id <ref>` | classify any id, handle, or URL, with no request at all |
 | `ytb query <sql>` | run SQL over the store, read-only |
 | `ytb export <handle\|id>` | render the store as interlinked Markdown |

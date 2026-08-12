@@ -67,6 +67,39 @@ func TestSurfaceTableIsClosed(t *testing.T) {
 			t.Errorf("surface id %q is in the code and not in doc 01's table", id)
 		}
 	}
+
+	// `ytb surfaces` prints SurfaceTable, so a surface missing from it is a
+	// record naming an id the tool will not explain, and a row in it that no
+	// constant matches is an id no read can ever produce.
+	printed := map[string]bool{}
+	for _, s := range SurfaceTable() {
+		if printed[s.ID] {
+			t.Errorf("SurfaceTable lists %s twice", s.ID)
+		}
+		printed[s.ID] = true
+		if got[s.ID] != s.Constant {
+			t.Errorf("SurfaceTable calls %s %q, and the constant of that value is %q", s.ID, s.Constant, got[s.ID])
+		}
+		if s.Host == "" || s.Summary == "" {
+			t.Errorf("SurfaceTable row %s has no host or no summary, which is a blank cell in `ytb surfaces`", s.ID)
+		}
+	}
+	for id := range got {
+		if !printed[id] {
+			t.Errorf("surface %s is a constant a read can stamp and `ytb surfaces` does not list it", id)
+		}
+	}
+
+	// Tier 1 is the one thing in the table that is about the caller rather than
+	// about YouTube, and s11 is the only read that carries their cookies.
+	for _, s := range SurfaceTable() {
+		if want := 0; s.ID != SurfaceSession && s.Tier != want {
+			t.Errorf("surface %s is tier %d, and everything but %s is anonymous", s.ID, s.Tier, SurfaceSession)
+		}
+		if s.ID == SurfaceSession && s.Tier != 1 {
+			t.Errorf("%s is the session surface and it is tier %d", s.ID, s.Tier)
+		}
+	}
 }
 
 // TestEverySurfaceIsClaimedBySomeRead asserts each id is named outside the file
