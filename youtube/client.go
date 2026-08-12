@@ -1,7 +1,6 @@
 package youtube
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -508,85 +507,9 @@ func parseJSONObject(raw string) map[string]any {
 	return v
 }
 
-// postJSON is a helper for InnerTube and music POSTs.
-func (c *Client) postJSON(ctx context.Context, url string, body map[string]any) (map[string]any, error) {
-	return c.postJSONUA(ctx, url, body, "")
-}
-
-func (c *Client) postJSONHeaders(ctx context.Context, url string, body map[string]any, headers map[string]string) (map[string]any, error) {
-	return c.postJSONWithHeaders(ctx, url, body, headers)
-}
-
-// postJSONUA is postJSON with an explicit User-Agent. A non-browser client such
-// as ANDROID_VR must send its matching app UA to receive complete, token-free
-// streaming data, so the cipher-free download path overrides the default here.
-func (c *Client) postJSONUA(ctx context.Context, url string, body map[string]any, ua string) (map[string]any, error) {
-	headers := map[string]string{}
-	if ua != "" {
-		headers["User-Agent"] = ua
-	}
-	return c.postJSONWithHeaders(ctx, url, body, headers)
-}
-
-func (c *Client) postJSONWithHeaders(ctx context.Context, url string, body map[string]any, headers map[string]string) (map[string]any, error) {
-	raw, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	var lastErr error
-	attempts := c.retries + 1
-	if attempts < 1 {
-		attempts = 1
-	}
-	for attempt := 0; attempt < attempts; attempt++ {
-		if attempt > 0 {
-			select {
-			case <-ctx.Done():
-				return nil, ctx.Err()
-			case <-time.After(time.Duration(attempt) * 500 * time.Millisecond):
-			}
-		}
-		c.rateLimit()
-		c.noteRequest(http.MethodPost, url)
-		req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(raw))
-		if err != nil {
-			return nil, err
-		}
-		req.Header.Set("Content-Type", "application/json")
-		if headers["User-Agent"] == "" {
-			req.Header.Set("User-Agent", c.userAgents[0])
-		}
-		req.Header.Set("Accept-Language", "en-US,en;q=0.9")
-		for k, v := range headers {
-			if v != "" {
-				req.Header.Set(k, v)
-			}
-		}
-		req.AddCookie(&http.Cookie{Name: "CONSENT", Value: "YES+"})
-		c.applySession(req)
-		resp, err := c.http.Do(req)
-		if err != nil {
-			lastErr = err
-			continue
-		}
-		data, err := io.ReadAll(resp.Body)
-		_ = resp.Body.Close()
-		if err != nil {
-			lastErr = err
-			continue
-		}
-		if resp.StatusCode == 429 || resp.StatusCode >= 500 {
-			lastErr = fmt.Errorf("POST %s: HTTP %d", url, resp.StatusCode)
-			continue
-		}
-		if resp.StatusCode != 200 {
-			return nil, fmt.Errorf("POST %s: HTTP %d", url, resp.StatusCode)
-		}
-		var result map[string]any
-		if err := json.Unmarshal(data, &result); err != nil {
-			return nil, fmt.Errorf("POST %s: invalid JSON: %w", url, err)
-		}
-		return result, nil
-	}
-	return nil, lastErr
-}
+// The POST helpers that used to live here are gone. There was a postJSON, a
+// postJSONUA and a postJSONWithHeaders under it, none of them called by anything
+// since the InnerTube rewrite, and each of them pinned Accept-Language to
+// en-US,en;q=0.9 with no way to say otherwise. A second way to POST to youtubei
+// is a second place for the language to be decided, and the whole point of Call
+// is that there is one. Doc 01 section 1.3, and policy_test.go keeps it that way.

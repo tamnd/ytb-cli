@@ -162,6 +162,10 @@ func TestEveryStreamRequestSetsRange(t *testing.T) {
 // adaptive formats carry no signatureCipher, so there is nothing to run, and a
 // dependency on a JS runtime is a large attack surface for a feature we do not
 // have.
+//
+// Vendoring one is the obvious way in and shelling out to one is the quiet way,
+// so both are checked. A tool that spawns node to undo a cipher has the same
+// dependency as one that links a VM, it just does not say so in go.mod.
 func TestNoJavaScriptRuntime(t *testing.T) {
 	banned := []string{
 		"github.com/dop251/goja",
@@ -176,6 +180,131 @@ func TestNoJavaScriptRuntime(t *testing.T) {
 		if strings.Contains(string(mod), dep) {
 			t.Errorf("go.mod depends on %s; nothing in this tool runs JavaScript", dep)
 		}
+	}
+
+	interpreters := map[string]bool{"node": true, "nodejs": true, "deno": true, "bun": true, "phantomjs": true, "qjs": true}
+	for _, path := range repoFiles(t) {
+		if filepath.Base(path) == "policy_test.go" {
+			continue
+		}
+		for lit, pos := range stringLiterals(t, path) {
+			if interpreters[strings.ToLower(lit)] {
+				t.Errorf("%s: names %q, which is a JavaScript runtime to shell out to. "+
+					"Nothing here runs JS, and the day something needs to it is a design decision rather than a patch.", pos, lit)
+			}
+		}
+	}
+}
+
+// execAllowed is every file permitted to start a process, with why.
+//
+// Doc 06 section 5 says exec.Command lives in one file. It lives in three, and
+// the deviation is deliberate rather than drift: the spec was written before
+// --use-yt-dlp and config edit existed, and both of them are the user asking for
+// another program by name. The rule that still matters is that a subprocess is
+// something the user chose, never something a parser reaches for on its own, and
+// that is what the allowlist encodes. Doc 06 records the same three.
+var execAllowed = map[string]string{
+	"youtube/ffmpeg.go": "muxes a video-only and an audio-only file into one, which is the whole reason " +
+		"the adaptive formats are worth downloading separately",
+	"cli/download.go": "runs yt-dlp, and only behind --use-yt-dlp, which is the user naming the program",
+	"cli/config.go":   "opens $EDITOR on the config file, which is the user's own editor on the user's own file",
+}
+
+// TestExecIsAccountedFor asserts nothing new starts a process without saying why.
+//
+// A subprocess is the one thing in here that escapes every other rule in this
+// file: it makes its own requests, sends its own headers, and answers with bytes
+// no parser in this package has seen. Three of them is a number somebody can hold
+// in their head, and the fourth one is where that stops being true.
+func TestExecIsAccountedFor(t *testing.T) {
+	found := map[string]bool{}
+	for _, path := range repoFiles(t) {
+		base := filepath.Base(path)
+		if base == "policy_test.go" {
+			continue
+		}
+		src, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatalf("read %s: %v", path, err)
+		}
+		if !strings.Contains(string(src), "exec.Command") {
+			continue
+		}
+		rel := strings.TrimPrefix(filepath.ToSlash(path), "../")
+		found[rel] = true
+		if _, ok := execAllowed[rel]; !ok {
+			t.Errorf("%s starts a process. A subprocess makes its own requests and answers with bytes "+
+				"nothing here parsed, so add the file to execAllowed with the reason it has to.", rel)
+		}
+	}
+	for rel := range execAllowed {
+		if !found[rel] {
+			t.Errorf("execAllowed names %s, which no longer runs anything. Drop the entry rather than "+
+				"leaving a permission nobody uses.", rel)
+		}
+	}
+}
+
+// TestCallIsTheOnlyInnerTubePost asserts there is one way to reach youtubei.
+//
+// Four things have to be right on an InnerTube request and none of them is
+// visible in the response when they are wrong: the harvested key, the headers and
+// the body context agreeing on the client, hl and gl in all four places, and the
+// alerts check that turns a 200 into a refusal. Call does all four. A second
+// POST helper does whichever of them its author remembered, and the version this
+// package shipped for a while pinned Accept-Language to English no matter what
+// the config said, which is doc 01 section 1.3 broken with nothing to show for it.
+func TestCallIsTheOnlyInnerTubePost(t *testing.T) {
+	for _, path := range repoFiles(t) {
+		base := filepath.Base(path)
+		if strings.HasSuffix(path, "_test.go") || base == "call.go" || base == "download.go" {
+			continue
+		}
+		src, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatalf("read %s: %v", path, err)
+		}
+		for i, line := range strings.Split(string(src), "\n") {
+			if !strings.Contains(line, "http.MethodPost") && !strings.Contains(line, "http.Post(") {
+				continue
+			}
+			t.Errorf("%s:%d builds a POST outside call.go: %s\n"+
+				"Every InnerTube request goes through Call, which is where the key, the client and the locale are decided.",
+				path, i+1, strings.TrimSpace(line))
+		}
+	}
+}
+
+// TestEveryInnerTubeBodyCarriesTheLocale is the body half of the locale rule.
+//
+// Doc 01 section 1.3: hl and gl go in four places, and the context is the one
+// that decides what the renderers say. A response asked for with no context comes
+// back in the language of the exit node, so a parser reading a count positionally
+// still works and one reading the word next to it does not, and the record ends
+// up with a subscriber count from a different country's rounding.
+func TestEveryInnerTubeBodyCarriesTheLocale(t *testing.T) {
+	for _, s := range Clients() {
+		client, ok := s.Context("vi", "VN", "")["client"].(map[string]any)
+		if !ok {
+			t.Errorf("%s: context has no client object", s.Name)
+			continue
+		}
+		if client["hl"] != "vi" || client["gl"] != "VN" {
+			t.Errorf("%s: context says hl=%v gl=%v, and the caller asked for vi/VN", s.Name, client["hl"], client["gl"])
+		}
+	}
+
+	// And that the one place that builds a body actually asks for it. The check is
+	// on the source because the alternative is a live request, and the failure it
+	// guards against is somebody inlining a literal "en" here on a quiet afternoon.
+	src, err := os.ReadFile("call.go")
+	if err != nil {
+		t.Fatalf("read call.go: %v", err)
+	}
+	if !strings.Contains(string(src), "effective.Context(c.hl, c.gl,") {
+		t.Error("call.go no longer fills the context from the client's own hl and gl, " +
+			"so the language on the wire is not the language the config asked for")
 	}
 }
 
