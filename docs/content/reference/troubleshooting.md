@@ -6,23 +6,22 @@ weight: 40
 
 ## Transcript text comes back empty
 
-YouTube gates the raw `timedtext` caption endpoint behind a proof-of-origin
-token (a poToken). Without it, a direct text fetch returns nothing, so the
-transcript prints empty even though the captions clearly exist.
-
-The fix is yt-dlp. Install it from
-[github.com/yt-dlp/yt-dlp](https://github.com/yt-dlp/yt-dlp) and put it on your
-PATH. When a direct fetch comes back empty, ytb falls back to yt-dlp, parses
-the VTT it returns, and gives you the timed segments anyway. Listing the tracks
-never needs the token, so this always works:
+This used to be the common case and no longer is. Transcripts are fetched and
+parsed in-process, with no yt-dlp and no JavaScript interpreter, so the ordinary
+path works on a machine with nothing else installed:
 
 ```sh
-ytb transcript dQw4w9WgXcQ --list   # available tracks, no yt-dlp needed
-ytb transcript dQw4w9WgXcQ          # text, via yt-dlp fallback if gated
+ytb captions dQw4w9WgXcQ            # what tracks exist
+ytb transcript dQw4w9WgXcQ          # the text of one of them
 ```
 
-If yt-dlp lives somewhere off PATH, point at it with `--yt-dlp-bin` or the
-`YTB_YT_DLP_BIN` environment variable.
+If a track still comes back empty, check the list first. A video with no
+captions at all is a different problem from a track that refused, and `ytb
+captions` tells the two apart in one request.
+
+When the endpoint does refuse and a yt-dlp binary happens to be on PATH, it is
+used as a fallback and says so. If yt-dlp lives somewhere off PATH, point at it
+with `--yt-dlp-bin` or the `YTB_YT_DLP_BIN` environment variable.
 
 ## A download exits with code 6
 

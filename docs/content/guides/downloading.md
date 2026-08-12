@@ -5,11 +5,10 @@ weight: 55
 ---
 
 `ytb download` has a built-in download engine written in pure Go. It needs no
-API key, no proof-of-origin token, and no external downloader for the common
-cases. Behind the scenes it asks YouTube's ANDROID_VR client for the stream
-list (the one anonymous client that still returns directly-fetchable URLs),
-deciphers the URL signature and the `n` throttling parameter with an embedded
-JavaScript interpreter, and pulls the bytes down in parallel ranges.
+API key, no proof-of-origin token, no JavaScript interpreter, and no external
+downloader for the common cases. It asks YouTube's ANDROID_VR client for the
+stream list, which is the one anonymous client that answers with plain signed
+URLs, so there is no signature to decipher and no `n` parameter to unscramble.
 
 ```sh
 ytb download dQw4w9WgXcQ
@@ -18,6 +17,37 @@ ytb download dQw4w9WgXcQ
 That saves the best progressive (combined video+audio) stream to the current
 directory. Media download is your responsibility: respect YouTube's Terms of
 Service and copyright.
+
+## Why every request is a byte range
+
+The engine never issues a plain GET for a stream. An un-ranged GET to
+googlevideo is throttled to about 32 KiB/s and in practice never finishes, while
+the same URL fetched in ranges runs at line speed. So the download goes out in
+1 MiB chunks, four at a time, and `--chunk` and `--concurrent-fragments` tune
+that:
+
+```sh
+ytb download dQw4w9WgXcQ --chunk 4M --concurrent-fragments 8
+```
+
+The size is known from `contentLength` before the first byte arrives, which is
+what makes the progress bar's total real rather than a guess, and what lets
+`--continue` resume from however long the existing part file already is.
+
+## One stream, or two merged
+
+`--audio` and `--video` each write a single stream and need nothing else
+installed. `--mux` fetches both and merges them, which is the case that needs
+ffmpeg:
+
+```sh
+ytb download dQw4w9WgXcQ --audio      # audio only, pure Go
+ytb download dQw4w9WgXcQ --video      # video only, silent, pure Go
+ytb download dQw4w9WgXcQ --mux        # both, merged, needs ffmpeg
+```
+
+`--itag` takes one exact itag from `ytb formats` when you already know which
+stream you want and would rather not write a selector for it.
 
 ## Selecting a format
 

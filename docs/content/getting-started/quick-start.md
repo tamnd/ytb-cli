@@ -65,21 +65,21 @@ The trailing `-` tells `video` to read its arguments from stdin, one per line.
 List the caption tracks a video has:
 
 ```bash
-ytb transcript dQw4w9WgXcQ --list
+ytb captions dQw4w9WgXcQ
 ```
 
-Fetch the text, or the timed segments:
+Fetch one of them as text, as subtitles, or as timed cues:
 
 ```bash
 ytb transcript dQw4w9WgXcQ
-ytb transcript dQw4w9WgXcQ --timestamps
+ytb transcript dQw4w9WgXcQ --format srt --out never.srt
+ytb transcript dQw4w9WgXcQ --format json
 ```
 
-YouTube now gates the raw caption endpoint behind a proof-of-origin token, so a
-direct text fetch often comes back empty. When that happens ytb falls back to
-[yt-dlp](https://github.com/yt-dlp/yt-dlp) if it is on your `PATH` and parses the
-result for you. Listing tracks never needs it. See
-[comments and transcripts](/guides/comments-transcripts/) for the details.
+Nothing here needs yt-dlp, ffmpeg, Deno or a JavaScript interpreter. The track
+is fetched and parsed in-process. See
+[comments and transcripts](/guides/comments-transcripts/) for picking a track,
+the auto-generated one, and machine translation.
 
 ## 5. Download a video
 

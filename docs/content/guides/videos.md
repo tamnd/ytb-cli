@@ -51,52 +51,71 @@ ytb search "go programming" -o url | ytb video -
 
 `-j`/`--workers` sets how many detail fetches run at once when you pass many ids.
 
-## Sub-views of one video
+## What one read already carries
 
-The sub-flags switch `video` from printing one metadata row to streaming the
-matching sub-list instead:
+Chapters, the description's links and hashtags, the thumbnail URLs and the
+caption track list all come back on a plain read and need no flag. `-o json`
+has them nested on the record.
+
+The flags below are the parts that cost another request, so each one is a
+decision rather than a default:
 
 ```sh
-ytb video dQw4w9WgXcQ --chapters    # chapter list (title and start time)
-ytb video dQw4w9WgXcQ --captions    # available caption tracks
-ytb video dQw4w9WgXcQ --formats     # streaming formats, deduped by itag
-ytb video dQw4w9WgXcQ --related     # the related-videos graph
+ytb video dQw4w9WgXcQ --captions      # caption tracks whose URLs fetch, one request
+ytb video dQw4w9WgXcQ --formats       # the stream list, one request
+ytb video dQw4w9WgXcQ --thumbnails    # a HEAD per constructed rendition
 ```
 
-`--transcript` fetches the transcript text and attaches it to the record.
-`--lang` picks the preferred caption language (it defaults to auto, English):
+`--captions` is a narrower thing than it sounds. The plain read already lists
+the tracks; what it lists are the watch page's URLs, and those answer HTTP 200
+with an empty body. The flag re-reads the list through the mobile player, whose
+URLs actually fetch, so the count is the same and the `base_url` is the part
+that changed.
+
+`--formats` stays off by default because it costs a mobile player request per
+video, and a crawl of a thousand videos should not make a thousand extra calls
+nobody asked for.
+
+`--transcript` fetches the transcript text and attaches it to the record, and
+`--lang` picks the language:
 
 ```sh
 ytb video dQw4w9WgXcQ --transcript --lang es
 ```
 
-## Faster and rawer
+`--microdata` adds what the page's own schema.org markup says, beside what ytb
+parsed, which is how you check one against the other.
 
-`--no-player` skips the `/player` call and resolves from the HTML bootstrap
-only. It is faster, at the cost of the formats, captions, and some `/player`
-exclusive fields:
+## Faster
+
+`--no-player` never calls the mobile player, whatever else was asked, and
+resolves from the HTML bootstrap only. It is faster, at the cost of the formats,
+the caption list, and some player-only fields:
 
 ```sh
 ytb video dQw4w9WgXcQ --no-player
 ```
 
-`--raw` emits the full `VideoResult` as the value, the whole parsed model rather
-than the projected row:
-
-```sh
-ytb video dQw4w9WgXcQ --raw -o json
-```
-
 ## Sibling commands
 
-Two commands operate on a single video and overlap with the `video` sub-flags,
-handy when that is all you want:
+Several commands print one part of a video on its own, which is handy when that
+part is all you want:
 
-`related` prints the related-videos graph for one video:
+The related-videos shelf is the one part of the watch page that does not land on
+the video record, because it is twenty other videos rather than a fact about
+this one. `related` prints it, `chapters` prints the chapter markers, and
+`captions` prints the caption track list:
 
 ```sh
 ytb related dQw4w9WgXcQ
+ytb chapters GlYgs6v2YfU
+ytb captions dQw4w9WgXcQ
 ```
+
+`chapters` names where each chapter came from. `markers` means YouTube served a
+chapter list of its own, so the site draws them on the scrubber; `description`
+means somebody typed `1:23 Verse 2` and the list is only as good as their
+typing.
 
 `formats` lists the muxed and adaptive formats from `/player` streamingData,
 deduped by itag. It lists metadata only and does not resolve playable URLs.

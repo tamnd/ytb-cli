@@ -28,15 +28,30 @@ Persistent flags accepted by every command.
 | `--gl` | InnerTube content country (US) |
 | `--db` | Tee every record into a generic store (e.g. `out.db`, `postgres://...`) |
 | `-q, --quiet` | Suppress progress output |
-| `-v, --verbose` | Increase verbosity (repeatable) |
+| `-v, --verbose` | Print each request that went out; `-vv` adds the query and the headers |
 | `--color` | Color output: `auto`, `always`, `never` (auto) |
 | `--template` | Go text/template applied per row |
 | `--no-header` | Omit the header row in table/csv/tsv |
-| `--config` | Config file (default: XDG config) |
+| `--cache-ttl` | How long a cached response is served before it is refetched (15m) |
+| `--no-cache` | Bypass the on-disk caches |
+| `--data-dir` | Override the data directory (the store, the cache, the cookies) |
 | `-y, --yes` | Assume yes to prompts |
 | `--dry-run` | Print actions without performing them |
 | `--yt-dlp-bin` | Path to the yt-dlp binary (`download --use-yt-dlp`) |
 | `--ffmpeg-bin` | Path to ffmpeg (used to merge/convert when present) |
+
+`-n` means the same thing everywhere: stop after N records.
+A read that pages is told the number up front and stops asking for continuations; a read that answers in one request cuts its list on the way out.
+So `ytb captions <id> -n 2` prints two tracks and `ytb search <q> -n 2` makes one request rather than paging to the default limit.
+
+There is no `--config` flag.
+The config file has one path, `ytb config path` prints it, and `--data-dir` moves the data rather than the config.
+`--profile` is accepted by the framework and nothing in ytb reads it yet.
+
+`-v` writes to stderr, one line per request, so records on stdout still pipe.
+A cache hit never prints, because the trace sits in the HTTP transport and a cache hit never reaches it, which makes the line count an honest answer to what a command cost.
+`-vv` adds the full query and the headers that decide what a request means, which is the `Range` on a media fetch and the client name on a player POST.
+`Cookie` and `Authorization` are never printed at either level.
 
 ## Commands
 
@@ -57,8 +72,14 @@ Persistent flags accepted by every command.
 | `hashtag` | A hashtag feed |
 | `related` | The related-videos graph |
 | `discover` | Breadth-first walk of the graph linked from a video, channel, or playlist |
+| `id` | Classify any id, handle or URL, and derive what it implies |
+| `edges` | The claims one read makes: subject, predicate, object, and who said so |
+| `predicates` | The closed vocabulary: every predicate with its domain and its range |
+| `rdf` | The same claims as n-triples, turtle or json-ld, with provenance |
+| `graph` | Walk the frontier the claims name, on a budget counted in requests |
 | `suggest` | Search autocomplete suggestions |
 | `transcript` | Captions as text |
+| `captions` | A video's caption tracks, one record each |
 | `formats` | Streaming formats (metadata only) |
 | `music` | YouTube Music (artists, albums, songs) |
 | `download` | Download media with the native engine (or yt-dlp) |
@@ -71,8 +92,11 @@ Persistent flags accepted by every command.
 | `query` | Run SQL over the store, read-only |
 | `export` | Render the store as interlinked Markdown |
 | `db` | The local SQLite store |
+| `auth` | Manage the optional YouTube session |
 | `config` | View and manage configuration |
 | `version` | Print version information |
+| `serve` | Serve the operations over HTTP as NDJSON, covered in [serve and MCP](/reference/serve-and-mcp/) |
+| `mcp` | Run as an MCP server over stdio, covered in [serve and MCP](/reference/serve-and-mcp/) |
 
 ## video
 
@@ -80,14 +104,15 @@ Persistent flags accepted by every command.
 
 | Flag | Meaning |
 | --- | --- |
-| `--captions` | List available caption tracks |
-| `--chapters` | List chapters |
-| `--formats` | Attach the stream list, one extra request |
-| `--related` | List related videos |
+| `--captions` | Also list the caption tracks that fetch, one extra request |
+| `--formats` | Also read the stream list, one extra request |
 | `--transcript` | Fetch and attach the transcript text |
-| `--lang` | Preferred caption language (default auto/English) |
-| `--no-player` | Skip `/player` (HTML-only, faster) |
-| `--raw` | Emit the full VideoResult as the value |
+| `--lang` | Preferred caption language for `--transcript` |
+| `--thumbnails` | Confirm each constructed thumbnail rendition with a HEAD |
+| `--microdata` | Include what the page's own schema.org markup says |
+| `--no-player` | Never call the mobile player, whatever else was asked |
+
+Chapters, related videos and the description's links come back on a plain read and need no flag; `ytb chapters` and `ytb related` are the same data on its own.
 
 `formats` is off by default and stays off, because it costs a mobile player request per video and a crawl of a thousand videos should not make a thousand extra calls nobody asked for.
 The watch page carries a stream list for free and a plain read still leaves it off: 29 formats nobody asked for bury the dozen fields the caller wanted.
@@ -179,12 +204,13 @@ This is the only surface outside the player that says whether a video is a short
 
 | Flag | Meaning |
 | --- | --- |
-| `--type` | `Video`, `Channel`, `Playlist` |
+| `--type` | `Video`, `Channel`, `Playlist`, `Movie` |
 | `--duration` | `Short`, `Medium`, `Long` |
 | `--upload-date` | `Hour`, `Today`, `Week`, `Month`, `Year` |
 | `--sort` | `Relevance`, `Date`, `Views`, `Rating` |
 | `--cc` | Closed captions / subtitles |
 | `--creative-commons` | Creative Commons license |
+| `--purchased` | Purchased titles only |
 | `--4k` | 4K only |
 | `--hd` | HD only |
 | `--hdr` | HDR only |
@@ -207,8 +233,9 @@ This is the only surface outside the player that says whether a video is a short
 | Flag | Meaning |
 | --- | --- |
 | `--sort` | `Top`, `New` |
-| `--replies` | Also fetch replies (parent_id set) |
-| `--all` | Remove the default cap |
+| `--replies` | Also fetch replies (`parent_id` set) |
+
+Use `-n` for how many, and `-n 0` for no cap at all.
 
 ## community
 
@@ -216,7 +243,11 @@ This is the only surface outside the player that says whether a video is a short
 
 ## hashtag
 
-`ytb hashtag <tag> [--flags]`. A hashtag feed. No notable flags beyond the globals.
+`ytb hashtag <tag> [--flags]`. Streams a hashtag's videos.
+
+| Flag | Meaning |
+| --- | --- |
+| `--info` | The hashtag's own record instead of its videos |
 
 ## related
 
@@ -224,7 +255,9 @@ This is the only surface outside the player that says whether a video is a short
 
 ## discover
 
-`ytb discover <seed>... [--flags]` (aliases `walk`, `graph`). Walk the graph of linked objects breadth-first from one or more seeds (a video, channel, or playlist reference), streaming one row per node reached. See [graph discovery](/guides/graph-discovery/).
+`ytb discover <seed>... [--flags]` (alias `walk`). Walk the graph of linked objects breadth-first from one or more seeds (a video, channel, or playlist reference), streaming one row per node reached. See [graph discovery](/guides/graph-discovery/).
+
+`discover` streams records, one per node it reached. `graph`, below, streams claims, and the two answer different questions: what is out there, and who said so.
 
 | Flag | Meaning |
 | --- | --- |
@@ -235,21 +268,143 @@ This is the only surface outside the player that says whether a video is a short
 
 The comment edges (`comments`, `commenter`) are served only when YouTube is not applying its per-IP Restricted Mode to this network; when it is, they are noted on stderr and skipped and the rest of the walk continues. `-n/--limit` is the total node budget (default `500`).
 
+## id
+
+`ytb id <ref>`. Classify any id, handle or URL, say what it names, and derive whatever follows from it without a request. No flags beyond the globals.
+
+Four of YouTube's id shapes decode locally and the command says which one it got, whether reaching it needs a request, and why.
+
+```
+$ ytb id UUuAXFkgsw1L7xaCfnd5JJOw -o json
+{
+  "id": "UUuAXFkgsw1L7xaCfnd5JJOw",
+  "kind": "uploads_playlist",
+  "url": "https://www.youtube.com/playlist?list=UUuAXFkgsw1L7xaCfnd5JJOw",
+  "channel_id": "UCuAXFkgsw1L7xaCfnd5JJOw",
+  "needs_request": false
+}
+```
+
+A channel id is five playlists: swap the `UC` prefix for `UU`, `UULF`, `UUSH`, `UULV` or `UULP` and you have every upload, the long-form videos, the shorts, the past streams and the popular list, none of which costs a request to construct.
+The reverse works too, which is why a `UU` id found in a payload names a channel nobody fetched.
+
+A handle reports `needs_request: true` and says why: a handle is an alias a channel can change, so it is a property of a channel and never the key.
+A video id reports `needs_request: false` and stops, because eleven characters of base64url decode to nothing else and a tool that guessed the channel from them would be making it up.
+
+## edges
+
+`ytb edges <ref>... [--flags]`. Read anything YouTube has an id for and print what that read claims. See [claims and RDF](/guides/claims/).
+
+A claim is an edge with its provenance attached: which URL asserted it, which surface answered, which client ytb said it was, and at which tier.
+The source is part of the claim's identity, so two surfaces asserting the same edge stay two rows and a disagreement between them is something you can query rather than something the last read overwrote.
+
+One request per reference. Each flag below is another read and says what it costs.
+A handle costs one more, to resolve it, because a handle is not an identity and can never be a node.
+
+| Flag | Meaning |
+| --- | --- |
+| `--captions` | Read the ANDROID player for the caption list (1 request) |
+| `--comments` | Read up to n comments (1 request per page of about 20) |
+| `--items` | Read up to n playlist items (1 request per page) |
+| `--featured` | Read a channel's home tab for its featured channels (1 request) |
+| `--posts` | Read up to n community posts (the tab refuses tier 0 today) |
+| `--music` | Read the same id through YouTube Music (1 request) |
+
+## predicates
+
+`ytb predicates`. The twenty one predicates the graph plane may write, with the domain and range of each, the RDF term it maps to, and where on the site it comes from. This command makes no request. No flags beyond the globals.
+
+The table is closed. A predicate not in it cannot be written, which is what stops a typo becoming a claim that looks fine, is never queried because nobody knows to ask for it, and is found a year later by somebody counting.
+
+Where the arrow turns round on the way to RDF the `rdf` column says `(inverse)`: ytb writes `channel published video` because that is the direction a page reads in, and `schema:author` runs from the work to its author.
+
+## rdf
+
+`ytb rdf <ref>... [--flags]`. The same claims as n-triples, turtle or json-ld, with provenance. See [claims and RDF](/guides/claims/).
+
+The vocabulary was not invented here.
+YouTube publishes schema.org about its own pages, so a watch page is a `schema:VideoObject`, its author a `schema:Person` and both counts `schema:InteractionCounter` blocks, and the mapping is read off the site.
+Where the site says nothing, the terms are the ones x-cli and facebook-cli already export into, so a store from all three tools joins, and a predicate with no schema.org equivalent goes in the `yt:` namespace declared in the output rather than assumed.
+
+Output is byte stable between two runs over the same input in all three formats, because a dump that reorders itself cannot be diffed and a diff is how somebody notices that YouTube started saying something different.
+
+| Flag | Meaning |
+| --- | --- |
+| `--format` | `nt` (default, streams), `turtle`, `jsonld` |
+| `--check` | Compare our triples with the page's own microdata, predicate by predicate |
+| `--types-only` | Write nothing but the `rdf:type` of each node |
+| `--no-provenance` | Drop the source and client annotations |
+
+`ytb rdf` takes the same six extra-read flags as `ytb edges`.
+
+## graph
+
+`ytb graph <seed>... [--flags]`. Collect claims from the seeds, then from the nodes those claims named, and so on, and print how many claims of each predicate came back.
+
+`--depth 0` is the seeds and nothing else, which is exactly what `ytb edges` does.
+
+The budget is in requests and it is counted, not estimated.
+Every request that goes out passes a hook the walk counts on, and the walk stops when the count reaches the budget, mid-level if that is where it lands.
+A cache hit never reaches the hook, so it is not a request and does not count, which is why a second walk over the same seeds gets further on the same budget.
+
+The frontier is every node the claims so far have named and nothing has read.
+Only nodes ytb can read are followed, so an external URL and a hashtag are named and never fetched.
+
+| Flag | Meaning |
+| --- | --- |
+| `--depth` | Hops to follow from each seed (default 1; 0 = the seeds only) |
+| `--budget` | How many requests the walk may spend (default 25) |
+| `--edges` | Print the claims themselves rather than the per-predicate counts |
+
+`ytb graph` takes the same six extra-read flags as `ytb edges`.
+
 ## suggest
 
 `ytb suggest <query> [--flags]`. Search autocomplete suggestions. No notable flags beyond the globals.
 
 ## transcript
 
-`ytb transcript <video-id|url> [--flags]`. Lists tracks (`--list`) or fetches the chosen track's text. When the raw caption endpoint is gated and yt-dlp is on PATH, the transcript is recovered through it automatically.
+`ytb transcript <video-id|url> [--flags]`. Fetches one caption track and writes it out. Use `ytb captions` to see what a video has.
 
 | Flag | Meaning |
 | --- | --- |
-| `--list` | List available caption tracks |
-| `--lang` | Preferred caption language |
-| `--timestamps` | Emit timed segments instead of joined text |
-| `--format` | Render as subtitles: `srt`, `vtt`, `txt` |
-| `--out` | Write the transcript/subtitles to this file |
+| `--format` | `text` (default), `srt`, `vtt`, `json` |
+| `--lang` | Caption language code |
+| `--auto` | Take the auto-generated track |
+| `--translate` | Ask YouTube to machine-translate the chosen track into this language code |
+| `--out` | Write to this file instead of stdout |
+
+All four serializations come off one parse, so the timings in the `srt` and the `json` are the same timings.
+
+`--lang en` matches `en-GB` when there is no plain `en`.
+With no `--lang` the human track wins over the auto-generated one, because a person's punctuation is worth more than a machine's word list.
+`--auto` asks for the auto track even when a human one exists, and it is the only one that carries per-word timings, which `json` keeps.
+
+No yt-dlp, no Deno and no JavaScript interpreter is involved: the track is fetched and parsed in-process. When the caption endpoint refuses and a yt-dlp binary is on PATH, it is used as a fallback and says so.
+
+## captions
+
+`ytb captions <video-id|url>`. The caption tracks a video has, one record each: language code, `vss_id`, name, whether it was machine generated and whether it can be auto-translated. No flags beyond the globals.
+
+The tracks come off the ANDROID player. The watch page lists the same tracks with URLs that answer HTTP 200 and an empty body, so they are not listed here.
+
+`vss_id` is the track's own name for itself, and it is the column that matters: `.en` is the human English track and `a.en` is the machine one, which is what tells two tracks with the same language code apart.
+
+```
+$ ytb captions dQw4w9WgXcQ
+╭───────────────┬─────────┬──────────────────────────┬───────┬──────────────╮
+│ LANGUAGE_CODE │ VSS_ID  │ NAME                     │ AUTO  │ TRANSLATABLE │
+├───────────────┼─────────┼──────────────────────────┼───────┼──────────────┤
+│ en            │ .en     │ English                  │ false │ true         │
+│ en            │ a.en    │ English (auto-generated) │ true  │ true         │
+│ de-DE         │ .de-DE  │ German (Germany)         │ false │ true         │
+│ ja            │ .ja     │ Japanese                 │ false │ true         │
+│ pt-BR         │ .pt-BR  │ Portuguese (Brazil)      │ false │ true         │
+│ es-419        │ .es-419 │ Spanish (Latin America)  │ false │ true         │
+╰───────────────┴─────────┴──────────────────────────┴───────┴──────────────╯
+```
+
+`ytb transcript` fetches one of these tracks; this command is the one that says which tracks exist.
 
 ## formats
 
@@ -297,19 +452,28 @@ Every row is classified by the type on its own endpoint and never by the word th
 
 `ytb download <id|url>... [--flags]`. Downloads media with the built-in pure-Go engine.
 
-The native engine fetches streams through the ANDROID_VR client (no API key, no token), deciphers the signature and the throttling `n` parameter with an embedded JavaScript interpreter, and downloads in parallel byte ranges. The `ytb` binary itself stays pure-Go and CGO-free; merging separate video+audio tracks, audio conversion, and thumbnail embedding shell out to ffmpeg when it is on PATH (or `--ffmpeg-bin` / `YTB_FFMPEG_BIN`). Without ffmpeg the engine still downloads any single progressive or adaptive stream, and commands that need merging exit with code 6. Pass `--use-yt-dlp` to delegate to a yt-dlp binary instead.
+The native engine fetches streams through the ANDROID_VR client (no API key, no token), which answers with plain signed URLs, so there is nothing to decipher and no JavaScript to run.
+
+Every request goes out as a byte range, in 1 MiB chunks by default. That is not a tuning choice: an un-ranged GET to googlevideo is throttled to about 32 KiB/s and never finishes, while the same URL fetched in ranges runs at line speed. Because `contentLength` is known before the first byte, the progress total is real and `--continue` resumes from the size of the part file.
+
+`--audio` and `--video` each write one stream and need nothing else installed. `--mux` fetches both and merges them, which needs ffmpeg, as do `--audio-format` and `--embed-thumbnail`. When a requested operation needs ffmpeg and none is found on PATH (or at `--ffmpeg-bin` / `YTB_FFMPEG_BIN`), the command exits with code 6. Pass `--use-yt-dlp` to delegate to a yt-dlp binary instead.
 
 The `--format` selector accepts a yt-dlp-style grammar: keywords (`best`, `worst`, `bestvideo`/`bv`, `bestaudio`/`ba`, `bv*`), explicit itags (`22`), a single `+` to merge a video and audio track (`bv*+ba`, `137+140`), `/` fallback groups (`bv*+ba/b`), and `[key OP value]` filters on `height`, `width`, `fps`, `ext`, `vcodec`, `acodec`, `itag`, and bitrate (`bv*[height<=720]+ba`).
 
 | Flag | Meaning |
 | --- | --- |
-| `-x, --audio` | Download audio only |
+| `-x, --audio` | Download the audio stream only, no ffmpeg needed |
+| `--video` | Download the video stream only, no ffmpeg needed |
+| `--mux` | Download video and audio and merge them, needs ffmpeg |
 | `--audio-format` | Convert audio to this codec (`mp3`, `m4a`, `opus`, `flac`); needs ffmpeg |
 | `-f, --format` | Format selector (e.g. `best`, `22`, `bv*+ba`, `bv[height<=720]+ba`) |
-| `--quality` | Max video height shorthand (e.g. 1080) |
+| `--itag` | Download this exact itag, as listed by `ytb formats` |
+| `--quality` | Max video height (e.g. `best`, `1080`, `1080p`) |
 | `--out` | Output directory (.) |
-| `--output-template` | yt-dlp-style output filename template (`%(title)s [%(id)s].%(ext)s`) |
+| `--output-template` | yt-dlp-style filename template (default `%(title)s [%(id)s].%(ext)s`) |
+| `--chunk` | Byte range requested per GET (e.g. `512K`, `1M`, `4M`; default `1M`) |
 | `--concurrent-fragments` | Parallel byte-range workers (4) |
+| `--continue` | Resume into an existing part file instead of starting over |
 | `--embed-thumbnail` | Embed the thumbnail as cover art (mp4/m4a); needs ffmpeg |
 | `--playlist-items` | Playlist item selection (e.g. `1,3,5-7,10-`) |
 | `--sub-langs` | Subtitle language to write (e.g. `en`) |

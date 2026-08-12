@@ -34,7 +34,9 @@ The path follows the XDG config convention (Go's `os.UserConfigDir`, then
 | Linux | `~/.config/ytb/config.toml` |
 | macOS | `~/Library/Application Support/ytb/config.toml` |
 
-Point at a different file for one run with the global `--config` flag.
+There is one path and no flag that moves it, so `ytb config path` always names
+the file that is actually being read. `--data-dir` moves the store and the
+cache, not the config.
 
 ## The file format
 
@@ -106,6 +108,41 @@ These apply to every command. Defaults are in parentheses.
 | `-o, --output` (`auto`) | Output format |
 | `-n, --limit` (`0`) | Max rows emitted, `0` is unlimited |
 | `--max-pages` (`0`) | Max continuation pages fetched, `0` is unlimited |
+| `--cache-ttl` (`15m`) | How long a cached response is served before it is refetched |
+| `--no-cache` | Bypass the on-disk caches for this run |
+| `-v, --verbose` | Print every request that went out, repeatable |
+
+`--help` prints `0s` for `--rate` and `-1` for `--retries`, which are the
+flag's own zero values rather than the effective defaults. Zero there means
+"you did not ask", and ytb then uses `1.5s` and `3`. Pass `--rate 0.1s` if you
+actually want it fast.
+
+## Seeing what went out
+
+`-v` prints one line per request to stderr, so records on stdout still pipe
+cleanly:
+
+```sh
+ytb video dQw4w9WgXcQ -v --no-cache -o json | jq -r '.[0].title'
+```
+
+```
+GET  200  297ms https://www.youtube.com/watch?v=dQw4w9WgXcQ
+```
+
+One line, because a whole video record costs one request.
+
+A cache hit never appears, because the trace sits in the HTTP transport and a
+cache hit never gets that far. That makes the line count an honest answer to
+"how many requests did this actually cost", which is the same rule the crawl
+budget counts by. It also means a second run of the command above traces
+nothing at all, which is why the example passes `--no-cache`.
+
+`-vv` adds the full query string and the headers that decide what a request
+means: the `Range` on a media fetch, the InnerTube client name on a player POST.
+That is the level to use when you want to replay a request with curl. `Cookie`
+and `Authorization` are never printed at either level, so a trace is safe to
+paste into a bug report even with a session attached.
 
 ## Precedence
 
