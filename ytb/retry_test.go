@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 
 	"github.com/tamnd/any-cli/kit/errs"
@@ -52,5 +53,29 @@ func TestTheFailureThatSurvivesTheRetriesIsClassified(t *testing.T) {
 				t.Errorf("exit %d for %q, want %d", got, err, tc.want)
 			}
 		})
+	}
+}
+
+// The client builds its own http.Transport for the connection limits, and a
+// hand-built one starts with no Proxy at all where http.DefaultTransport reads
+// the environment. Dropping it means HTTP_PROXY, HTTPS_PROXY and NO_PROXY are
+// ignored, so on a machine that reaches the internet only through a proxy every
+// request fails to connect and nothing in the error says the proxy was never
+// tried.
+func TestTheTransportReadsTheProxyEnvironment(t *testing.T) {
+	tr, ok := NewClient(DefaultConfig()).HTTP().Transport.(*http.Transport)
+	if !ok {
+		t.Fatalf("transport is %T, want *http.Transport", NewClient(DefaultConfig()).HTTP().Transport)
+	}
+	if tr.Proxy == nil {
+		t.Fatal("the transport has no Proxy, so HTTPS_PROXY is ignored")
+	}
+	// It has to be the standard library's reader and not some other function.
+	// Setting HTTPS_PROXY here and calling tr.Proxy would be the better test and
+	// cannot work: net/http reads the proxy environment once per process behind a
+	// sync.Once, so by the time this runs in the full suite the variables have
+	// already been read and a t.Setenv after that changes nothing.
+	if got, want := reflect.ValueOf(tr.Proxy).Pointer(), reflect.ValueOf(http.ProxyFromEnvironment).Pointer(); got != want {
+		t.Error("the transport's Proxy is not http.ProxyFromEnvironment, so the proxy environment is not what decides")
 	}
 }

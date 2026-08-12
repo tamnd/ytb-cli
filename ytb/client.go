@@ -222,6 +222,12 @@ func NewClient(cfg Config) *Client {
 			Timeout: cfg.Timeout,
 			Jar:     jar,
 			Transport: &http.Transport{
+				// http.DefaultTransport sets this and a hand-built one does not, so
+				// building our own quietly dropped HTTP_PROXY, HTTPS_PROXY and
+				// NO_PROXY. On a machine that reaches the internet only through a
+				// proxy that is every request failing to connect, with nothing in the
+				// error to say the proxy was never tried.
+				Proxy:               http.ProxyFromEnvironment,
 				MaxIdleConns:        10,
 				MaxConnsPerHost:     cfg.Workers + 2,
 				IdleConnTimeout:     90 * time.Second,
