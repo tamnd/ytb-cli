@@ -34,6 +34,7 @@ func escapeHatches() []kit.Command {
 		newQueryCmd(),
 		newExportCmd(),
 		newConfigCmd(),
+		newAuthCmd(),
 		newVersionCmd(),
 	}
 }

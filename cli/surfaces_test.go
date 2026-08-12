@@ -32,6 +32,7 @@ var notServed = map[string]string{
 	"query":    "runs SQL over the local store",
 	"export":   "renders the local store as Markdown into a directory",
 	"config":   "shows and writes this machine's config file",
+	"auth":     "stores and removes this machine's cookies; a route that took them as a query parameter would be a way to write them into a log",
 	"version":  "prints the binary's own version, which the server already states",
 }
 
