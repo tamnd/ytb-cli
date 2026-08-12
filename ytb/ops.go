@@ -559,8 +559,13 @@ func (c *Client) WalkClaims(ctx context.Context, seeds []string, opt ClaimOption
 			if read[ref] {
 				continue
 			}
+			// The count is reported with the budget because the two rarely match.
+			// The check is here, before a reference, and a reference is read whole:
+			// a channel costs three requests, so a walk with one left can finish
+			// three past its budget. Printing only the budget would leave the
+			// summary line below saying a different number for no visible reason.
 			if w.Budget > 0 && spent.Load() >= int64(w.Budget) {
-				note(fmt.Sprintf("budget of %d requests reached at hop %d", w.Budget, hop))
+				note(fmt.Sprintf("budget of %d requests reached at hop %d, %d spent", w.Budget, hop, spent.Load()))
 				stopped = true
 				break
 			}

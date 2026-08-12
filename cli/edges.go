@@ -89,6 +89,11 @@ reaches the budget, mid-level if that is where it lands. A cache hit never
 reaches the hook, so it is not a request and does not count, which is why a
 second walk over the same seeds gets further on the same budget.
 
+The count is checked between references and a reference is read whole, so a walk
+can finish over its budget. A channel costs three requests, so a walk with one
+left can end three past. The note says what was spent alongside what was asked
+for, rather than leaving the two to disagree quietly.
+
 The frontier is every node the claims so far have named and nothing has read.
 Most of it is videos: one watch page names twenty related ones. Only nodes ytb
 can read are followed, so an external URL and a hashtag are named and never
