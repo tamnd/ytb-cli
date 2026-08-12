@@ -49,7 +49,7 @@ ffmpeg is optional too, and only for merging a separate video track with its aud
 | `ytb about <handle\|url>` | a channel's about panel: links, country, join date |
 | `ytb uploads <handle\|url>` | a channel's uploads; `--kind`, `--via`, `--exact` |
 | `ytb feed <handle\|url>` | the newest fifteen, with exact timestamps |
-| `ytb playlists <handle\|url>` | a channel's playlists |
+| `ytb playlists <handle\|url>` | a channel's playlists; `--kind playlists\|releases\|podcasts\|courses` |
 | `ytb playlist <id\|url>` | a playlist's header |
 | `ytb items <id\|url>` | a playlist's videos |
 | `ytb search <query>` | search with type, duration, features, and sort filters |

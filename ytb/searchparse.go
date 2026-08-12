@@ -98,8 +98,8 @@ func searchItems(item map[string]any) []any {
 		}
 	case mapValue(item, "lockupViewModel") != nil:
 		r := mapValue(item, "lockupViewModel")
-		switch stringValue(r["contentType"]) {
-		case "LOCKUP_CONTENT_TYPE_PLAYLIST", "LOCKUP_CONTENT_TYPE_PODCAST", "LOCKUP_CONTENT_TYPE_ALBUM":
+		switch {
+		case isPlaylistLockup(stringValue(r["contentType"])):
 			if p := parseLockupPlaylist(r); p.PlaylistID != "" {
 				out = append(out, p)
 			}
@@ -183,25 +183,6 @@ func parseOfficialCard(card map[string]any) Channel {
 	c.setVia("channel", "s2 officialCardViewModel, the card a search draws above its results")
 	c.miss("a search result card: no keywords, no links, no tab strip, no join date and no lifetime view count")
 	return c
-}
-
-// parsePlaylistRenderer reads the legacy playlist row, which a search still
-// serves to an older client context.
-func parsePlaylistRenderer(r map[string]any) Playlist {
-	p := newPlaylist(stringValue(r["playlistId"]), SurfaceInnerTube)
-	p.Title = extractText(r["title"])
-	p.ChannelTitle = extractText(r["longBylineText"])
-	p.ChannelID = ownerChannelID(r)
-	if txt := extractText(r["videoCountText"]); txt != "" {
-		p.VideoCountText = txt
-		p.VideoCount = parseCountText(txt)
-	}
-	if u := joinURL(endpointURL(r["navigationEndpoint"])); u != "" {
-		p.URL = u
-	}
-	p.Thumbnails = ParseThumbnails(mapValue(r, "thumbnail")["thumbnails"])
-	p.miss("a listing row: no description, and the item list is a separate read")
-	return p
 }
 
 // listOfMaps is the [] any to []map[string]any conversion this file does on

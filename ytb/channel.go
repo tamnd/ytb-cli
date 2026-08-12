@@ -3,6 +3,7 @@ package ytb
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/tamnd/any-cli/kit/errs"
@@ -384,22 +385,48 @@ func (c *Client) StreamChannelTab(ctx context.Context, idOrURL, tab string, opt 
 	return nil
 }
 
+// PlaylistTabs are the channel tabs that serve a grid of playlists.
+//
+// They are one read with one parser and four names. releases is albums and
+// singles, podcasts is shows, courses is course playlists, and all three used to
+// be unreachable: the channel record listed them in its tab strip and no command
+// could open one.
+var PlaylistTabs = []string{"playlists", "releases", "podcasts", "courses"}
+
 // StreamChannelPlaylists streams playlists from a channel's playlists tab.
 // The emit function receives each Playlist; returning ErrStop halts iteration cleanly.
 func (c *Client) StreamChannelPlaylists(ctx context.Context, idOrURL string, opt PageOptions, emit func(Playlist) error) error {
+	return c.StreamChannelPlaylistTab(ctx, idOrURL, "playlists", opt, emit)
+}
+
+// StreamChannelPlaylistTab streams one of the four playlist-grid tabs.
+//
+// Every one of them is a page of playlist rows under a different name, so the
+// tab is a parameter rather than four copies of this function. A channel that
+// does not have the tab exits 3 naming the tabs it does have, which is
+// AssertTab's job and matters more here than elsewhere: only two channels in ten
+// have courses, and YouTube answers a missing tab with the home page and a 200.
+func (c *Client) StreamChannelPlaylistTab(ctx context.Context, idOrURL, tab string, opt PageOptions, emit func(Playlist) error) error {
 	emit = stampEmit(c, emit)
+	tab = strings.ToLower(strings.TrimSpace(tab))
+	if tab == "" {
+		tab = "playlists"
+	}
+	if !slices.Contains(PlaylistTabs, tab) {
+		return errs.Usage("%q is not a playlist tab: pick one of %s", tab, strings.Join(PlaylistTabs, ", "))
+	}
 	channelBase := NormalizeChannelURL(idOrURL)
-	playlistsURL := strings.Replace(channelBase, "/videos", "/playlists", 1)
+	playlistsURL := strings.Replace(channelBase, "/videos", "/"+tab, 1)
 
 	data, code, err := c.FetchPageData(ctx, playlistsURL)
 	if err != nil {
-		return fmt.Errorf("fetch channel playlists %q: %w", idOrURL, err)
+		return fmt.Errorf("fetch channel %s %q: %w", tab, idOrURL, err)
 	}
 	if code == 404 || data == nil {
-		return errs.NotFound("channel playlists not found: %s", idOrURL)
+		return errs.NotFound("channel %s not found: %s", tab, idOrURL)
 	}
 	if initial, ok := data.InitialData.(map[string]any); ok {
-		if err := AssertTab(initial, "playlists"); err != nil {
+		if err := AssertTab(initial, tab); err != nil {
 			return err
 		}
 	}
@@ -430,13 +457,18 @@ func (c *Client) StreamChannelPlaylists(ctx context.Context, idOrURL string, opt
 	total := 0
 	pages := 0
 
-	emit1 := func(p Playlist) error {
+	// The rows off the page came from the page and the rows after them came from a
+	// browse call, and a reader who wants to check one has to be told which. Every
+	// row used to say nothing at all, so a courses row and a playlists row for the
+	// same channel were indistinguishable once they left the tool.
+	emit1 := func(p Playlist, source string) error {
 		if p.ChannelID == "" {
 			p.ChannelID = chID
 		}
 		if p.ChannelTitle == "" {
 			p.ChannelTitle = chTitle
 		}
+		p.addSource(source)
 		if err := emit(p); err != nil {
 			return err
 		}
@@ -451,7 +483,7 @@ func (c *Client) StreamChannelPlaylists(ctx context.Context, idOrURL string, opt
 		if ctx.Err() != nil {
 			return ctx.Err()
 		}
-		if err := emit1(p); err != nil {
+		if err := emit1(p, playlistsURL); err != nil {
 			if err == ErrStop {
 				return nil
 			}
@@ -472,14 +504,14 @@ func (c *Client) StreamChannelPlaylists(ctx context.Context, idOrURL string, opt
 		}
 		resp, err := it.BrowseContinuation(ctx, contToken)
 		if err != nil {
-			return fmt.Errorf("channel playlists continuation: %w", err)
+			return fmt.Errorf("channel %s continuation: %w", tab, err)
 		}
 		pagePlaylists, nextToken := ParseContinuationPlaylists(resp)
 		for _, p := range pagePlaylists {
 			if opt.Max > 0 && total >= opt.Max {
 				return nil
 			}
-			if err := emit1(p); err != nil {
+			if err := emit1(p, ClientWEB().Endpoint("browse")); err != nil {
 				if err == ErrStop {
 					return nil
 				}
