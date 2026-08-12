@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"net/http"
 	"net/http/cookiejar"
+	neturl "net/url"
 	"reflect"
 	"strings"
 	"sync"
@@ -396,7 +397,24 @@ func (c *Client) FetchPageData(ctx context.Context, url string) (*PageData, int,
 	if data.VisitorData == "" && data.YTCFG != nil {
 		data.VisitorData = stringValue(data.YTCFG["VISITOR_DATA"])
 	}
+	// Every YouTube HTML page carries the ytcfg, so a run that has just read one
+	// already holds the key and has no reason to go fetch the embed page for it.
+	// Nothing called SeedYTCfg before this, so ytb download read the watch page
+	// and then fetched /embed anyway: one wasted request, and with the default
+	// pacing a wasted 1.5 seconds on top of it.
+	c.SeedYTCfg(hostOf(url), data)
 	return data, code, nil
+}
+
+// hostOf is the ytcfg cache key for a page: the host it was served from. A URL
+// that will not parse gets "", which SeedYTCfg and ytcfgFor both treat as a host
+// they know nothing about, so a bad URL seeds nothing rather than poisoning www.
+func hostOf(raw string) string {
+	u, err := neturl.Parse(raw)
+	if err != nil {
+		return ""
+	}
+	return u.Host
 }
 
 // FetchTimedText fetches a caption track's timed-text XML and returns its raw bytes.
