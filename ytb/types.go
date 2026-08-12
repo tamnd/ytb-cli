@@ -634,8 +634,23 @@ type SearchResult struct {
 
 // Suggestion is one search-autocomplete suggestion, wrapped so the suggest
 // operation emits a record the renderer and a host can both address.
+//
+// It carries the envelope for the same reason every other record does. It was
+// the one record that did not, on the grounds that a bare string has nothing to
+// qualify, and that was wrong twice over: a reader had no way to tell that s9
+// answered rather than s2, and a suggestion is not a fact about YouTube but a
+// guess conditioned on the locale the read used, which is exactly the kind of
+// thing the envelope exists to record.
 type Suggestion struct {
 	Text string `json:"suggestion" kit:"id" table:"suggestion"`
+	Envelope
+}
+
+// NewSuggestion wraps one autocomplete string with the surface it came from.
+func NewSuggestion(text, source string) Suggestion {
+	s := Suggestion{Text: text, Envelope: newEnvelope("suggestion", SurfaceSuggest)}
+	s.addSource(source)
+	return s
 }
 
 // QueueItem is one pending crawl-queue entry.

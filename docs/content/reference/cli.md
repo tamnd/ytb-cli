@@ -476,6 +476,10 @@ Only nodes ytb can read are followed, so an external URL and a hashtag are named
 Search autocomplete suggestions.
 No notable flags beyond the globals.
 
+This reads s9, the JSONP autocomplete endpoint, which is not InnerTube: no key, no POST and no client context.
+So a suggestion record carries an empty `client` list where every other record names at least one.
+The suggestions are conditioned on the locale in the request, and the request is in `sources`, so two runs that disagree can be told apart by their `--hl` and `--gl`.
+
 ## transcript
 
 `ytb transcript <video-id|url> [--flags]`.

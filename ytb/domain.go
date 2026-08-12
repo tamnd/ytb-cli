@@ -547,7 +547,7 @@ func suggest(ctx context.Context, in suggestRef, emit func(Suggestion) error) er
 		return ExitError(err)
 	}
 	for _, s := range suggestions {
-		if err := emit(Suggestion{Text: s}); err != nil {
+		if err := emit(s); err != nil {
 			return err
 		}
 	}

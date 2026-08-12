@@ -227,8 +227,19 @@ func (c *Client) Trending(ctx context.Context, category string, opt PageOptions,
 	return nil
 }
 
-// Suggest returns autocomplete suggestions for query from YouTube's suggestion endpoint.
-func (c *Client) Suggest(ctx context.Context, query string) ([]string, error) {
+// Suggest returns autocomplete suggestions for query from YouTube's suggestion
+// endpoint, each one stamped with the request that produced it.
+func (c *Client) Suggest(ctx context.Context, query string) ([]Suggestion, error) {
 	it := NewInnerTube(c)
-	return it.Suggest(ctx, query)
+	texts, err := it.Suggest(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	source := it.SuggestURL(query)
+	out := make([]Suggestion, 0, len(texts))
+	for _, t := range texts {
+		out = append(out, NewSuggestion(t, source))
+	}
+	stampAll(c, out)
+	return out, nil
 }

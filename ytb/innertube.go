@@ -297,11 +297,18 @@ func (it *InnerTubeClient) MusicNext(ctx context.Context, body map[string]any, s
 	return it.c.Call(ctx, ClientWEBREMIX(), "next", body, subject)
 }
 
+// SuggestURL is the request the autocomplete read makes. It is built apart from
+// the read so a suggestion record can name the URL it came from without the
+// caller reassembling it from the config and getting one parameter wrong.
+func (it *InnerTubeClient) SuggestURL(input string) string {
+	return "https://suggestqueries-clients6.youtube.com/complete/search?client=youtube&ds=yt&hl=" +
+		it.hl + "&gl=" + it.gl + "&q=" + strings.ReplaceAll(input, " ", "+")
+}
+
 // Suggest fetches autocomplete suggestions from the public suggestqueries
 // endpoint. This is JSONP, not InnerTube: no key, no POST, no context.
 func (it *InnerTubeClient) Suggest(ctx context.Context, input string) ([]string, error) {
-	url := "https://suggestqueries-clients6.youtube.com/complete/search?client=youtube&ds=yt&hl=" +
-		it.hl + "&gl=" + it.gl + "&q=" + strings.ReplaceAll(input, " ", "+")
+	url := it.SuggestURL(input)
 	it.c.noteRequest(http.MethodGet, url)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
