@@ -38,6 +38,7 @@ var unstamped = map[string]string{
 	"StreamPlaylistItems":      "delegates to streamPlaylist, which stamps",
 	"StreamPlaylistWithHeader": "delegates to streamPlaylist, which stamps",
 	"StreamHashtag":            "delegates to StreamHashtagWithHeader, which stamps",
+	"StreamChannelPlaylists":   "delegates to StreamChannelPlaylistTab, which stamps",
 }
 
 func TestEveryReadStampsItsTier(t *testing.T) {

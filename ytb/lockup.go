@@ -254,6 +254,23 @@ func lockupChannelID(r map[string]any) string {
 	return found
 }
 
+// isPlaylistLockup reports whether a lockup content type is a playlist under
+// some other name.
+//
+// A podcast is a playlist of episodes and an album is a playlist of tracks, and
+// the only thing that differs is the word YouTube prints on the row. The search
+// reader knew that and listed all three, and then handed them to a parser that
+// checked for PLAYLIST alone and dropped the other two on the floor, so
+// searching for a podcast returned nothing and the podcasts tab came back empty.
+// One list, read by everyone who asks the question.
+func isPlaylistLockup(contentType string) bool {
+	switch contentType {
+	case "LOCKUP_CONTENT_TYPE_PLAYLIST", "LOCKUP_CONTENT_TYPE_PODCAST", "LOCKUP_CONTENT_TYPE_ALBUM":
+		return true
+	}
+	return false
+}
+
 // parseLockupPlaylist reads a lockup that holds a playlist.
 //
 // A playlist lockup's fragments are its own set: the word "Playlist", a video
@@ -262,7 +279,7 @@ func lockupChannelID(r map[string]any) string {
 // on one playlist and "by Music" on another, and the command run covers the whole
 // string including the "by ", so the prefix is trimmed by text and not by offset.
 func parseLockupPlaylist(r map[string]any) Playlist {
-	if stringValue(r["contentType"]) != "LOCKUP_CONTENT_TYPE_PLAYLIST" {
+	if !isPlaylistLockup(stringValue(r["contentType"])) {
 		return Playlist{}
 	}
 	id := stringValue(r["contentId"])

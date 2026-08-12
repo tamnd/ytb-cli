@@ -568,13 +568,13 @@ func ParseSearchPage(data *PageData, query string) ([]SearchResult, []Video, []C
 		// Newer search results render playlists (and some videos) as
 		// lockupViewModel rather than the legacy *Renderer shapes.
 		if r, ok := m["lockupViewModel"].(map[string]any); ok {
-			switch stringValue(r["contentType"]) {
-			case "LOCKUP_CONTENT_TYPE_PLAYLIST":
+			switch ct := stringValue(r["contentType"]); {
+			case isPlaylistLockup(ct):
 				if p := parseLockupPlaylist(r); p.PlaylistID != "" {
 					playlists = append(playlists, p)
 					results = append(results, SearchResult{EntityType: EntityPlaylist, ID: p.PlaylistID, Title: p.Title, URL: p.URL})
 				}
-			case "LOCKUP_CONTENT_TYPE_VIDEO":
+			case ct == "LOCKUP_CONTENT_TYPE_VIDEO":
 				if v := parseLockupViewModel(r); v.VideoID != "" {
 					videos = append(videos, v)
 					results = append(results, SearchResult{EntityType: EntityVideo, ID: v.VideoID, Title: v.Title, URL: v.URL})
@@ -1214,8 +1214,119 @@ func parsePlaylistsFromTree(root any) []Playlist {
 				out = append(out, p)
 			}
 		}
+		if r, ok := m["playlistRenderer"].(map[string]any); ok {
+			if p := parsePlaylistRenderer(r); p.PlaylistID != "" {
+				out = append(out, p)
+			}
+		}
 	})
 	return out
+}
+
+// parsePlaylistRenderer reads the third shape a playlist row arrives as.
+//
+// The site serves lockupViewModel on the playlists and podcasts tabs,
+// gridPlaylistRenderer in a shelf, and this one on the releases and courses
+// tabs, which is why those two came back empty from a page with rows on it. A
+// search served this shape too until the lockup rewrite reached it, and there is
+// no telling which client context still gets the old one, so both callers read
+// it here rather than keeping a copy each.
+//
+// videoCount is preferred over videoCountText because it is the same field in
+// every language. Fetched from an address YouTube reads as Vietnamese, the text
+// is "10 video" and the count is "10", and parsing the text for a number that is
+// sitting in its own field is asking for a translation to break it.
+func parsePlaylistRenderer(r map[string]any) Playlist {
+	id := stringValue(r["playlistId"])
+	if id == "" {
+		return Playlist{}
+	}
+	p := newPlaylist(id, SurfaceInnerTube)
+	p.Title = extractText(r["title"])
+	p.VideoCountText = extractText(r["videoCountText"])
+	if n := numericString(r["videoCount"]); n > 0 {
+		p.VideoCount = n
+	} else {
+		p.VideoCount = parseCountText(p.VideoCountText)
+	}
+	// The owner is on a releases row and not on a courses row, where the channel
+	// is the page you are already on and the caller fills it in.
+	p.ChannelID = ownerChannelID(r)
+	if p.ChannelID != "" {
+		p.ChannelTitle, p.MetadataParts = splitByline(r["longBylineText"])
+	}
+	p.Thumbnails = playlistRendererThumbnails(r)
+	// navigationEndpoint on this shape is the watch url of the first video, not
+	// the playlist. Taking it would give every row a url that plays something
+	// instead of a url that is the row, so newPlaylist's canonical one stands.
+	p.miss("a listing row: no description, and the item list is a separate read")
+	return p
+}
+
+// splitByline separates the owner from whatever else is rendered on the same
+// line, and returns the owner and the rest.
+//
+// A releases row bylines "Rick Astley · Jul 6, 2026", so flattening the runs put
+// the release date inside channel_title and every album on the tab came back
+// owned by a channel with a date in its name. The run that carries the link is
+// the owner and nothing else is, which is the same rule the lockup reader
+// follows. The rest is kept rather than dropped because the release date is real
+// information this shape states and no field on a playlist holds it.
+func splitByline(v any) (owner string, rest []string) {
+	m, ok := v.(map[string]any)
+	if !ok {
+		return extractText(v), nil
+	}
+	runs := arrayValue(m["runs"])
+	if len(runs) == 0 {
+		return extractText(v), nil
+	}
+	for _, item := range runs {
+		run, ok := item.(map[string]any)
+		if !ok {
+			continue
+		}
+		text := cleanWhitespace(stringValue(run["text"]))
+		switch {
+		case text == "" || text == "·":
+		case run["navigationEndpoint"] != nil && owner == "":
+			owner = text
+		default:
+			rest = append(rest, text)
+		}
+	}
+	if owner == "" {
+		return extractText(v), nil
+	}
+	return owner, rest
+}
+
+// playlistRendererThumbnails picks the row's own art out of the three places
+// this shape puts an image.
+//
+// thumbnailRenderer is the row's cover and the one to want: an album on the
+// releases tab has real art there, under playlistCustomThumbnailRenderer on a
+// release and playlistVideoThumbnailRenderer on a course. The flat thumbnails
+// list is a frame from each of the first few videos, which is a fallback and not
+// a cover. thumbnail is where the legacy search row put it.
+func playlistRendererThumbnails(r map[string]any) []Thumbnail {
+	for _, key := range []string{"playlistCustomThumbnailRenderer", "playlistVideoThumbnailRenderer"} {
+		inner := mapValue(mapValue(r, "thumbnailRenderer"), key)
+		if t := ParseThumbnails(mapValue(inner, "thumbnail")["thumbnails"]); len(t) > 0 {
+			return t
+		}
+	}
+	if t := ParseThumbnails(mapValue(r, "thumbnail")["thumbnails"]); len(t) > 0 {
+		return t
+	}
+	for _, item := range arrayValue(r["thumbnails"]) {
+		if m, ok := item.(map[string]any); ok {
+			if t := ParseThumbnails(m["thumbnails"]); len(t) > 0 {
+				return t
+			}
+		}
+	}
+	return nil
 }
 
 // ParseContinuationPlaylists extracts playlists and next continuation token from a /browse continuation.

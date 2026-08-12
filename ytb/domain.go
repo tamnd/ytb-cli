@@ -87,7 +87,7 @@ func (Domain) Register(app *kit.App) {
 		URIType: "channel",
 		Args:    []kit.Arg{{Name: "ref", Help: "channel id, @handle, or URL"}}}, listFeed)
 	kit.Handle(app, kit.OpMeta{Name: "playlists", Group: "read", List: true,
-		Summary: "List a channel's playlists",
+		Summary: "List a channel's playlists (--kind playlists|releases|podcasts|courses)",
 		URIType: "channel",
 		Args:    []kit.Arg{{Name: "ref", Help: "channel id, @handle, or URL"}}}, listChannelPlaylists)
 	kit.Handle(app, kit.OpMeta{Name: "items", Group: "read", List: true,
@@ -271,6 +271,20 @@ type pagedRef struct {
 	Client   *Client `kit:"inject"`
 }
 
+// playlistsRef is a channel's playlists, and Kind says which of the four tabs
+// they are listed on.
+//
+// They are four names for one thing. releases is albums and singles, podcasts is
+// shows, courses is course playlists, and every one of them is a page of
+// playlist rows read by the same code. The channel record listed all four in its
+// tab strip from the day it shipped and only one of them could be opened.
+type playlistsRef struct {
+	Ref      string  `kit:"arg" help:"channel id, @handle, or URL"`
+	Kind     string  `kit:"flag" help:"which tab: playlists|releases|podcasts|courses" default:"playlists" enum:"playlists,releases,podcasts,courses"`
+	MaxPages int     `kit:"flag,name=max-pages" help:"max continuation pages (0 = unlimited)"`
+	Client   *Client `kit:"inject"`
+}
+
 type commentsRef struct {
 	Ref      string  `kit:"arg" help:"video id or URL"`
 	Replies  bool    `kit:"flag" help:"also fetch replies (parent_id set)"`
@@ -443,8 +457,8 @@ func listFeed(ctx context.Context, in feedRef, emit func(Video) error) error {
 	return nil
 }
 
-func listChannelPlaylists(ctx context.Context, in pagedRef, emit func(Playlist) error) error {
-	return ExitError(in.Client.StreamChannelPlaylists(ctx, in.Ref, pageOpts(in.MaxPages, false), emit))
+func listChannelPlaylists(ctx context.Context, in playlistsRef, emit func(Playlist) error) error {
+	return ExitError(in.Client.StreamChannelPlaylistTab(ctx, in.Ref, in.Kind, pageOpts(in.MaxPages, false), emit))
 }
 
 func listItems(ctx context.Context, in pagedRef, emit func(Video) error) error {
