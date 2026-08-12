@@ -18,7 +18,7 @@ var (
 	Date    = "unknown"
 )
 
-// builder holds the youtube-specific globals and defaults while a kit.App is
+// builder holds the YouTube-specific globals and defaults while a kit.App is
 // assembled. The globals hook binds the flags to it; the finalize hook reads
 // them back onto the resolved Config so the client factory and escape hatches
 // see them.
