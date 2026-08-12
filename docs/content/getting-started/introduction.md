@@ -22,11 +22,11 @@ own JavaScript through a private JSON API called **InnerTube**, at
 `https://www.youtube.com/youtubei/v1/*`. The endpoints map to what you do on the
 site:
 
-- `/player` — a video's playability, streaming formats, and caption list
-- `/next` — the watch page: metadata, related videos, comments entry
-- `/browse` — channels, playlists, trending, community, hashtags
-- `/search` — search results and continuations
-- `/navigation/resolve_url` — turn a handle or vanity URL into an id
+- `/player`: a video's playability, streaming formats, and caption list
+- `/next`: the watch page, with its metadata, related videos and comments entry
+- `/browse`: channels, playlists, trending, community, hashtags
+- `/search`: search results and continuations
+- `/navigation/resolve_url`: turn a handle or vanity URL into an id
 
 These need no API key for public reads. ytb bootstraps a short-lived session
 from a watch page (the visitor data and client version the endpoints expect),

@@ -38,7 +38,7 @@ built on [lipgloss](https://github.com/charmbracelet/lipgloss).
 
 - **`-o table`** is now a rounded-border grid with an accented bold header and a
   dim border, colored on a terminal and plain in a pipe.
-- **`-o markdown`** (alias `md`) — a GitHub pipe table you can paste straight
+- **`-o markdown`** (alias `md`) is a GitHub pipe table you can paste straight
   into a README, issue, or PR. Pipes inside titles are escaped, so the table is
   always valid Markdown.
 - **`-o json` and `-o jsonl`** are syntax-highlighted on a terminal: keys,

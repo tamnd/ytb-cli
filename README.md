@@ -6,20 +6,20 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/tamnd/ytb-cli)](https://goreportcard.com/report/github.com/tamnd/ytb-cli)
 [![License](https://img.shields.io/github/license/tamnd/ytb-cli)](./LICENSE)
 
-A command line for [YouTube](https://www.youtube.com). `ytb` resolves any video,
-channel, playlist, comment thread, transcript, or YouTube Music record into clean
-structured data. One pure-Go binary, no API key, no quota.
+A command line for [YouTube](https://www.youtube.com).
+`ytb` resolves any video, channel, playlist, comment thread, transcript, or YouTube Music record into clean structured data.
+One pure-Go binary, no API key, no quota.
 
 [Install](#install) • [Commands](#commands) • [Usage](#usage) • [The local store](#the-local-store)
 
 ![ytb searching YouTube and reading a video record from the command line](docs/static/demo.gif)
 
-It talks to the same public InnerTube endpoints the YouTube site uses, so there
-is no key to register and no quota to budget. Responses are cached on disk, so a
-repeat call is instant. `ytb crawl` walks the graph into a local SQLite store you
-can query with SQL.
+It talks to the same public InnerTube endpoints the YouTube site uses, so there is no key to register and no quota to budget.
+Responses are cached on disk, so a repeat call is instant.
+`ytb crawl` walks the graph into a local SQLite store you can query with SQL.
 
-`ytb` is an independent tool. It is not affiliated with YouTube or Google.
+`ytb` is an independent tool.
+It is not affiliated with YouTube or Google.
 
 ## Install
 
@@ -27,8 +27,7 @@ can query with SQL.
 go install github.com/tamnd/ytb-cli/cmd/ytb@latest
 ```
 
-Or grab a prebuilt binary, a Linux package (`deb`/`rpm`/`apk`), or a container
-image from the [releases](https://github.com/tamnd/ytb-cli/releases):
+Or grab a prebuilt binary, a Linux package (`deb`/`rpm`/`apk`), or a container image from the [releases](https://github.com/tamnd/ytb-cli/releases):
 
 ```bash
 brew install tamnd/tap/ytb
@@ -37,9 +36,9 @@ docker run --rm ghcr.io/tamnd/ytb:latest search 'lofi hip hop' -n 10
 
 Shell completion is built in: `ytb completion bash|zsh|fish|powershell`.
 
-`ytb download` uses a native pure-Go engine. `yt-dlp` is optional and only needed
-for `extract`, for `download --use-yt-dlp`, and as a transcript fallback when
-YouTube gates the caption endpoints.
+Downloads and transcripts both run in-process, with no yt-dlp, no Deno and no JavaScript interpreter.
+yt-dlp is optional and is only used by `ytb extract`, by `ytb download --use-yt-dlp`, and as a transcript fallback if YouTube gates the caption endpoints.
+ffmpeg is optional too, and only for merging a separate video track with its audio, converting audio, and embedding cover art.
 
 ## Commands
 
@@ -60,9 +59,9 @@ YouTube gates the caption endpoints.
 | `ytb hashtag <tag>` | a hashtag feed |
 | `ytb related <id\|url>` | related videos for a video |
 | `ytb suggest <term>` | search autocomplete terms |
-| `ytb transcript <id\|url>` | caption tracks and transcript text; `--timestamps`, `--lang` |
-| `ytb formats <id\|url>` | streaming format metadata; `--audio`, `--video`, `--muxed` |
+| `ytb transcript <id\|url>` | one caption track as text, srt, vtt or json; `--lang`, `--auto`, `--translate` |
 | `ytb captions <id\|url>` | the caption tracks a video has, and which of them fetch |
+| `ytb formats <id\|url>` | streaming format metadata; `--audio`, `--video`, `--muxed` |
 | `ytb chapters <id\|url>` | a video's chapters, and where each one came from |
 | `ytb thumbnail <id\|url>` | thumbnail renditions, confirmed with a HEAD; `--fetch` |
 | `ytb sponsorblock <id\|url>` | community SponsorBlock segments; `--categories` |
@@ -71,8 +70,8 @@ YouTube gates the caption endpoints.
 | `ytb music album <id\|url>` | a Music album |
 | `ytb music playlist <id\|url>` | a Music playlist |
 | `ytb music track <id\|url>` | a Music track; `--lyrics` |
-| `ytb download <id\|url>` | download media via yt-dlp |
-| `ytb extract <id\|url>` | extract a specific stream via yt-dlp; `--audio`, `--video` |
+| `ytb download <id\|url>...` | download media with the native engine; `-f`, `-x`, `--quality`, `--out` |
+| `ytb extract <audio\|video\|transcript\|all> <id\|url>` | extract one stream through yt-dlp |
 | `ytb crawl <seed>...` | walk the graph from seeds into the store; `--depth`, `--budget`, `--resume` |
 | `ytb archive <id\|url>` | write one read down in full: page, payloads, headers, and what ytb parsed |
 | `ytb edges <id\|url>...` | the claims one read makes: subject, predicate, object, and who said so |
@@ -84,9 +83,9 @@ YouTube gates the caption endpoints.
 | `ytb query <sql>` | run SQL over the store, read-only |
 | `ytb export <handle\|id>` | render the store as interlinked Markdown |
 | `ytb db stats\|search\|path\|vacuum\|reset` | work with the local SQLite store |
+| `ytb cache path\|info\|clear` | where the response cache is, what is in it, and how to empty it |
 | `ytb auth import\|status\|clear` | store your browser's YouTube cookies, or forget them |
-| `ytb config show\|init\|path` | show or reset configuration |
-| `ytb cache path\|info\|clear` | inspect or clear the on-disk cache |
+| `ytb config show\|path\|init\|edit` | show, write or open the config file |
 | `ytb serve` | one HTTP route per read, NDJSON, plus a generated OpenAPI spec |
 | `ytb mcp` | the same reads as MCP tools over stdio |
 | `ytb version` | print version, commit, and build date |
@@ -106,18 +105,19 @@ ytb trending --category music                # what is hot right now
 ytb music search 'rick astley'               # YouTube Music search
 ```
 
-Records come out as a table (the default on a terminal), list, markdown, JSON,
-JSONL, CSV, TSV, url, or raw. The table uses rounded borders and a colored header
-on a true-color terminal; JSON and JSONL are syntax-highlighted too:
+Records come out as a table (the default on a terminal), list, markdown, JSON, JSONL, CSV, TSV, url, or raw.
+The table uses rounded borders and a colored header on a true-color terminal, and JSON and JSONL are syntax-highlighted too:
 
 ```bash
 ytb search 'lofi hip hop' --fields id,title,channel,views -o table
 ytb video dQw4w9WgXcQ -o json
-ytb search 'go' -n 50 -o jsonl | jq 'select(.views > 100000)'
+ytb search 'go' -n 50 -o jsonl | jq 'select(.view_count > 100000)'
 ytb search 'go' -o url
 ytb uploads @MrBeast -o jsonl > mrbeast.jsonl
 ytb items PLFgquLnL59alCl_2TQvOiD5Vgm1hCaGSI -o url | ytb video -
 ```
+
+`--fields` takes the table's column names and JSON keeps the record's own, which is why `views` selects a column and `.view_count` selects a field.
 
 Chain commands through stdin with `-` for batch lookups:
 
@@ -128,25 +128,32 @@ ytb search 'go programming' -o url | ytb video -
 ### Global flags
 
 ```
--o, --output       list|table|markdown|json|jsonl|csv|tsv|url|raw      (auto: table on a TTY, jsonl when piped)
+-o, --output       auto|table|list|markdown|json|jsonl|csv|tsv|url|raw   (auto: table on a TTY, jsonl when piped)
     --fields       comma-separated columns to keep, in order
     --no-header    omit the header row
     --template     Go text/template applied per record
 -n, --limit        max records (0 = unlimited)
     --max-pages    max continuation pages (0 = unlimited)
 -j, --workers      concurrency for detail fetches (default 4)
-    --rate         min delay between requests (default 500ms)
+    --rate         min delay between requests (default 1.5s)
     --timeout      per-request timeout (default 30s)
-    --retries      retry attempts on 429/5xx (default 4)
+    --retries      retry attempts on 429/5xx (default 3)
     --hl           InnerTube interface language (default en)
     --gl           InnerTube content country (default US)
+-v, --verbose      print each request as it goes out; twice for the full URL and headers
 -q, --quiet        suppress progress output
     --color        auto|always|never
     --db           tee every record into a store (e.g. out.db, postgres://...)
-    --data-dir     override the data directory, which is where the store lives
+    --data-dir     override the data directory, which is where the store and the cache live
+    --cache-ttl    how long a cached response is served before it is refetched (default 15m)
     --no-cache     bypass the on-disk cache
-    --dry-run      print the requests that would be made
+    --profile      named profile to load from the config file
+    --dry-run      print what would be done, do nothing
+-y, --yes          assume yes to prompts
 ```
+
+`--rate`, `--timeout` and `--retries` show `0s`, `0s` and `-1` in `--help`, which is how the flag layer says "not set".
+The defaults above are what an unset flag resolves to.
 
 ## Signing in, if you want to
 
@@ -172,13 +179,11 @@ Nothing in this binary writes to YouTube, so a session cannot post, like, subscr
 
 ## The local store
 
-`ytb crawl` walks the graph from a seed and writes what it saw into a SQLite file
-at `<data-dir>/ytb.db`, which `ytb db path` will print. There are three tables.
-`nodes` is everything with an identity, one row per URI, with the record as JSON
-and a null record for a node somebody named that nobody has fetched yet. `claims`
-is the edges, one row per observation, so the same edge seen on the watch page
-and in a browse response is two rows and each says where it came from. `reads` is
-the log: every request, what answered it, and how big it was.
+`ytb crawl` walks the graph from a seed and writes what it saw into a SQLite file at `<data-dir>/ytb.db`, which `ytb db path` will print.
+There are three tables.
+`nodes` is everything with an identity, one row per URI, with the record as JSON and a null record for a node somebody named that nobody has fetched yet.
+`claims` is the edges, one row per observation, so the same edge seen on the watch page and in a browse response is two rows and each says where it came from.
+`reads` is the log: every request, what answered it, and how big it was.
 
 ```bash
 ytb crawl @MrBeast --depth 2 --budget 200     # walk the graph into the store
@@ -188,18 +193,23 @@ ytb db search "lofi"                          # full-text search over stored vid
 ytb export @MrBeast --out site/               # render the store as Markdown
 ```
 
-The unread nodes are the frontier, which is a query rather than a queue, so a
-crawl that stops is just a crawl with rows left to read:
+The unread nodes are the frontier, which is a query rather than a queue, so a crawl that stops is just a crawl with rows left to read:
 
 ```bash
 ytb query "select uri from nodes where record is null and kind='video' limit 20"
 ytb query "select predicate, count(*) c from claims group by 1 order by c desc"
 ```
 
-`ytb query` opens the file read-only, so a statement that would write is refused
-by SQLite itself. To keep the raw bytes as well, `ytb archive <id>` writes one
-read into a directory: the page, every InnerTube payload, the request headers
-with the session ones removed, and the records and claims ytb parsed out of them.
+`ytb query` opens the file read-only, so a statement that would write is refused by SQLite itself.
+To keep the raw bytes as well, `ytb archive <id>` writes one read into a directory: the page, every InnerTube payload, the request headers with the session ones removed, and the records and claims ytb parsed out of them.
+
+The response cache is a different thing and lives beside the store.
+It holds the bytes a request answered with, so a repeat call costs nothing, and an entry older than `--cache-ttl` is not served and is not deleted either:
+
+```bash
+ytb cache info                                # entries, size, and how many are still fresh
+ytb cache clear --dry-run                     # what emptying it would free
+```
 
 ## Serve and MCP
 
@@ -216,21 +226,26 @@ ytb mcp                                                      # the same set on s
 
 Arguments go in the query as well as on the path, which is the form to use, because a path splits on slashes and half of what you pass ytb is a URL.
 Flags keep the names the command gives them: `--max-pages 3` is `&max-pages=3`.
-Nothing that writes is served, so `download`, `crawl`, `export`, `db`, `config` and `auth` stay on the command line where they belong.
+Nothing that writes is served, so `download`, `crawl`, `export`, `db`, `cache`, `config` and `auth` stay on the command line where they belong.
 [Reference](https://ytb-cli.tamnd.com/reference/serve-and-mcp/).
 
 ## Exit codes
 
 ```
 0  success
-1  error
-2  usage error
-3  no results
-4  auth required
-5  rate limited
-6  not found
-7  unsupported (missing optional tool such as yt-dlp)
+1  something else went wrong, including a 5xx that outlasted the retries
+2  usage error, or nothing named to work on
+3  the query ran and matched nothing
+4  signing in would be needed to see this
+5  still rate limited after the retries
+6  no such video, channel, playlist or track
+7  a missing external tool or capability: ffmpeg, yt-dlp, a SABR-only stream
+8  the request never got an answer
 ```
+
+The pair worth branching on is 3 against 6.
+A search that matched nothing is a normal outcome and an id that does not resolve is not.
+An unknown flag or an unknown command exits 1, because the argument parser decides that before ytb sees the run.
 
 ## Development
 
@@ -252,24 +267,25 @@ make vet     # go vet ./...
 make fmt     # gofmt -s -w .
 ```
 
-Requires Go 1.26+. yt-dlp is optional; install it from
-[its releases](https://github.com/yt-dlp/yt-dlp) if you want `extract`,
-`download --use-yt-dlp`, and transcript recovery.
+Requires Go 1.26+.
+yt-dlp is optional; install it from [its releases](https://github.com/yt-dlp/yt-dlp) if you want `ytb extract`, `ytb download --use-yt-dlp`, or transcript recovery on a video whose captions are gated.
 
 ## Releasing
 
 Push a version tag and GitHub Actions runs GoReleaser:
 
 ```bash
-git tag -a v0.3.2 -m "v0.3.2"
+git tag -a v0.5.0 -m "v0.5.0"
 git push --tags
 ```
 
-The image tag carries no `v` prefix (`ghcr.io/tamnd/ytb:0.3.2`).
+The image tag carries no `v` prefix (`ghcr.io/tamnd/ytb:0.5.0`).
 
 ## License
 
-Apache-2.0. See [LICENSE](LICENSE).
+Apache-2.0.
+See [LICENSE](LICENSE).
 
-`ytb` is an independent client. Use it to access public data responsibly and
-within YouTube's Terms of Service. YouTube is a trademark of Google LLC.
+`ytb` is an independent client.
+Use it to access public data responsibly and within YouTube's Terms of Service.
+YouTube is a trademark of Google LLC.
