@@ -305,36 +305,8 @@ func cleanWhitespace(s string) string {
 	return strings.Join(strings.Fields(strings.ReplaceAll(s, " ", " ")), " ")
 }
 
-// parseCountText converts display strings like "1.2M views", "5K", "3,400" to int64.
-func parseCountText(s string) int64 {
-	s = strings.TrimSpace(strings.ToLower(strings.ReplaceAll(s, ",", "")))
-	if s == "" {
-		return 0
-	}
-	// The number leads and the unit word follows it: "1.2M views", "10 songs",
-	// "121 views". Matching the number and ignoring whatever noun comes after
-	// beats a list of the nouns YouTube happens to use, which was missing "songs"
-	// and would miss every word of the next language somebody passes to --hl.
-	m := countTextRe.FindStringSubmatch(s)
-	if m == nil {
-		return 0
-	}
-	mult := float64(1)
-	switch m[2] {
-	case "k":
-		mult = 1_000
-	case "m":
-		mult = 1_000_000
-	case "b":
-		mult = 1_000_000_000
-	}
-	f, _ := strconv.ParseFloat(m[1], 64)
-	return int64(f * mult)
-}
-
-// countTextRe matches the leading number of a rendered count and its compact
-// suffix, on a string already lowercased with its thousands commas removed.
-var countTextRe = regexp.MustCompile(`^([0-9]+(?:\.[0-9]+)?)\s*([kmb])?`)
+// parseCountText lives in counts.go, because reading a rendered count in a
+// language nobody here speaks turned out to be a page of table and reasoning.
 
 // compactCountRe matches a bare display count like "101K", "1.2M", "423", "1,234".
 var compactCountRe = regexp.MustCompile(`^\d[\d.,]*\s*[KMB]?$`)

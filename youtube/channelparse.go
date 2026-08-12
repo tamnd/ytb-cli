@@ -3,6 +3,7 @@ package youtube
 import (
 	"encoding/json"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -112,7 +113,11 @@ func ParseChannelRecord(data *PageData, pageURL string) *Channel {
 		if v, ok := cm["isFamilySafe"].(bool); ok {
 			ch.IsFamilySafe = boolPtr(v)
 		}
+		// YouTube hands the 249 codes back in a different order every read, which is
+		// a set written out as a list. Sorting makes two reads of the same channel
+		// compare equal, and there is no order here to lose.
 		ch.AvailableCountryCodes = stringSlice(cm["availableCountryCodes"])
+		sort.Strings(ch.AvailableCountryCodes)
 		ch.FacebookProfileID = stringValue(cm["facebookProfileId"])
 	}
 	if mf != nil {
@@ -144,17 +149,29 @@ func ParseChannelRecord(data *PageData, pageURL string) *Channel {
 
 	if header != nil {
 		ch.Banner = ParseThumbnails(mapValue(mapValue(mapValue(header, "banner"), "imageBannerViewModel"), "image")["sources"])
+		// The header line is the handle, then the subscribers, then the videos, and
+		// the two counts are told apart by that order rather than by the words in
+		// them. Under --hl vi the same line reads "@BBCNews", "20 Tr người đăng ký",
+		// "32 N video", so a match on "subscriber" finds nothing and the record comes
+		// back with no counts at all. Doc 01 section 1.3.
+		//
+		// The English words are still checked first, because a channel with no videos
+		// prints two parts rather than three and position alone would read its
+		// subscriber count as a video count.
+		counts := 0
 		for _, part := range pageHeaderMetadataParts(header) {
 			switch {
 			case strings.HasPrefix(part, "@"):
 				ch.Handle = firstNonEmpty(ch.Handle, part)
-			case strings.Contains(part, "subscriber"):
+			case strings.Contains(part, "subscriber") || (counts == 0 && !strings.Contains(part, "video")):
+				counts++
 				ch.SubscriberCountText = part
 				if ch.SubscriberCount == 0 {
 					ch.SubscriberCount = parseCountText(part)
 					ch.setVia("subscriber_count", "s4 header, rounded from "+part)
 				}
-			case strings.Contains(part, "video"):
+			case strings.Contains(part, "video") || counts == 1:
+				counts++
 				ch.VideoCountText = part
 				ch.VideoCount = parseCountText(part)
 				ch.setVia("video_count", "s4 header, rounded from "+part)

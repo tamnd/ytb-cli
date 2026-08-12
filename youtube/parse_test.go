@@ -259,30 +259,6 @@ func TestA11yViewCount(t *testing.T) {
 	}
 }
 
-// A rendered count is a number and then a noun, and the noun is whichever word
-// the page happens to use in whichever language it was asked for. Reading the
-// number and ignoring the noun is the only version of this that survives both.
-func TestParseCountText(t *testing.T) {
-	cases := map[string]int64{
-		"1.2M views":             1_200_000,
-		"2B plays":               2_000_000_000,
-		"1.29K subscribers":      1_290,
-		"10 songs":               10,
-		"116 songs":              116,
-		"121 views":              121,
-		"1,234 views":            1_234,
-		"15.6M monthly audience": 15_600_000,
-		"":                       0,
-		"no numbers here":        0,
-		"views 12":               0,
-	}
-	for in, want := range cases {
-		if got := parseCountText(in); got != want {
-			t.Errorf("parseCountText(%q) = %d, want %d", in, got, want)
-		}
-	}
-}
-
 // extractLines is for a body whose line breaks are part of it. extractText is
 // for a title in a table cell and flattens one, which turns a verse into a
 // paragraph.
