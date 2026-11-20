@@ -404,3 +404,40 @@ func TestURLExpiry(t *testing.T) {
 		}
 	}
 }
+
+// TestDownloadFailsInsteadOfHanging is the CDN that serves the first range and
+// refuses every one after it, which is what googlevideo does to a stream URL it
+// wants a PO token for. One chunk failing cancels the others, and they must
+// still report in, or run waits on a result that never comes.
+func TestDownloadFailsInsteadOfHanging(t *testing.T) {
+	const chunk = 1 << 10
+	body := make([]byte, 8*chunk)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var from, to int
+		if _, err := fmt.Sscanf(r.Header.Get("Range"), "bytes=%d-%d", &from, &to); err != nil || from > 0 {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+		w.Header().Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", from, to, len(body)))
+		w.WriteHeader(http.StatusPartialContent)
+		_, _ = w.Write(body[from : to+1])
+	}))
+	defer srv.Close()
+
+	done := make(chan error, 1)
+	go func() {
+		done <- newTestClient(t).DownloadToFile(context.Background(), srv.URL, filepath.Join(t.TempDir(), "out.bin"), DownloadOptions{
+			Total:     int64(len(body)),
+			ChunkSize: chunk,
+			Workers:   4,
+		})
+	}()
+	select {
+	case err := <-done:
+		if err == nil {
+			t.Fatal("a download refused past the first chunk reported success")
+		}
+	case <-time.After(20 * time.Second):
+		t.Fatal("DownloadToFile hung after a chunk failed")
+	}
+}

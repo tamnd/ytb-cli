@@ -164,7 +164,10 @@ func (d *download) run(ctx context.Context, start int64) error {
 
 	var (
 		wg      sync.WaitGroup
-		results = make(chan result)
+		// Buffered to Workers, which bounds inFlight, so a worker's send never
+		// blocks. A worker that dropped its result on cancel would leave the loop
+		// below waiting on a receive that never comes.
+		results = make(chan result, d.opt.Workers)
 		next    = start
 		index   = 0
 		issued  = 0
@@ -190,10 +193,7 @@ func (d *download) run(ctx context.Context, start int64) error {
 		go func(i int, from, to int64) {
 			defer wg.Done()
 			data, err := d.chunk(cctx, from, to)
-			select {
-			case results <- result{index: i, data: data, err: err}:
-			case <-cctx.Done():
-			}
+			results <- result{index: i, data: data, err: err}
 		}(index, next, end)
 		next = end + 1
 		index++
