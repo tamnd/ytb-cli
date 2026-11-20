@@ -163,7 +163,7 @@ func (d *download) run(ctx context.Context, start int64) error {
 	}
 
 	var (
-		wg      sync.WaitGroup
+		wg sync.WaitGroup
 		// Buffered to Workers, which bounds inFlight, so a worker's send never
 		// blocks. A worker that dropped its result on cancel would leave the loop
 		// below waiting on a receive that never comes.
